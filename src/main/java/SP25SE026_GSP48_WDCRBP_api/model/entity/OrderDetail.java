@@ -11,8 +11,8 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @NoArgsConstructor
 @Entity
-@Table(name = "ProductOrderDetail")
-public class ProductOrderDetail {
+@Table(name = "OrderDetail")
+public class OrderDetail {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long productOrderDetailId;
@@ -34,7 +34,7 @@ public class ProductOrderDetail {
 
     @ManyToOne
     @JoinColumn(name = "orderId", nullable = true)
-    private CusOrder cusOrder;
+    private ServiceOrder serviceOrder;
 
     @ManyToOne
     @JoinColumn(name = "productId", nullable = true)

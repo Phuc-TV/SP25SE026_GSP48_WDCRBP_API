@@ -27,13 +27,13 @@ public class AuthController {
         this.authService = authService;
     }
 
-    @PostMapping(value = {"/login", "/signin"})
+    @PostMapping(value = {"/login"})
     public ResponseEntity<AuthenticationResponse> login(@Valid @RequestBody LoginRequest loginDto){
         AuthenticationResponse token = authService.login(loginDto);
         return  ResponseEntity.ok(token);
     }
 
-    @PostMapping(value = {"/signup", "/register"})
+    @PostMapping(value = { "/register"})
     public ResponseEntity<String> signup(@Valid @RequestBody SignupRequest signupDto){
         String response = authService.signup(signupDto);
         return new ResponseEntity<>(response, HttpStatus.CREATED);

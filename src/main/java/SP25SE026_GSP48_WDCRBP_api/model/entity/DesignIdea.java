@@ -9,30 +9,32 @@ import lombok.*;
 @AllArgsConstructor
 @NoArgsConstructor
 @Entity
-@Table(name = "CustomizationDesign")
-public class CustomizationDesign {
-
+@Table(name = "DesignIdea")
+public class DesignIdea {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long customizationDesignId;
+    private Long designIdeaId;
 
-    @Column(nullable = false)
+    @Column(nullable = true)
     private String name;
 
     @Column(nullable = true)
-    private String mediaUrls;
+    private String img_urls;
 
     @Column(nullable = true)
     private String description;
 
+    @Column(nullable = true)
+    private Short totalStar;
+
+    @Column(nullable = true)
+    private Short totalReviews;
+
     @ManyToOne
-    @JoinColumn(name = "category_id", nullable = false)
+    @JoinColumn(name = "categoryId", nullable = true)
     private Category category;
 
-    @Column(nullable = false)
-    private String designCode;
-
     @ManyToOne
-    @JoinColumn(name = "woodworkerId", nullable = false)
+    @JoinColumn(name = "woodworkerId", nullable = true)
     private WoodworkerProfile woodworkerProfile;
 }

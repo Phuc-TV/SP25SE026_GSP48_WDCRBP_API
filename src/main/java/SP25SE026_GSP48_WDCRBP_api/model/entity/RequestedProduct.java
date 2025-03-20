@@ -11,18 +11,9 @@ import lombok.*;
 @Entity
 @Table(name = "RequestedProduct")
 public class RequestedProduct {
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long requestedProductId;
-
-    @ManyToOne
-    @JoinColumn(name = "category_id", nullable = false)
-    private Category category;
-
-    @ManyToOne
-    @JoinColumn(name = "requirement_form_id", nullable = false)
-    private RequirementForm requirementForm;
 
     @Column(nullable = false)
     private Byte quantity;
@@ -37,6 +28,11 @@ public class RequestedProduct {
     private Boolean hasDesign;
 
     @ManyToOne
-    @JoinColumn(name = "customizationDesignId", nullable = true)
-    private CustomizationDesign customizationDesign;
+    @JoinColumn(name = "categoryId", nullable = false)
+    private Category category;
+
+
+    @ManyToOne
+    @JoinColumn(name = "designIdeaVariantId", nullable = false)
+    private DesignIdeaVariant designIdeaVariant;
 }

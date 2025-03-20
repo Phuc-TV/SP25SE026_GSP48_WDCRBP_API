@@ -10,23 +10,14 @@ import lombok.*;
 @AllArgsConstructor
 @NoArgsConstructor
 @Entity
-@Table(name = "Category")
-public class Category {
+@Table(name = "Wallet")
+public class Wallet {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long categoryId;
+    private Long walletId;
 
     @Column(nullable = true)
-    private Long parentId;
-
-    @Column(nullable = true)
-    private String categoryName;
-
-    @Column(nullable = true)
-    private String description;
-
-    @Column(nullable = true)
-    private String categoryLevel;
+    private Float balance;
 
     @Column(nullable = true)
     private DateTime createdAt;
@@ -34,6 +25,7 @@ public class Category {
     @Column(nullable = true)
     private DateTime updatedAt;
 
-    @Column(nullable = true)
-    private boolean status;
+    @OneToOne
+    @JoinColumn(name = "userId", nullable = true)
+    private User user;
 }

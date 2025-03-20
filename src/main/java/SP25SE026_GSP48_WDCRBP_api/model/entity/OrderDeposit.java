@@ -10,23 +10,23 @@ import lombok.*;
 @AllArgsConstructor
 @NoArgsConstructor
 @Entity
-@Table(name = "Category")
-public class Category {
+@Table(name = "OrderDeposit")
+public class OrderDeposit {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long categoryId;
+    private Long orderDepositId;
 
     @Column(nullable = true)
-    private Long parentId;
+    private Float amount;
 
     @Column(nullable = true)
-    private String categoryName;
+    private Short percent;
 
     @Column(nullable = true)
-    private String description;
+    private Short depositNumber;
 
     @Column(nullable = true)
-    private String categoryLevel;
+    private Boolean status;
 
     @Column(nullable = true)
     private DateTime createdAt;
@@ -34,6 +34,11 @@ public class Category {
     @Column(nullable = true)
     private DateTime updatedAt;
 
-    @Column(nullable = true)
-    private boolean status;
+    @ManyToOne
+    @JoinColumn(name = "orderId" ,nullable = true)
+    private ServiceOrder serviceOrder;
+
+    @ManyToOne
+    @JoinColumn(name = "guranteeOrderId" ,nullable = true)
+    private GuranteeOrder guranteeOrder;
 }

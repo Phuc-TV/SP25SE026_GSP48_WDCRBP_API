@@ -1,17 +1,19 @@
-package SP25SE026_GSP48_WDCRBP_api.model.entity;
+package SP25SE026_GSP48_WDCRBP_api.model.responseModel;
 
-import com.google.api.client.util.DateTime;
-import jakarta.persistence.*;
-import lombok.*;
+import jakarta.persistence.Column;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
-@Getter
-@Setter
+@Data
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-@Entity
-@Table(name = "User")
-public class User {
+public class UserInfoResponse {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long userId;
@@ -29,11 +31,11 @@ public class User {
     private String password;
 
     @Column(nullable = true)
-    private String role;
+    private String wardCode;
 
     @Column(nullable = true)
-    private Boolean status;
+    private String address;
 
     @Column(nullable = true)
-    private DateTime createdAt;
+    private int districtId;
 }

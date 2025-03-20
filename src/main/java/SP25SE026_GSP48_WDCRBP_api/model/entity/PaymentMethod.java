@@ -1,9 +1,8 @@
 package SP25SE026_GSP48_WDCRBP_api.model.entity;
 
+import com.google.api.client.util.DateTime;
 import jakarta.persistence.*;
 import lombok.*;
-
-import java.time.LocalDate;
 
 @Getter
 @Setter
@@ -11,28 +10,28 @@ import java.time.LocalDate;
 @AllArgsConstructor
 @NoArgsConstructor
 @Entity
-@Table(name = "TransactionDetail")
-public class TransactionDetail {
+@Table(name = "PaymentMethod")
+public class PaymentMethod {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long transactionDetailId;
+    private Long paymentId;
 
     @Column(nullable = true)
-    private float amount;
+    private String methodType;
 
     @Column(nullable = true)
-    private LocalDate transactionDateTime;
+    private String providerName;
 
     @Column(nullable = true)
-    private LocalDate dueDate;
+    private String accountNumber;
 
     @Column(nullable = true)
-    private String description;
+    private Boolean isDefault;
 
     @Column(nullable = true)
-    private boolean status;
+    private DateTime createdAt;
 
     @ManyToOne
-    @JoinColumn(name = "transactionId", nullable = true)
-    private Transaction transaction;
+    @JoinColumn(name = "userId", nullable = true)
+    private User user;
 }

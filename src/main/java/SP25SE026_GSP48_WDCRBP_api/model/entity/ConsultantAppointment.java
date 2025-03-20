@@ -11,31 +11,31 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @NoArgsConstructor
 @Entity
-@Table(name = "RequirementForm")
-public class RequirementForm {
+@Table(name = "ConsultantAppointment")
+public class ConsultantAppointment {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long requirementFormId;
+    private Long appointmentId;
 
     @Column(nullable = true)
-    private Byte versionNo;
+    private LocalDateTime dateTime;
 
     @Column(nullable = true)
     private LocalDateTime createdAt;
 
     @Column(nullable = true)
-    private String image;
+    private String form;
 
     @Column(nullable = true)
-    private float maximumAmount;
+    private String meetAddress;
 
     @Column(nullable = true)
-    private LocalDateTime estimatedCompleteDate;
+    private String content;
 
     @Column(nullable = true)
-    private String note;
+    private boolean status;
 
     @ManyToOne
     @JoinColumn(name = "orderId", nullable = true)
-    private CusOrder cusOrder;
+    private ServiceOrder serviceOrder;
 }

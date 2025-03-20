@@ -3,32 +3,27 @@ package SP25SE026_GSP48_WDCRBP_api.model.entity;
 import jakarta.persistence.*;
 import lombok.*;
 
-import java.time.LocalDate;
-
 @Getter
 @Setter
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
 @Entity
-@Table(name = "TechSpec")
-public class TechSpec {
+@Table(name = "ServicePack")
+public class ServicePack {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long techSpecId;
+    private Long servicePackId;
 
-    @Column(nullable = false)
+    @Column(nullable = true)
     private String name;
 
     @Column(nullable = true)
-    private String optionType;
+    private Float price;
 
     @Column(nullable = true)
-    private boolean status;
+    private String description;
 
     @Column(nullable = true)
-    private LocalDate createdAt;
-
-    @Column(nullable = true)
-    private LocalDate updatedAt;
+    private Short duration;
 }

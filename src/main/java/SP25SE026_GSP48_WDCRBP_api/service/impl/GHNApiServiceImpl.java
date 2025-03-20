@@ -120,7 +120,7 @@ public class GHNApiServiceImpl implements GHNApiService {
 
         // Sử dụng HttpComponentsClientHttpRequestFactory để hỗ trợ POST có body
         RestTemplate restTemplate = new RestTemplate(new HttpComponentsClientHttpRequestFactory());
-        // URL test theo tài liệu, sử dụng POST
+        // URL theo tài liệu, sử dụng POST
         String url = "https://online-gateway.ghn.vn/shiip/public-api/master-data/ward?district_id";
         ResponseEntity<String> response = restTemplate.exchange(url, HttpMethod.POST, entity, String.class);
 

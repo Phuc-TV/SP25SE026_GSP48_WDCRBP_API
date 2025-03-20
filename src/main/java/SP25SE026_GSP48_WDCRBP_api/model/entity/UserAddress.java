@@ -1,9 +1,8 @@
 package SP25SE026_GSP48_WDCRBP_api.model.entity;
 
+import com.google.api.client.util.DateTime;
 import jakarta.persistence.*;
 import lombok.*;
-
-import java.time.LocalDateTime;
 
 @Getter
 @Setter
@@ -11,31 +10,31 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @NoArgsConstructor
 @Entity
-@Table(name = "Appointment")
-public class Appointment {
+@Table(name = "UserAddress")
+public class UserAddress {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long appointmentId;
+    private Long userAddressId;
 
     @Column(nullable = true)
-    private LocalDateTime dateTime;
+    private Boolean isDefault;
 
     @Column(nullable = true)
-    private LocalDateTime createdAt;
+    private String address;
 
     @Column(nullable = true)
-    private String form;
+    private String wardCode;
 
     @Column(nullable = true)
-    private String meetAddress;
+    private String districtId;
 
     @Column(nullable = true)
-    private String content;
+    private String cityId;
 
     @Column(nullable = true)
-    private boolean status;
+    private DateTime createdAt;
 
     @ManyToOne
-    @JoinColumn(name = "orderId", nullable = true)
-    private CusOrder cusOrder;
+    @JoinColumn(name = "userId", nullable = true)
+    private User user;
 }

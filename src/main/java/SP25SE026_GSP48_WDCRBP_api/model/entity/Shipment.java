@@ -3,40 +3,41 @@ package SP25SE026_GSP48_WDCRBP_api.model.entity;
 import jakarta.persistence.*;
 import lombok.*;
 
-import java.time.LocalDate;
-
 @Getter
 @Setter
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
 @Entity
-@Table(name = "Progress")
-
-public class Progress {
+@Table(name = "Shipment ")
+public class Shipment {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long progressId;
+    private Long shipmentId;
 
     @Column(nullable = true)
-    private String description;
+    private String toAddress;
 
     @Column(nullable = true)
-    private Long createdBy;
+    private String from_address;
 
     @Column(nullable = true)
-    private Long deletedBy;
+    private String shippingUnit;
 
     @Column(nullable = true)
-    private LocalDate createdTime;
+    private float totalFee;
 
     @Column(nullable = true)
-    private LocalDate deletedTime;
+    private String orderCode;
 
     @Column(nullable = true)
-    private boolean status;
+    private String shipType;
 
     @ManyToOne
     @JoinColumn(name = "orderId", nullable = true)
-    private CusOrder cusOrder;
+    private ServiceOrder serviceOrder;
+
+    @ManyToOne
+    @JoinColumn(name = "guranteeOrderId", nullable = true)
+    private GuranteeOrder guranteeOrder;
 }

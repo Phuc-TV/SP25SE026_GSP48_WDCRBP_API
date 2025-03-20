@@ -10,24 +10,19 @@ import lombok.*;
 @AllArgsConstructor
 @NoArgsConstructor
 @Entity
-@Table(name = "Service")
-public class Service {
+@Table(name = "DesignIdeaConfigValue")
+public class DesignIdeaConfigValue {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long serviceId;
+    private Long designIdeaConfigValueId;
 
     @Column(nullable = true)
-    private String serviceName;
-
-    @Column(nullable = true)
-    private boolean status;
-
-    @Column(nullable = true)
-    private DateTime createdAt;
+    private String value;
 
     @Column(nullable = true)
     private DateTime updatedAt;
 
-    @Column(nullable = true)
-    private Short numberOfDeposits;
+    @ManyToOne
+    @JoinColumn(name = "designIdeaConfigId", nullable = true)
+    private DesignIdeaConfig designIdeaConfig;
 }

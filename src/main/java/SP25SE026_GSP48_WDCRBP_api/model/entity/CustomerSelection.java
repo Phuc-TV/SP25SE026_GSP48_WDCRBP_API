@@ -13,7 +13,6 @@ import java.time.LocalDate;
 @Entity
 @Table(name = "CustomerSelection")
 public class CustomerSelection {
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long customerSelectionId;
@@ -23,10 +22,7 @@ public class CustomerSelection {
     private RequestedProduct requestedProduct;
 
     @Column(nullable = true)
-    private String content;
-
-    @Column(nullable = true)
-    private String dataType;
+    private String value;
 
     @ManyToOne
     @JoinColumn(name = "techSpecId", nullable = false)

@@ -10,30 +10,25 @@ import lombok.*;
 @AllArgsConstructor
 @NoArgsConstructor
 @Entity
-@Table(name = "Category")
-public class Category {
+@Table(name = "Post")
+public class Post {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long categoryId;
+    private Long postId;
 
     @Column(nullable = true)
-    private Long parentId;
-
-    @Column(nullable = true)
-    private String categoryName;
+    private String title;
 
     @Column(nullable = true)
     private String description;
 
     @Column(nullable = true)
-    private String categoryLevel;
+    private String img_Urls;
 
     @Column(nullable = true)
     private DateTime createdAt;
 
-    @Column(nullable = true)
-    private DateTime updatedAt;
-
-    @Column(nullable = true)
-    private boolean status;
+    @ManyToOne
+    @JoinColumn(name = "woodworkerId", nullable = true)
+    private WoodworkerProfile woodworkerProfile;
 }

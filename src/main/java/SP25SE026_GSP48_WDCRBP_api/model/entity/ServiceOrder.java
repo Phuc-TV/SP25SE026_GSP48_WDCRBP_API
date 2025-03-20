@@ -1,5 +1,6 @@
 package SP25SE026_GSP48_WDCRBP_api.model.entity;
 
+import com.google.api.client.util.DateTime;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -9,14 +10,11 @@ import lombok.*;
 @AllArgsConstructor
 @NoArgsConstructor
 @Entity
-@Table(name = "CusOrder ")
-public class CusOrder {
+@Table(name = "ServiceOrder ")
+public class ServiceOrder {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long orderId;
-
-    @Column(nullable = true)
-    private String orderType;
 
     @Column(nullable = true)
     private Byte quantity;
@@ -25,26 +23,38 @@ public class CusOrder {
     private Float totalAmount;
 
     @Column(nullable = true)
-    private Byte shipmentId;
-
-    @Column(nullable = true)
     private boolean isInstall;
 
     @Column(nullable = true)
     private String description;
 
     @Column(nullable = true)
+    private String feedback;
+
+    @Column(nullable = true)
+    private DateTime createdAt;
+
+    @Column(nullable = true)
+    private DateTime updatedAt;
+
+    @Column(nullable = true)
     private boolean status;
+
+    @Column(nullable = true)
+    private Float amountPaid;
+
+    @Column(nullable = true)
+    private Float amountRemaining;
 
     @ManyToOne
     @JoinColumn(name = "userId", nullable = true)
     private User user;
 
     @ManyToOne
-    @JoinColumn(name = "transactionId", nullable = true)
-    private Transaction transaction;
+    @JoinColumn(name = "availableServiceId", nullable = true)
+    private AvailableService availableService;
 
     @OneToOne
-    @JoinColumn(name = "serviceId", nullable = true)
-    private Service service;
+    @JoinColumn(name = "appointmentId" ,nullable = true)
+    private ConsultantAppointment consultantAppointment;
 }

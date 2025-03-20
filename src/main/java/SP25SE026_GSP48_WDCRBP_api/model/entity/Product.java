@@ -61,6 +61,12 @@ public class Product {
     private String scent;
 
     @Column(nullable = true)
+    private Short totalStar;
+
+    @Column(nullable = true)
+    private Short totalReviews;
+
+    @Column(nullable = true)
     private boolean status;
 
     @ManyToOne

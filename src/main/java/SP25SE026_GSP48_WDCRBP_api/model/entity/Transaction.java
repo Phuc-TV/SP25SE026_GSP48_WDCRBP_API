@@ -24,12 +24,6 @@ public class Transaction {
     private float amount;
 
     @Column(nullable = true)
-    private float amountPaid;
-
-    @Column(nullable = true)
-    private float amountRemaining;
-
-    @Column(nullable = true)
     private LocalDate createdAt;
 
     @Column(nullable = true)
@@ -41,4 +35,16 @@ public class Transaction {
     @ManyToOne
     @JoinColumn(name = "userId", nullable = true)
     private User user;
+
+    @OneToOne
+    @JoinColumn(name = "orderDepositId", nullable = true)
+    private OrderDeposit orderDeposit;
+
+    @ManyToOne
+    @JoinColumn(name = "paymentId", nullable = true)
+    private PaymentMethod paymentMethod;
+
+    @ManyToOne
+    @JoinColumn(name = "walletId", nullable = true)
+    private Wallet wallet;
 }

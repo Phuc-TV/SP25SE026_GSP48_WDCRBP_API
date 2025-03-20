@@ -1,5 +1,6 @@
 package SP25SE026_GSP48_WDCRBP_api.model.entity;
 
+import com.google.api.client.util.DateTime;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -12,17 +13,13 @@ import lombok.*;
 @Table(name = "Contract")
 public class Contract {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long contractId;
+    private String contractId;
 
     @Column(nullable = true)
-    private Boolean isSignByA;
+    private String customerSignature;
 
     @Column(nullable = true)
-    private Boolean isSignByB;
-
-    @Column(nullable = true)
-    private String quote;
+    private String woodworkerSignature;
 
     @Column(nullable = true)
     private String warrantyPolicy;
@@ -37,21 +34,21 @@ public class Contract {
     private String signDate;
 
     @Column(nullable = true)
-    private String aInformation;
+    private String cusFullName;
 
     @Column(nullable = true)
-    private String bInformation;
+    private String cusAddress;
+
+    @Column(nullable = true)
+    private String cusPhone;
 
     @Column(nullable = true)
     private String createdAt;
 
     @Column(nullable = true)
-    private String contractNumber;
+    private DateTime warrantyPeriod;
 
-    @Column(nullable = true)
-    private float platformCommission;
-
-    @ManyToOne
+    @OneToOne
     @JoinColumn(name = "orderId", nullable = true)
-    private CusOrder cusOrder;
+    private ServiceOrder serviceOrder;
 }

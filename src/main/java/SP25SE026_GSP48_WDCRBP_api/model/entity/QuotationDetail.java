@@ -9,15 +9,20 @@ import lombok.*;
 @AllArgsConstructor
 @NoArgsConstructor
 @Entity
-@Table(name = "DesignFile")
-public class DesignFile {
-
+@Table(name = "QuotationDetail")
+public class QuotationDetail {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long designFileId;
+    private Long quotationDetailId;
 
-    @Column(nullable = true)
-    private String mediaUrls;
+    @Column(nullable = false)
+    private String costType;
+
+    @Column(nullable = false)
+    private String costAmount;
+
+    @Column(nullable = false)
+    private Short quantityRequired;
 
     @ManyToOne
     @JoinColumn(name = "requested_product_id", nullable = false)
