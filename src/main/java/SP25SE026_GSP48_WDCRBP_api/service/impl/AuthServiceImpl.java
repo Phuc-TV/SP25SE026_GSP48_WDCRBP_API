@@ -58,11 +58,15 @@ public class AuthServiceImpl implements AuthService {
     public AuthenticationResponse login(LoginRequest loginDto) {
         Authentication authentication = authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(loginDto.getEmailOrPhone(), loginDto.getPassword()));
+
         SecurityContextHolder.getContext().setAuthentication(authentication);
+
         User user = userRepository.findByEmailOrPhone(loginDto.getEmailOrPhone(), loginDto.getEmailOrPhone())
                 .orElseThrow(() -> new WDCRBPApiException(HttpStatus.BAD_REQUEST, "User not found"));
-        String accessToken = jwtTokenProvider.generateAccessToken(authentication);
-        String refreshToken = jwtTokenProvider.generateRefreshToken(authentication);
+
+        // Truyền thẳng User vào để JWT chứa thông tin User
+        String accessToken = jwtTokenProvider.generateAccessToken(user);
+        String refreshToken = jwtTokenProvider.generateRefreshToken(user);
 
         revokeRefreshToken(accessToken);
         RefreshToken savedRefreshToken = saveUserRefreshToken(refreshToken);
@@ -75,6 +79,7 @@ public class AuthServiceImpl implements AuthService {
                 .refreshToken(refreshToken)
                 .build();
     }
+
 
     private void revokeRefreshToken(String accessToken) {
         AccessToken token = accessTokenRepository.findByToken(accessToken);
@@ -145,31 +150,33 @@ public class AuthServiceImpl implements AuthService {
     @Override
     public AuthenticationResponse refreshToken(HttpServletRequest request, HttpServletResponse response) throws IOException {
         final String authHeader = request.getHeader(HttpHeaders.AUTHORIZATION);
-        final String refreshToken;
-        final String username;
         if (authHeader == null || !authHeader.startsWith("Bearer ")) {
-            return null;
+            throw new WDCRBPApiException(HttpStatus.BAD_REQUEST, "Invalid token format");
         }
-        refreshToken = authHeader.substring(7);
-        RefreshToken token = refreshTokenRepository.findByToken(refreshToken).orElseThrow();
-        username = jwtTokenProvider.getUsernameFromJwt(refreshToken);
-        if (username != null) {
-            UserDetails userDetails = userDetailsService.loadUserByUsername(username);
-            if (jwtTokenProvider.isTokenValid(refreshToken, userDetails.getUsername())
-                    && !token.isRevoked() && !token.isExpired()
-            ) {
-                //map user to authentication
-                Authentication userAuthentication = new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
-                var accessToken = jwtTokenProvider.generateAccessToken(userAuthentication);
-                User user = this.userRepository.findByEmailOrPhone(username, username).orElseThrow();
-                revokeAllUserAccessTokens(user);
-                saveUserAccessToken(user, accessToken, token);
-                return AuthenticationResponse.builder()
-                        .accessToken(accessToken)
-                        .refreshToken(refreshToken)
-                        .build();
-            }
+
+        String refreshToken = authHeader.substring(7);
+        RefreshToken token = refreshTokenRepository.findByToken(refreshToken)
+                .orElseThrow(() -> new WDCRBPApiException(HttpStatus.BAD_REQUEST, "Refresh token not found"));
+
+        User user = jwtTokenProvider.getUserFromToken(refreshToken); // 🔥 Load User trực tiếp từ JWT
+
+        if (user != null && jwtTokenProvider.isTokenValid(refreshToken, user.getEmail())
+                && !token.isRevoked() && !token.isExpired()
+        ) {
+            // map user to authentication
+            Authentication userAuthentication = new UsernamePasswordAuthenticationToken(user, null, null);
+            var accessToken = jwtTokenProvider.generateAccessToken(user);
+
+            revokeAllUserAccessTokens(user);
+            saveUserAccessToken(user, accessToken, token);
+
+            return AuthenticationResponse.builder()
+                    .accessToken(accessToken)
+                    .refreshToken(refreshToken)
+                    .build();
         }
-        return null;
+
+        throw new WDCRBPApiException(HttpStatus.BAD_REQUEST, "Invalid refresh token");
     }
+
 }

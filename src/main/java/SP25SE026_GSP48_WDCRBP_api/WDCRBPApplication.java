@@ -9,6 +9,9 @@ import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
 import java.util.Arrays;
+import java.util.List;
+
+import static org.springframework.http.HttpHeaders.ACCESS_CONTROL_ALLOW_ORIGIN;
 
 @SpringBootApplication
 public class WDCRBPApplication {
@@ -23,19 +26,19 @@ public class WDCRBPApplication {
 
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
-        CorsConfiguration configuration = new CorsConfiguration();
-        // Cho phép tất cả các nguồn truy cập, có thể thay đổi thành danh sách cụ thể nếu cần
-        configuration.setAllowedOriginPatterns(Arrays.asList("*"));
-        // Cho phép các phương thức HTTP cần thiết
-        configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
-        // Cho phép tất cả các header
-        configuration.setAllowedHeaders(Arrays.asList("*"));
-        // Cho phép gửi cookie, header xác thực,...
-        configuration.setAllowCredentials(true);
+        CorsConfiguration corsConfiguration = new CorsConfiguration();
+        corsConfiguration.setAllowCredentials(true);
+        corsConfiguration.setAllowedOrigins(
+                List.of("http://localhost:8080", "https://wdcrbp.vercel.app/"));
+        corsConfiguration.setAllowedHeaders(Arrays.asList("Origin", ACCESS_CONTROL_ALLOW_ORIGIN, "Content-Type",
+                "Accept", "Authorization", "Origin, Accept", "X-Requested-With",
+                "Access-Control-Request-Method", "Access-Control-Request-Headers"));
+        corsConfiguration.setExposedHeaders(Arrays.asList("Origin", "Content-Type", "Accept", "Authorization",
+                ACCESS_CONTROL_ALLOW_ORIGIN, "Access-Control-Allow-Credentials"));
+        corsConfiguration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-        // Áp dụng cấu hình cho tất cả các endpoint
-        source.registerCorsConfiguration("/**", configuration);
+        source.registerCorsConfiguration("/**", corsConfiguration);
         return source;
     }
 }
