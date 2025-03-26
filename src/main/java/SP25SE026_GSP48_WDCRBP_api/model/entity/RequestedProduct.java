@@ -3,6 +3,8 @@ package SP25SE026_GSP48_WDCRBP_api.model.entity;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.time.LocalDateTime;
+
 @Getter
 @Setter
 @Builder
@@ -19,7 +21,7 @@ public class RequestedProduct {
     private Byte quantity;
 
     @Column(nullable = false)
-    private String createdAt;
+    private LocalDateTime createdAt;
 
     @Column(nullable = false)
     private float totalAmount;
