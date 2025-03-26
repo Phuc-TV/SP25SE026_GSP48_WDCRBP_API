@@ -75,6 +75,7 @@ public class SecurityConfig {
                                 .requestMatchers("/api/v1/GHNApi/ward").permitAll()
                                 .requestMatchers("api/payment/**").permitAll()
                                 .requestMatchers("/api/transaction/**").permitAll()
+                                .requestMatchers("/api/v1/ww/**").permitAll()
                                 .anyRequest().authenticated()
                 ).exceptionHandling((exception) -> exception
                         .authenticationEntryPoint(this.jwtAuthenticationEntryPoint) // Sử dụng JwtAuthenticationEntryPoint tùy chỉnh
