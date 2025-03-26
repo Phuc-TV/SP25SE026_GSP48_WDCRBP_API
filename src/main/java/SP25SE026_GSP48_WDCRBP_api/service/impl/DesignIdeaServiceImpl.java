@@ -34,13 +34,17 @@ public class DesignIdeaServiceImpl implements DesignIdeaService {
     @Autowired
     private DesignIdeaVariantConfigRepository designIdeaVariantConfigRepository;
 
+    @Autowired
+    private CategoryRepository categoryRepository;
+
     public DesignIdeaServiceImpl(
             DesignIdeaRepository ideaRepository,
             WoodworkerProfileService woodworkerProfileService,
             DesignIdeaConfigRepository designIdeaConfigRepository,
             DesignIdeaConfigValueRepository designIdeaConfigValueRepository,
             DesignIdeaVariantRepository designIdeaVariantRepository,
-            DesignIdeaVariantConfigRepository designIdeaVariantConfigRepository
+            DesignIdeaVariantConfigRepository designIdeaVariantConfigRepository,
+            CategoryRepository categoryRepository
     ) {
         this.ideaRepository = ideaRepository;
         this.woodworkerProfileService = woodworkerProfileService;
@@ -48,6 +52,7 @@ public class DesignIdeaServiceImpl implements DesignIdeaService {
         this.designIdeaConfigValueRepository = designIdeaConfigValueRepository;
         this.designIdeaVariantRepository = designIdeaVariantRepository;
         this.designIdeaVariantConfigRepository = designIdeaVariantConfigRepository;
+        this.categoryRepository = categoryRepository;
     }
 
 
@@ -86,6 +91,10 @@ public class DesignIdeaServiceImpl implements DesignIdeaService {
 
         idea.setName(woodworkProductDto.getName());
         idea.setImg_urls(woodworkProductDto.getImg());
+
+        Category category = categoryRepository.findCategoriesByCategoryId(woodworkProductDto.getCategoryId());
+
+        idea.setCategory(category);
 
         ideaRepository.save(idea);
 
