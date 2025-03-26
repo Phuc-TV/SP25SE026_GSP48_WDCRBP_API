@@ -159,9 +159,9 @@ public class DesignIdeaServiceImpl implements DesignIdeaService {
                                 designIdeaVariantConfigRepository.save(designIdeaVariantConfig);
                             }
                         }
+                        i++;
+                        break;
                     }
-                    i++;
-                    break;
                 }
             }
         }
