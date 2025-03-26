@@ -22,6 +22,7 @@ import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.*;
 
 @Service
@@ -117,7 +118,7 @@ public class VNPayServiceImp implements VNPayService {
                                     .methodType("online")
                                     .accountNumber("VNPay")
                                     .isDefault(false)
-                                    .createdAt(new DateTime(System.currentTimeMillis()))
+                                    .createdAt(LocalDateTime.now())
                                     .build()
                     ));
 
@@ -126,7 +127,7 @@ public class VNPayServiceImp implements VNPayService {
                     .transactionType(vnp_TxnRef)
                     .amount(amount)
                     .status(false)
-                    .createdAt(LocalDate.now())
+                    .createdAt(LocalDateTime.now())
                     .user(dbUser)
                     .paymentMethod(paymentMethod)
                     .orderDeposit(orderDeposit)
