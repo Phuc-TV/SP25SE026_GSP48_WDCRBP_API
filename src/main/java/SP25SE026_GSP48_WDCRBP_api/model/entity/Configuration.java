@@ -25,7 +25,7 @@ public class Configuration {
     private String value;
 
     @Column(nullable = true)
-    private String createdBy;
+    private LocalDateTime createdBy;
 
     @Column(nullable = true)
     private LocalDateTime updatedAt;

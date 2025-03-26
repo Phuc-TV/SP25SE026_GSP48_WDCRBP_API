@@ -6,7 +6,7 @@ import SP25SE026_GSP48_WDCRBP_api.model.entity.Transaction;
 import SP25SE026_GSP48_WDCRBP_api.model.entity.User;
 import SP25SE026_GSP48_WDCRBP_api.model.exception.WDCRBPApiException;
 import SP25SE026_GSP48_WDCRBP_api.model.requestModel.PaymentRequest;
-import SP25SE026_GSP48_WDCRBP_api.model.requestModel.PaymentRest;
+import SP25SE026_GSP48_WDCRBP_api.model.responseModel.PaymentRest;
 import SP25SE026_GSP48_WDCRBP_api.repository.OrderDepositRepository;
 import SP25SE026_GSP48_WDCRBP_api.repository.PaymentMethodRepository;
 import SP25SE026_GSP48_WDCRBP_api.repository.TransactionRepository;
@@ -128,7 +128,7 @@ public class VNPayServiceImp implements VNPayService {
                     .build();
             transactionRepository.save(txn);
 
-            mailService.sendPaymentLink(email, paymentUrl);
+            mailService.sendEmail(email, "VNPay Payment Link", "payment", paymentUrl);
 
             return PaymentRest.builder()
                     .status("ok")

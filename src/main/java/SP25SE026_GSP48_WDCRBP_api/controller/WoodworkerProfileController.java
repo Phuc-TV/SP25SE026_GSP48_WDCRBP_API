@@ -4,7 +4,10 @@ import SP25SE026_GSP48_WDCRBP_api.components.CoreApiResponse;
 import SP25SE026_GSP48_WDCRBP_api.model.dto.WoodworkerProfileDto;
 import SP25SE026_GSP48_WDCRBP_api.model.entity.WoodworkerProfile;
 import SP25SE026_GSP48_WDCRBP_api.model.requestModel.WoodworkerRequest;
+import SP25SE026_GSP48_WDCRBP_api.model.requestModel.WoodworkerUpdateStatusRequest;
 import SP25SE026_GSP48_WDCRBP_api.model.responseModel.DesignIdeaResponse;
+import SP25SE026_GSP48_WDCRBP_api.model.responseModel.WoodworkerProfileRest;
+import SP25SE026_GSP48_WDCRBP_api.model.responseModel.WoodworkerUpdateStatusRest;
 import SP25SE026_GSP48_WDCRBP_api.service.WoodworkerProfileService;
 import jakarta.validation.Valid;
 import org.modelmapper.ModelMapper;
@@ -45,10 +48,20 @@ public class WoodworkerProfileController {
     @PostMapping("/ww-register")
     public CoreApiResponse registerWoodworker(@RequestBody @Valid WoodworkerRequest request) {
         try {
-            WoodworkerProfile woodworkerProfile = woodworkerProfileService.registerWoodworker(request);
-            return CoreApiResponse.success(modelMapper.map(woodworkerProfile, WoodworkerProfileDto.class));
+            WoodworkerProfileRest response = woodworkerProfileService.registerWoodworker(request);
+            return CoreApiResponse.success(response);
         } catch (Exception e) {
             return CoreApiResponse.error("Error registering woodworker: " + e.getMessage());
+        }
+    }
+
+    @PutMapping("/ww-update-status")
+    public CoreApiResponse updateWoodworkerStatus(@RequestBody WoodworkerUpdateStatusRequest request) {
+        try {
+            WoodworkerUpdateStatusRest response = woodworkerProfileService.updateWoodworkerStatus(request);
+            return CoreApiResponse.success(response);
+        } catch (Exception e) {
+            return CoreApiResponse.error("Error updating woodworker status: " + e.getMessage());
         }
     }
 }

@@ -5,15 +5,19 @@ import SP25SE026_GSP48_WDCRBP_api.model.entity.RefreshToken;
 import SP25SE026_GSP48_WDCRBP_api.model.entity.User;
 import SP25SE026_GSP48_WDCRBP_api.model.exception.WDCRBPApiException;
 import SP25SE026_GSP48_WDCRBP_api.model.requestModel.LoginRequest;
+import SP25SE026_GSP48_WDCRBP_api.model.requestModel.ResetPasswordRequest;
 import SP25SE026_GSP48_WDCRBP_api.model.requestModel.SignupRequest;
 import SP25SE026_GSP48_WDCRBP_api.model.responseModel.AuthenticationResponse;
+import SP25SE026_GSP48_WDCRBP_api.model.responseModel.ResetPasswordRest;
 import SP25SE026_GSP48_WDCRBP_api.repository.AccessTokenRepository;
 import SP25SE026_GSP48_WDCRBP_api.repository.RefreshTokenRepository;
 import SP25SE026_GSP48_WDCRBP_api.repository.UserRepository;
 import SP25SE026_GSP48_WDCRBP_api.security.JwtTokenProvider;
 import SP25SE026_GSP48_WDCRBP_api.service.AuthService;
+import SP25SE026_GSP48_WDCRBP_api.service.MailService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import org.apache.commons.lang3.RandomStringUtils;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
@@ -28,6 +32,10 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
+import java.time.LocalDateTime;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Optional;
 
 @Service
 public class AuthServiceImpl implements AuthService {
@@ -53,6 +61,11 @@ public class AuthServiceImpl implements AuthService {
         this.jwtTokenProvider = jwtTokenProvider;
         this.modelMapper = modelMapper;
     }
+
+    @Autowired
+    private MailService mailService;
+
+    private static final Map<String, String> otpMap = new HashMap<>();
 
     @Override
     public AuthenticationResponse login(LoginRequest loginDto) {
@@ -179,4 +192,78 @@ public class AuthServiceImpl implements AuthService {
         throw new WDCRBPApiException(HttpStatus.BAD_REQUEST, "Invalid refresh token");
     }
 
+    @Override
+    public ResetPasswordRest sendOtpToEmail(String email) {
+        // Check if user exists with the provided email
+        Optional<User> userOptional = userRepository.findByEmailOrPhone(email, email);
+        if (userOptional.isEmpty()) {
+            throw new RuntimeException("User with the provided email not found.");
+        }
+
+        User user = userOptional.get();
+
+        // Generate OTP
+        String otp = generateOtp();
+
+        // Store OTP temporarily (for this example, using an in-memory map)
+        otpMap.put(user.getEmail(), otp);
+
+        // Send OTP to email
+        sendOtpEmail(user.getEmail(), otp);
+
+        // Return response
+        ResetPasswordRest response = new ResetPasswordRest();
+        response.setStatus("Success");
+        response.setMessage("OTP sent to your email.");
+        return response;
+    }
+
+    // Generate a random OTP (6 digits)
+    private String generateOtp() {
+        return RandomStringUtils.randomNumeric(6);  // OTP is a 6-digit number
+    }
+
+    // Send OTP to the user's email
+    private void sendOtpEmail(String email, String otp) {
+        String subject = "Your Password Reset OTP";
+        String messageType = "otp";
+        mailService.sendEmail(email, subject, messageType, otp);
+    }
+
+    @Override
+    public ResetPasswordRest verifyOtpAndResetPassword(String email, String otp, String newPassword, String confirmPassword) {
+        // Verify OTP
+        if (!otp.equals(otpMap.get(email))) {
+            throw new RuntimeException("Invalid OTP.");
+        }
+
+        // Check if password and confirm password match
+        if (!newPassword.equals(confirmPassword)) {
+            throw new RuntimeException("Password and confirm password do not match.");
+        }
+
+        // Find the user by email
+        Optional<User> userOptional = userRepository.findByEmailOrPhone(email, email);
+        if (userOptional.isEmpty()) {
+            throw new RuntimeException("User not found.");
+        }
+
+        User user = userOptional.get();
+
+        // Update the password
+        user.setPassword(newPassword); // Set the new password
+        userRepository.save(user); // Save the updated user
+
+        // Clear OTP after successful reset
+        otpMap.remove(email);
+
+        // Send confirmation email
+        mailService.sendEmail(user.getEmail(), "Password Reset Successful", "passwordReset", "");
+
+        // Return success response
+        ResetPasswordRest response = new ResetPasswordRest();
+        response.setStatus("Success");
+        response.setMessage("Password reset successfully.");
+        return response;
+    }
 }
