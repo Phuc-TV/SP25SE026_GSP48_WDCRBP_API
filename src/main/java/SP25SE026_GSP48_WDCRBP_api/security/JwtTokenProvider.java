@@ -46,21 +46,13 @@ public class JwtTokenProvider {
         Date currentDate = new Date();
         Date expirationDate = new Date(currentDate.getTime() + expiration);
 
-        // Convert User object to JSON string
-        ObjectMapper objectMapper = new ObjectMapper();
-        String userJson;
-        try {
-            userJson = objectMapper.writeValueAsString(user);
-        } catch (Exception e) {
-            throw new RuntimeException("Error converting user to JSON", e);
-        }
-
-        // Encode JSON string (Base64)
-        String encodedUserJson = Base64.getEncoder().encodeToString(userJson.getBytes());
-
-        // Add user data to JWT claims
+        // Add selected user info to JWT claims
         Map<String, Object> claims = new HashMap<>();
-        claims.put("userData", encodedUserJson);
+        claims.put("userId", user.getUserId());
+        claims.put("username", user.getUsername());
+        claims.put("email", user.getEmail());
+        claims.put("phone", user.getPhone());
+        claims.put("role", user.getRole());
 
         return Jwts.builder()
                 .setClaims(claims)
@@ -70,7 +62,6 @@ public class JwtTokenProvider {
                 .signWith(key())
                 .compact();
     }
-
 
     private Key key() {
         return Keys.hmacShaKeyFor(
@@ -95,23 +86,16 @@ public class JwtTokenProvider {
                 .parseClaimsJws(token)
                 .getBody();
 
-        // Lấy dữ liệu mã hóa từ claims
-        String encodedUserJson = (String) claims.get("userData");
-
-        if (encodedUserJson == null) {
-            throw new WDCRBPApiException(HttpStatus.BAD_REQUEST, "User data not found in token");
-        }
-
         try {
-            // Giải mã Base64
-            byte[] decodedBytes = Base64.getDecoder().decode(encodedUserJson);
-            String userJson = new String(decodedBytes);
-
-            // Chuyển JSON string thành đối tượng User
-            ObjectMapper objectMapper = new ObjectMapper();
-            return objectMapper.readValue(userJson, User.class);
+            return User.builder()
+                    .userId(((Number) claims.get("userId")).longValue())
+                    .username((String) claims.get("username"))
+                    .email((String) claims.get("email"))
+                    .phone((String) claims.get("phone"))
+                    .role((String) claims.get("role"))
+                    .build();
         } catch (Exception e) {
-            throw new RuntimeException("Error decoding user data from JWT", e);
+            throw new RuntimeException("Error extracting user from JWT claims", e);
         }
     }
 
