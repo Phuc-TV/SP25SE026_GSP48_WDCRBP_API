@@ -1,7 +1,7 @@
 package SP25SE026_GSP48_WDCRBP_api.controller;
 
 import SP25SE026_GSP48_WDCRBP_api.model.requestModel.PaymentRequest;
-import SP25SE026_GSP48_WDCRBP_api.model.requestModel.PaymentRest;
+import SP25SE026_GSP48_WDCRBP_api.model.responseModel.PaymentRest;
 import SP25SE026_GSP48_WDCRBP_api.service.VNPayService;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
