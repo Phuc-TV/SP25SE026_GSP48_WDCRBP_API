@@ -14,6 +14,8 @@ import java.util.List;
 public class WoodworkProductDto {
     private String name;
     private String img;
+    private String description;
+    private Long categoryId;
     private List<ConfigurationDto> configurations;
     private List<PriceDto> prices;
 }
