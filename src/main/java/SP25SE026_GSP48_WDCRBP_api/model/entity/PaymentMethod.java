@@ -4,6 +4,8 @@ import com.google.api.client.util.DateTime;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.time.LocalDateTime;
+
 @Getter
 @Setter
 @Builder
@@ -29,7 +31,7 @@ public class PaymentMethod {
     private Boolean isDefault;
 
     @Column(nullable = true)
-    private DateTime createdAt;
+    private LocalDateTime createdAt;
 
     @ManyToOne
     @JoinColumn(name = "userId", nullable = true)

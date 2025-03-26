@@ -4,6 +4,8 @@ import com.google.api.client.util.DateTime;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.time.LocalDateTime;
+
 @Getter
 @Setter
 @Builder
@@ -23,7 +25,7 @@ public class DesignIdeaConfig {
     private String description;
 
     @Column(nullable = true)
-    private DateTime updatedAt;
+    private LocalDateTime updatedAt;
 
     @ManyToOne
     @JoinColumn(name = "designIdeaId", nullable = true)

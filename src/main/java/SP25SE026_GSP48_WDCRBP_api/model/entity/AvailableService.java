@@ -4,6 +4,8 @@ import com.google.api.client.util.DateTime;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.time.LocalDateTime;
+
 @Getter
 @Setter
 @Builder
@@ -20,10 +22,10 @@ public class AvailableService {
     private String description;
 
     @Column(nullable = true)
-    private DateTime createdAt;
+    private LocalDateTime createdAt;
 
     @Column(nullable = true)
-    private DateTime updatedAt;
+    private LocalDateTime updatedAt;
 
     @Column(nullable = true)
     private Boolean status;

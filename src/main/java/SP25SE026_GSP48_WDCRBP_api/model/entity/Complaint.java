@@ -3,6 +3,8 @@ package SP25SE026_GSP48_WDCRBP_api.model.entity;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.time.LocalDateTime;
+
 @Getter
 @Setter
 @Builder
@@ -27,8 +29,8 @@ public class Complaint {
     private Boolean status;
 
     @Column(nullable = true)
-    private String createdAt;
+    private LocalDateTime createdAt;
 
     @Column(nullable = true)
-    private String updatedAt;
+    private LocalDateTime updatedAt;
 }

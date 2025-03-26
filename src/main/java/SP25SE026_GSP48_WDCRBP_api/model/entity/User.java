@@ -4,6 +4,8 @@ import com.google.api.client.util.DateTime;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.time.LocalDateTime;
+
 @Getter
 @Setter
 @Builder
@@ -35,5 +37,5 @@ public class User {
     private Boolean status;
 
     @Column(nullable = true)
-    private DateTime createdAt;
+    private LocalDateTime createdAt;
 }

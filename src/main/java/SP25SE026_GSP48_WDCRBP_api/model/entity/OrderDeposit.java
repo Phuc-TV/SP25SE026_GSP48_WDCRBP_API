@@ -1,8 +1,9 @@
 package SP25SE026_GSP48_WDCRBP_api.model.entity;
 
-import com.google.api.client.util.DateTime;
 import jakarta.persistence.*;
 import lombok.*;
+
+import java.time.LocalDateTime;
 
 @Getter
 @Setter
@@ -29,10 +30,10 @@ public class OrderDeposit {
     private Boolean status;
 
     @Column(nullable = true)
-    private DateTime createdAt;
+    private LocalDateTime createdAt;
 
     @Column(nullable = true)
-    private DateTime updatedAt;
+    private LocalDateTime updatedAt;
 
     @ManyToOne
     @JoinColumn(name = "orderId" ,nullable = true)
@@ -40,5 +41,5 @@ public class OrderDeposit {
 
     @ManyToOne
     @JoinColumn(name = "guranteeOrderId" ,nullable = true)
-    private GuranteeOrder guranteeOrder;
+    private GuaranteeOrder guaranteeOrder;
 }

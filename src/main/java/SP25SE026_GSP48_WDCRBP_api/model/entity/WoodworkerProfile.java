@@ -4,6 +4,8 @@ import com.google.api.client.util.DateTime;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.time.LocalDateTime;
+
 @Getter
 @Setter
 @Builder
@@ -41,16 +43,19 @@ public class WoodworkerProfile {
     private boolean status;
 
     @Column(nullable = true)
-    private DateTime createdAt;
+    private String imgUrl;
 
     @Column(nullable = true)
-    private DateTime updatedAt;
+    private LocalDateTime createdAt;
 
     @Column(nullable = true)
-    private DateTime servicePackStartDate;
+    private LocalDateTime updatedAt;
 
     @Column(nullable = true)
-    private DateTime servicePackEndDate;
+    private LocalDateTime servicePackStartDate;
+
+    @Column(nullable = true)
+    private LocalDateTime servicePackEndDate;
 
     @Column(nullable = true)
     private Short totalStar;

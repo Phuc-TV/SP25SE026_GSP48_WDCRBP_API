@@ -1,8 +1,9 @@
 package SP25SE026_GSP48_WDCRBP_api.model.entity;
 
-import com.google.api.client.util.DateTime;
 import jakarta.persistence.*;
 import lombok.*;
+
+import java.time.LocalDateTime;
 
 @Getter
 @Setter
@@ -11,7 +12,7 @@ import lombok.*;
 @NoArgsConstructor
 @Entity
 @Table(name = "GuranteeOrder")
-public class GuranteeOrder {
+public class GuaranteeOrder {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long guranteeOrderId;
@@ -23,10 +24,10 @@ public class GuranteeOrder {
     private String description;
 
     @Column(nullable = true)
-    private DateTime createdAt;
+    private LocalDateTime createdAt;
 
     @Column(nullable = true)
-    private DateTime updatedAt;
+    private LocalDateTime updatedAt;
 
     @Column(nullable = true)
     private boolean status;
@@ -41,15 +42,11 @@ public class GuranteeOrder {
     @JoinColumn(name = "availableServiceId", nullable = true)
     private AvailableService availableService;
 
-    @ManyToOne
-    @JoinColumn(name = "userId", nullable = true)
-    private User user;
-
     @OneToOne
     @JoinColumn(name = "appointmentId" ,nullable = true)
     private ConsultantAppointment consultantAppointment;
 
     @ManyToOne
-    @JoinColumn(name = "orderId" ,nullable = true)
-    private ServiceOrder serviceOrder;
+    @JoinColumn(name = "requestedProductId" ,nullable = true)
+    private RequestedProduct requestedProduct;
 }

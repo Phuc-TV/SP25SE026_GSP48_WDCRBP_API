@@ -39,5 +39,5 @@ public class Shipment {
 
     @ManyToOne
     @JoinColumn(name = "guranteeOrderId", nullable = true)
-    private GuranteeOrder guranteeOrder;
+    private GuaranteeOrder guaranteeOrder;
 }

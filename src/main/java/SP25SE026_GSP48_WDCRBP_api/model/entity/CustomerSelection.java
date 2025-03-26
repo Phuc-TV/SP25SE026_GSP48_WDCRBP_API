@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import lombok.*;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 @Getter
 @Setter
@@ -29,5 +30,5 @@ public class CustomerSelection {
     private TechSpec techSpec;
 
     @Column(nullable = true)
-    private LocalDate createdAt;
+    private LocalDateTime createdAt;
 }

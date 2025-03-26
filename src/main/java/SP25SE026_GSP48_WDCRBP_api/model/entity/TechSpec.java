@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import lombok.*;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 @Getter
 @Setter
@@ -27,8 +28,8 @@ public class TechSpec {
     private boolean status;
 
     @Column(nullable = true)
-    private LocalDate createdAt;
+    private LocalDateTime createdAt;
 
     @Column(nullable = true)
-    private LocalDate updatedAt;
+    private LocalDateTime updatedAt;
 }

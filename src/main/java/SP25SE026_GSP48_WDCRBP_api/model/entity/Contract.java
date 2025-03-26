@@ -4,6 +4,8 @@ import com.google.api.client.util.DateTime;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.time.LocalDateTime;
+
 @Getter
 @Setter
 @Builder
@@ -28,10 +30,10 @@ public class Contract {
     private float contractTotalAmount;
 
     @Column(nullable = true)
-    private String completeDate;
+    private LocalDateTime completeDate;
 
     @Column(nullable = true)
-    private String signDate;
+    private LocalDateTime signDate;
 
     @Column(nullable = true)
     private String cusFullName;
@@ -43,10 +45,10 @@ public class Contract {
     private String cusPhone;
 
     @Column(nullable = true)
-    private String createdAt;
+    private LocalDateTime createdAt;
 
     @Column(nullable = true)
-    private DateTime warrantyPeriod;
+    private LocalDateTime warrantyPeriod;
 
     @OneToOne
     @JoinColumn(name = "orderId", nullable = true)

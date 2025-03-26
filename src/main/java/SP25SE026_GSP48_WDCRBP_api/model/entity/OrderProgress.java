@@ -3,7 +3,7 @@ package SP25SE026_GSP48_WDCRBP_api.model.entity;
 import jakarta.persistence.*;
 import lombok.*;
 
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 @Getter
 @Setter
@@ -28,10 +28,10 @@ public class OrderProgress {
     private Long deletedBy;
 
     @Column(nullable = true)
-    private LocalDate createdTime;
+    private LocalDateTime createdTime;
 
     @Column(nullable = true)
-    private LocalDate deletedTime;
+    private LocalDateTime deletedTime;
 
     @Column(nullable = true)
     private boolean status;
@@ -42,5 +42,5 @@ public class OrderProgress {
 
     @ManyToOne
     @JoinColumn(name = "guranteeOrderId", nullable = true)
-    private GuranteeOrder guranteeOrder;
+    private GuaranteeOrder guaranteeOrder;
 }
