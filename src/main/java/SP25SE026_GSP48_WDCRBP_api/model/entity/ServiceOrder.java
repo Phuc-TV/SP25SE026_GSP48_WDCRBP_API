@@ -48,6 +48,9 @@ public class ServiceOrder {
     @Column(nullable = true)
     private Float amountRemaining;
 
+    @Column(nullable = true)
+    private String role;
+
     @ManyToOne
     @JoinColumn(name = "userId", nullable = true)
     private User user;
