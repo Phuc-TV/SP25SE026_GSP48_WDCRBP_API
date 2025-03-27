@@ -7,7 +7,7 @@ import java.time.LocalDateTime;
 
 @Getter
 @Setter
-public class ResetPasswordRest {
+public class OtpSendRest {
     private String status;
     private String message;
 
