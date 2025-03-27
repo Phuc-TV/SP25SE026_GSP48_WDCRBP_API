@@ -8,7 +8,7 @@ import lombok.Setter;
 
 @Getter
 @Setter
-public class ResetPasswordRequest {
+public class OtpSendRequest {
 
     @Email(regexp = ".+@.+\\..+", message = "Email is invalid!")
     @NotBlank(message = "Email is required")

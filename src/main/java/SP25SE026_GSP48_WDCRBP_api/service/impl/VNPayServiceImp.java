@@ -11,7 +11,6 @@ import SP25SE026_GSP48_WDCRBP_api.repository.OrderDepositRepository;
 import SP25SE026_GSP48_WDCRBP_api.repository.PaymentMethodRepository;
 import SP25SE026_GSP48_WDCRBP_api.repository.TransactionRepository;
 import SP25SE026_GSP48_WDCRBP_api.repository.UserRepository;
-import SP25SE026_GSP48_WDCRBP_api.service.MailService;
 import SP25SE026_GSP48_WDCRBP_api.service.VNPayService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -31,7 +30,7 @@ public class VNPayServiceImp implements VNPayService {
     private final OrderDepositRepository orderDepositRepository;
     private final PaymentMethodRepository paymentMethodRepository;
     private final TransactionRepository transactionRepository;
-    private final MailService mailService;
+    private final MailServiceImpl mailServiceImpl;
 
     @Override
     public PaymentRest processPayment(PaymentRequest request) {
@@ -128,7 +127,7 @@ public class VNPayServiceImp implements VNPayService {
                     .build();
             transactionRepository.save(txn);
 
-            mailService.sendEmail(email, "VNPay Payment Link", "payment", paymentUrl);
+            mailServiceImpl.sendEmail(email, "VNPay Payment Link", "payment", paymentUrl);
 
             return PaymentRest.builder()
                     .status("ok")
