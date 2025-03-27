@@ -3,8 +3,6 @@ package SP25SE026_GSP48_WDCRBP_api.service.impl;
 import SP25SE026_GSP48_WDCRBP_api.model.entity.*;
 import SP25SE026_GSP48_WDCRBP_api.repository.*;
 import SP25SE026_GSP48_WDCRBP_api.service.ServiceOrderService;
-import SP25SE026_GSP48_WDCRBP_api.service.UserService;
-import org.checkerframework.checker.units.qual.A;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -51,7 +49,7 @@ public class ServiceOrderServiceImpl implements ServiceOrderService {
     }
 
     @Override
-    public  List<ServiceOrder> listServiceOrderByUserIdOrWwId(Long id, String role)
+    public List<ServiceOrder> listServiceOrderByUserIdOrWwId(Long id, String role)
     {
         List<ServiceOrder> orders = new ArrayList<>();
         if (role.equals("User"))
