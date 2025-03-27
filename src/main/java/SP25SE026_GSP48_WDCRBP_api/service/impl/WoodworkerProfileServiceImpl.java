@@ -1,6 +1,7 @@
 package SP25SE026_GSP48_WDCRBP_api.service.impl;
 
 import SP25SE026_GSP48_WDCRBP_api.model.entity.User;
+import SP25SE026_GSP48_WDCRBP_api.model.entity.ServicePack;
 import SP25SE026_GSP48_WDCRBP_api.model.entity.WoodworkerProfile;
 import SP25SE026_GSP48_WDCRBP_api.model.requestModel.SignupRequest;
 import SP25SE026_GSP48_WDCRBP_api.model.requestModel.WoodworkerRequest;
@@ -8,14 +9,19 @@ import SP25SE026_GSP48_WDCRBP_api.model.requestModel.WoodworkerUpdateStatusReque
 import SP25SE026_GSP48_WDCRBP_api.model.responseModel.WoodworkerProfileRest;
 import SP25SE026_GSP48_WDCRBP_api.model.responseModel.WoodworkerUpdateStatusRest;
 import SP25SE026_GSP48_WDCRBP_api.repository.UserRepository;
+import SP25SE026_GSP48_WDCRBP_api.repository.ServicePackRepository;
 import SP25SE026_GSP48_WDCRBP_api.repository.WoodworkerProfileRepository;
+import SP25SE026_GSP48_WDCRBP_api.service.AvailableServiceService;
 import SP25SE026_GSP48_WDCRBP_api.service.MailService;
 import SP25SE026_GSP48_WDCRBP_api.service.WoodworkerProfileService;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import java.time.temporal.ChronoUnit;
 
+
+import java.time.LocalDateTime;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -30,16 +36,29 @@ public class WoodworkerProfileServiceImpl implements WoodworkerProfileService {
     private UserRepository userRepository;
 
     @Autowired
-    private ModelMapper modelMapper;
+    private ServicePackRepository servicePackRepository;
+
+    @Autowired
+    private AvailableServiceService availableServiceService;
 
     @Autowired
     private AuthServiceImpl authServiceImpl;
 
+
+    @Autowired
+    private ModelMapper modelMapper;
+
     @Autowired
     private MailService mailService;
 
-    public WoodworkerProfileServiceImpl(WoodworkerProfileRepository repository) {
+    public WoodworkerProfileServiceImpl(WoodworkerProfileRepository repository,
+                                        ServicePackRepository servicePackRepository,
+                                        AvailableServiceService availableServiceService,
+                                        ModelMapper modelMapper) {
         this.wwRepository = repository;
+        this.servicePackRepository = servicePackRepository;
+        this.availableServiceService = availableServiceService;
+        this.modelMapper = modelMapper;
     }
 
     @Override
@@ -189,6 +208,26 @@ public class WoodworkerProfileServiceImpl implements WoodworkerProfileService {
         } catch (Exception e) {
             throw new RuntimeException("Failed to send password email: " + e.getMessage());
         }
+    }
+
+    @Override
+    public WoodworkerProfile addServicePack(Long servicePackId, Long wwId)
+    {
+        WoodworkerProfile obj = wwRepository.findWoodworkerProfileByWoodworkerId(wwId);
+
+        ServicePack servicePack = servicePackRepository.findServicePackByServicePackId(servicePackId);
+
+        obj.setServicePack(servicePack);
+        obj.setServicePackStartDate(LocalDateTime.now());
+
+        // Cộng Duration vào LocalDateTime
+        obj.setServicePackEndDate(LocalDateTime.now().plus(servicePack.getDuration(), ChronoUnit.MONTHS));
+
+        wwRepository.save(obj);
+
+        availableServiceService.addAvailableService(obj);
+
+        return obj;
     }
 }
 

@@ -33,4 +33,8 @@ public class AvailableService {
     @ManyToOne
     @JoinColumn(name = "serviceId", nullable = true)
     private Service service;
+
+    @ManyToOne
+    @JoinColumn(name = "woodworkerId", nullable = true)
+    private WoodworkerProfile woodworkerProfile;
 }

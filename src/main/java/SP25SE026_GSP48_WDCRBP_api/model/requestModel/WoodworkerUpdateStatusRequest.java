@@ -10,11 +10,8 @@ import lombok.Setter;
 public class WoodworkerUpdateStatusRequest {
 
     @NotNull(message = "Status is required")
-    private boolean status;  // Boolean for the status (true or false)
-
-    @NotEmpty(message = "User ID is required")
-    private String userId;   // String for userId
+    private boolean status;
 
     @NotEmpty(message = "Woodworker ID is required")
-    private String woodworkerId;  // String for woodworkerId
+    private String woodworkerId;
 }

@@ -1,9 +1,11 @@
 package SP25SE026_GSP48_WDCRBP_api.controller;
 
 import SP25SE026_GSP48_WDCRBP_api.components.CoreApiResponse;
+import SP25SE026_GSP48_WDCRBP_api.model.dto.DesignIdeaVariantDto;
 import SP25SE026_GSP48_WDCRBP_api.model.dto.WoodworkProductDto;
 import SP25SE026_GSP48_WDCRBP_api.model.dto.WoodworkerProfileDto;
 import SP25SE026_GSP48_WDCRBP_api.model.entity.DesignIdea;
+import SP25SE026_GSP48_WDCRBP_api.model.entity.DesignIdeaVariant;
 import SP25SE026_GSP48_WDCRBP_api.model.responseModel.DesignIdeaResponse;
 import SP25SE026_GSP48_WDCRBP_api.service.DesignIdeaService;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
@@ -35,6 +37,12 @@ public class DesignIdeaController {
         return CoreApiResponse.success(ideas);
     }
 
+    @GetMapping("/getDesignById/{Id}")
+    public CoreApiResponse getDesignById(@PathVariable Long Id)
+    {
+        return CoreApiResponse.success(designIdeaService.getDesignById(Id));
+    }
+
     @GetMapping("/getAllDesignIdea")
     public CoreApiResponse getAllDesignIdea()
     {
@@ -59,5 +67,17 @@ public class DesignIdeaController {
         if (idea == null)
             return CoreApiResponse.error("Error");
         return CoreApiResponse.success(idea);
+    }
+
+
+    @GetMapping("/getDesignIdeaVariantByDesignId/{designId}")
+    public CoreApiResponse getDesignIdeaVariantByDesignId(@PathVariable Long designId)
+    {
+        List<DesignIdeaVariantDto> ideass = designIdeaService.getDesignIdeaVariantByDesignId(designId);
+
+        if (ideass == null)
+            return CoreApiResponse.error("No data found");
+
+        return CoreApiResponse.success(ideass);
     }
 }

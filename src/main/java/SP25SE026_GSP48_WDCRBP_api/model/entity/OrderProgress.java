@@ -34,7 +34,7 @@ public class OrderProgress {
     private LocalDateTime deletedTime;
 
     @Column(nullable = true)
-    private boolean status;
+    private String status;
 
     @ManyToOne
     @JoinColumn(name = "orderId", nullable = true)

@@ -46,12 +46,9 @@ public class JwtTokenProvider {
         Date currentDate = new Date();
         Date expirationDate = new Date(currentDate.getTime() + expiration);
 
-        // Add selected user info to JWT claims
+        // Add selected user info (only userId and role) to JWT claims
         Map<String, Object> claims = new HashMap<>();
         claims.put("userId", user.getUserId());
-        claims.put("username", user.getUsername());
-        claims.put("email", user.getEmail());
-        claims.put("phone", user.getPhone());
         claims.put("role", user.getRole());
 
         return Jwts.builder()
@@ -62,6 +59,7 @@ public class JwtTokenProvider {
                 .signWith(key())
                 .compact();
     }
+
 
     private Key key() {
         return Keys.hmacShaKeyFor(
@@ -88,11 +86,8 @@ public class JwtTokenProvider {
 
         try {
             return User.builder()
-                    .userId(((Number) claims.get("userId")).longValue())
-                    .username((String) claims.get("username"))
-                    .email((String) claims.get("email"))
-                    .phone((String) claims.get("phone"))
-                    .role((String) claims.get("role"))
+                    .userId(((Number) claims.get("userId")).longValue())  // Extract userId
+                    .role((String) claims.get("role"))  // Extract role
                     .build();
         } catch (Exception e) {
             throw new RuntimeException("Error extracting user from JWT claims", e);

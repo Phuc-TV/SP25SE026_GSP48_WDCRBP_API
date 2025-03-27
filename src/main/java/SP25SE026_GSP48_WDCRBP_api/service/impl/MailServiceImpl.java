@@ -1,4 +1,4 @@
-package SP25SE026_GSP48_WDCRBP_api.service;
+package SP25SE026_GSP48_WDCRBP_api.service.impl;
 
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
@@ -9,7 +9,7 @@ import org.springframework.stereotype.Service;
 
 @Service
 @RequiredArgsConstructor
-public class MailService {
+public class MailServiceImpl {
 
     private final JavaMailSender mailSender;
 
