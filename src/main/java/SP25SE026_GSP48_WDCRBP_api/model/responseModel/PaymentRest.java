@@ -1,4 +1,4 @@
-package SP25SE026_GSP48_WDCRBP_api.model.requestModel;
+package SP25SE026_GSP48_WDCRBP_api.model.responseModel;
 
 import lombok.*;
 
