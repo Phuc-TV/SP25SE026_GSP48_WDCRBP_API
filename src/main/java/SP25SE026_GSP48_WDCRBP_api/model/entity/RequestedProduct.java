@@ -3,6 +3,8 @@ package SP25SE026_GSP48_WDCRBP_api.model.entity;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.time.LocalDateTime;
+
 @Getter
 @Setter
 @Builder
@@ -19,7 +21,7 @@ public class RequestedProduct {
     private Byte quantity;
 
     @Column(nullable = false)
-    private String createdAt;
+    private LocalDateTime createdAt;
 
     @Column(nullable = false)
     private float totalAmount;
@@ -31,8 +33,11 @@ public class RequestedProduct {
     @JoinColumn(name = "categoryId", nullable = false)
     private Category category;
 
-
     @ManyToOne
     @JoinColumn(name = "designIdeaVariantId", nullable = false)
     private DesignIdeaVariant designIdeaVariant;
+
+    @ManyToOne
+    @JoinColumn(name = "orderId", nullable = false)
+    private ServiceOrder serviceOrder;
 }

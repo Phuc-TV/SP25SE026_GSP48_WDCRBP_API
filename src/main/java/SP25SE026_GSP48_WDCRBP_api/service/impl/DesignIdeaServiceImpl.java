@@ -1,13 +1,12 @@
 package SP25SE026_GSP48_WDCRBP_api.service.impl;
 
-import SP25SE026_GSP48_WDCRBP_api.model.dto.ConfigValueDto;
-import SP25SE026_GSP48_WDCRBP_api.model.dto.ConfigurationDto;
-import SP25SE026_GSP48_WDCRBP_api.model.dto.PriceDto;
-import SP25SE026_GSP48_WDCRBP_api.model.dto.WoodworkProductDto;
+import SP25SE026_GSP48_WDCRBP_api.model.dto.*;
 import SP25SE026_GSP48_WDCRBP_api.model.entity.*;
+import SP25SE026_GSP48_WDCRBP_api.model.responseModel.DesignIdeaResponse;
 import SP25SE026_GSP48_WDCRBP_api.repository.*;
 import SP25SE026_GSP48_WDCRBP_api.service.DesignIdeaService;
 import SP25SE026_GSP48_WDCRBP_api.service.WoodworkerProfileService;
+import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -37,6 +36,12 @@ public class DesignIdeaServiceImpl implements DesignIdeaService {
     @Autowired
     private CategoryRepository categoryRepository;
 
+    @Autowired
+    private DesignIdeaRepository designIdeaRepository;
+
+    @Autowired
+    private ModelMapper modelMapper;
+
     public DesignIdeaServiceImpl(
             DesignIdeaRepository ideaRepository,
             WoodworkerProfileService woodworkerProfileService,
@@ -44,7 +49,8 @@ public class DesignIdeaServiceImpl implements DesignIdeaService {
             DesignIdeaConfigValueRepository designIdeaConfigValueRepository,
             DesignIdeaVariantRepository designIdeaVariantRepository,
             DesignIdeaVariantConfigRepository designIdeaVariantConfigRepository,
-            CategoryRepository categoryRepository
+            CategoryRepository categoryRepository,
+            ModelMapper modelMapper
     ) {
         this.ideaRepository = ideaRepository;
         this.woodworkerProfileService = woodworkerProfileService;
@@ -53,6 +59,7 @@ public class DesignIdeaServiceImpl implements DesignIdeaService {
         this.designIdeaVariantRepository = designIdeaVariantRepository;
         this.designIdeaVariantConfigRepository = designIdeaVariantConfigRepository;
         this.categoryRepository = categoryRepository;
+        this.modelMapper = modelMapper;
     }
 
 
@@ -65,6 +72,12 @@ public class DesignIdeaServiceImpl implements DesignIdeaService {
             return null;
 
         return ideaRepository.findDesignIdeaByWoodworkerProfile(woodworkerProfile);
+    }
+
+    @Override
+    public DesignIdea getDesignById(Long id)
+    {
+        return ideaRepository.findDesignIdeaByDesignIdeaId(id);
     }
 
     @Override
@@ -176,5 +189,35 @@ public class DesignIdeaServiceImpl implements DesignIdeaService {
         }
 
         return idea;
+    }
+
+    @Override
+    public List<DesignIdeaVariantDto> getDesignIdeaVariantByDesignId(Long designId)
+    {
+        DesignIdea designIdea = designIdeaRepository.findDesignIdeaByDesignIdeaId(designId);
+
+        List<DesignIdeaVariant> designIdeaVariants =
+                designIdeaVariantRepository.findDesignIdeaVariantByDesignIdea(designIdea);
+
+        List<DesignIdeaVariantDto> designIdeaVariantDtos = new ArrayList<>();
+
+        if (designIdeaVariants == null)
+            return null;
+
+        for (DesignIdeaVariant designIdeaVariantDtoss : designIdeaVariants)
+        {
+            List<DesignIdeaVariantConfig> designIdeaVariantConfigs =
+                    designIdeaVariantConfigRepository.
+                            findDesignIdeaVariantConfigByDesignIdeaVariant(designIdeaVariantDtoss);
+
+            DesignIdeaVariantDto designIdeaVariantDto =
+                    modelMapper.map(designIdeaVariantDtoss, DesignIdeaVariantDto.class);
+
+            designIdeaVariantDto.setDesignIdeaVariantConfig(designIdeaVariantConfigs);
+
+            designIdeaVariantDtos.add(designIdeaVariantDto);
+        }
+
+        return designIdeaVariantDtos;
     }
 }

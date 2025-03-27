@@ -21,5 +21,5 @@ public class DesignIdeaVariant {
 
     @ManyToOne
     @JoinColumn(name = "designIdeaId", nullable = true)
-    private DesignIdea decideDesignIdea;
+    private DesignIdea designIdea;
 }

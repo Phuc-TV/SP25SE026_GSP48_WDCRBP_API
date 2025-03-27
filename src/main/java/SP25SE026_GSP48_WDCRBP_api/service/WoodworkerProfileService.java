@@ -10,4 +10,6 @@ public interface WoodworkerProfileService {
     List<WoodworkerProfile> getAllWoodWorker();
 
     WoodworkerProfile getWoodworkerById(Long id);
+
+    WoodworkerProfile addServicePack(Long servicePackId, Long wwId);
 }
