@@ -16,4 +16,6 @@ public interface WoodworkerProfileService {
     WoodworkerProfileRest registerWoodworker(WoodworkerRequest request);
 
     WoodworkerUpdateStatusRest updateWoodworkerStatus(WoodworkerUpdateStatusRequest request);
+
+    WoodworkerProfile addServicePack(Long servicePackId, Long wwId);
 }

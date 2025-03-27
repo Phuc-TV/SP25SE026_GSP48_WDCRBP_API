@@ -33,8 +33,11 @@ public class RequestedProduct {
     @JoinColumn(name = "categoryId", nullable = false)
     private Category category;
 
-
     @ManyToOne
     @JoinColumn(name = "designIdeaVariantId", nullable = false)
     private DesignIdeaVariant designIdeaVariant;
+
+    @ManyToOne
+    @JoinColumn(name = "orderId", nullable = false)
+    private ServiceOrder serviceOrder;
 }

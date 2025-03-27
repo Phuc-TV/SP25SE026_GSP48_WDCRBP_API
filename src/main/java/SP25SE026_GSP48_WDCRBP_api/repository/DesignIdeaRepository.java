@@ -10,4 +10,6 @@ public interface DesignIdeaRepository extends JpaRepository<DesignIdea, Long> {
     List<DesignIdea> findDesignIdeaByWoodworkerProfile(WoodworkerProfile woodworkerProfile);
 
     DesignIdea findDesignIdeaByName(String name);
+
+    DesignIdea findDesignIdeaByDesignIdeaId(Long id);
 }
