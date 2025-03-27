@@ -73,6 +73,9 @@ public class SecurityConfig {
                                 .requestMatchers("/api/v1/OTP/start-verification").permitAll() // Cho phép quyền truy cập cho người dùng vô danh
                                 .requestMatchers("/api/v1/OTP/check-verification").permitAll()
                                 .requestMatchers("/api/v1/GHNApi/ward").permitAll()
+                                .requestMatchers("api/payment/**").permitAll()
+                                .requestMatchers("/api/transaction/**").permitAll()
+                                .requestMatchers("/api/v1/ww/**").permitAll()
                                 .anyRequest().authenticated()
                 ).exceptionHandling((exception) -> exception
                         .authenticationEntryPoint(this.jwtAuthenticationEntryPoint) // Sử dụng JwtAuthenticationEntryPoint tùy chỉnh

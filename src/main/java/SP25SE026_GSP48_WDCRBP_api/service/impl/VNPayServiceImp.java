@@ -6,14 +6,13 @@ import SP25SE026_GSP48_WDCRBP_api.model.entity.Transaction;
 import SP25SE026_GSP48_WDCRBP_api.model.entity.User;
 import SP25SE026_GSP48_WDCRBP_api.model.exception.WDCRBPApiException;
 import SP25SE026_GSP48_WDCRBP_api.model.requestModel.PaymentRequest;
-import SP25SE026_GSP48_WDCRBP_api.model.requestModel.PaymentRest;
+import SP25SE026_GSP48_WDCRBP_api.model.responseModel.PaymentRest;
 import SP25SE026_GSP48_WDCRBP_api.repository.OrderDepositRepository;
 import SP25SE026_GSP48_WDCRBP_api.repository.PaymentMethodRepository;
 import SP25SE026_GSP48_WDCRBP_api.repository.TransactionRepository;
 import SP25SE026_GSP48_WDCRBP_api.repository.UserRepository;
 import SP25SE026_GSP48_WDCRBP_api.service.MailService;
 import SP25SE026_GSP48_WDCRBP_api.service.VNPayService;
-import com.google.api.client.util.DateTime;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -21,7 +20,6 @@ import org.springframework.stereotype.Service;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.text.SimpleDateFormat;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.*;
 
@@ -35,22 +33,20 @@ public class VNPayServiceImp implements VNPayService {
     private final TransactionRepository transactionRepository;
     private final MailService mailService;
 
-    private static final long MAX_AMOUNT = 1_000_000_000L;
-
     @Override
     public PaymentRest processPayment(PaymentRequest request) {
         long amount = request.getAmount();
         String email = request.getEmail();
         String userId = request.getUserId();
         String orderDepositId = request.getOrderDepositId();
-
-        if (amount > MAX_AMOUNT) {
-            throw new WDCRBPApiException(HttpStatus.BAD_REQUEST, "Amount exceeds the allowed limit.");
+        String transactionType = request.getTransactionType();
+        if (transactionType == null || transactionType.isBlank()) {
+            transactionType = "pay_online";
         }
 
         try {
             Long parsedUserId = Long.parseLong(userId);
-            Long parsedOrderDepositId = Long.parseLong(orderDepositId );
+            Long parsedOrderDepositId = Long.parseLong(orderDepositId);
 
             User dbUser = userRepository.findById(parsedUserId)
                     .orElseThrow(() -> new WDCRBPApiException(HttpStatus.NOT_FOUND, "User not found with ID: " + userId));
@@ -60,7 +56,7 @@ public class VNPayServiceImp implements VNPayService {
 
             // VNPay URL creation
             long vnpAmount = amount * 100;
-            String vnp_TxnRef = VnPayConfig.getRandomNumber(8);
+            String vnp_TxnRef = UUID.randomUUID().toString().replace("-", "").substring(0, 12);
             String vnp_IpAddr = "127.0.0.1";
             String returnUrl = "http://localhost:5173/payment-successfull";
 
@@ -109,7 +105,6 @@ public class VNPayServiceImp implements VNPayService {
             query.append("&vnp_SecureHash=").append(vnp_SecureHash);
             String paymentUrl = VnPayConfig.vnp_PayUrl + "?" + query;
 
-            // Save or reuse payment method
             PaymentMethod paymentMethod = paymentMethodRepository.findByUserAndProviderName(dbUser, "VNPay")
                     .orElseGet(() -> paymentMethodRepository.save(
                             PaymentMethod.builder()
@@ -122,9 +117,8 @@ public class VNPayServiceImp implements VNPayService {
                                     .build()
                     ));
 
-            // Save transaction
             Transaction txn = Transaction.builder()
-                    .transactionType(vnp_TxnRef)
+                    .transactionType(transactionType)
                     .amount(amount)
                     .status(false)
                     .createdAt(LocalDateTime.now())
@@ -134,7 +128,7 @@ public class VNPayServiceImp implements VNPayService {
                     .build();
             transactionRepository.save(txn);
 
-            mailService.sendPaymentLink(email, paymentUrl); // Send the email before return
+            mailService.sendEmail(email, "VNPay Payment Link", "payment", paymentUrl);
 
             return PaymentRest.builder()
                     .status("ok")
@@ -152,3 +146,4 @@ public class VNPayServiceImp implements VNPayService {
         }
     }
 }
+
