@@ -18,7 +18,7 @@ public class UserController {
         this.userService = userService;
     }
 
-    @GetMapping("/getProvinces/{id}")
+    @GetMapping("/getUserInformationById/{id}")
     public CoreApiResponse getUserInformationById(@PathVariable Long id)
     {
         return userService.getUserInformationById(id);
