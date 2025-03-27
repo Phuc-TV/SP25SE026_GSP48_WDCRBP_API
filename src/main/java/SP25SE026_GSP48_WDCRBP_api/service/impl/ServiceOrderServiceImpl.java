@@ -69,7 +69,9 @@ public class ServiceOrderServiceImpl implements ServiceOrderService {
         //Create OrderProgress
         OrderProgress orderProgress = new OrderProgress();
         orderProgress.setServiceOrder(serviceOrder);
-        orderProgress.setStatus("Đang chờ thợ mộc duyệt");
+
+        String s = "Đang chờ thợ mộc duyệt";
+        orderProgress.setStatus(s);
 
         return serviceOrder;
     }
