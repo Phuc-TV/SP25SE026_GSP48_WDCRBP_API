@@ -27,6 +27,9 @@ public class User {
     private String email;
 
     @Column(nullable = true)
+    private String OTP;
+
+    @Column(nullable = true)
     private String password;
 
     @Column(nullable = true)
