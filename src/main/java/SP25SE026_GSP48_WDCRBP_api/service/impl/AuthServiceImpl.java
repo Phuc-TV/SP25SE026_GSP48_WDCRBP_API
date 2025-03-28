@@ -141,7 +141,7 @@ public class AuthServiceImpl implements AuthService {
     public String signup(SignupRequest signupDto) {
         // add check if email already exists
         if (userRepository.existsByEmail(signupDto.getEmail())) {
-            throw new WDCRBPApiException(HttpStatus.BAD_REQUEST, "Email is already exist!");
+            throw new WDCRBPApiException(HttpStatus.BAD_REQUEST, "Đã có tài khoản sử dụng email đó rồi !");
         }
 
         User user = modelMapper.map(signupDto, User.class);
