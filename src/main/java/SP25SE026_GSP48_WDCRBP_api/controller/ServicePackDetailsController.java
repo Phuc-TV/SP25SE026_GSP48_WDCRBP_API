@@ -1,13 +1,13 @@
 package SP25SE026_GSP48_WDCRBP_api.controller;
 
+import SP25SE026_GSP48_WDCRBP_api.components.CoreApiResponse;
 import SP25SE026_GSP48_WDCRBP_api.model.requestModel.CreateServicePackDetailsRequest;
 import SP25SE026_GSP48_WDCRBP_api.model.responseModel.CreateServicePackDetailsRest;
-import SP25SE026_GSP48_WDCRBP_api.model.responseModel.DeleteServicePackDetailsRest;
 import SP25SE026_GSP48_WDCRBP_api.model.responseModel.ListServicePackDetailsRest;
 import SP25SE026_GSP48_WDCRBP_api.service.ServicePackDetailsService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -19,37 +19,58 @@ public class ServicePackDetailsController {
     private ServicePackDetailsService service;
 
     @PostMapping("/create")
-    public ResponseEntity<CreateServicePackDetailsRest> create(@Valid @RequestBody CreateServicePackDetailsRequest request) {
+    public CoreApiResponse<CreateServicePackDetailsRest> create(@Valid @RequestBody CreateServicePackDetailsRequest request) {
         CreateServicePackDetailsRest response = service.createServicePackDetails(request);
-        return ResponseEntity.ok(response);
+        try{
+            return CoreApiResponse.success(response, "Tạo Service Pack Details thành công");
+        } catch (RuntimeException e) {
+            return CoreApiResponse.error(HttpStatus.BAD_REQUEST, "Tạo Service Pack Details thất bại: " + e.getMessage());
+        }
+
     }
 
-    @PutMapping("/{servicePackDetailsId}")
-    public ResponseEntity<CreateServicePackDetailsRest> updateServicePackDetails(
-            @PathVariable Long servicePackDetailsId,
+    @PutMapping("/update")
+    public CoreApiResponse<CreateServicePackDetailsRest> updateServicePackDetails(
+            @RequestParam Long servicePackDetailsId,
             @Valid @RequestBody CreateServicePackDetailsRequest request) {
         CreateServicePackDetailsRest response = service.updateServicePackDetails(servicePackDetailsId, request);
-        return ResponseEntity.ok(response);
+        try{
+            return CoreApiResponse.success(response, "Sửa chữa Service Pack Details thành công");
+        } catch (RuntimeException e) {
+            return CoreApiResponse.error(HttpStatus.BAD_REQUEST, "Tạo Service Pack Details thất bại: " + e.getMessage());
+        }
     }
 
     @DeleteMapping("/delete")
-    public ResponseEntity<DeleteServicePackDetailsRest> deleteServicePackDetails(
+    public CoreApiResponse<?> deleteServicePackDetails(
             @RequestParam("servicePackDetailsId") Long servicePackDetailsId) {
-        DeleteServicePackDetailsRest response = service.deleteServicePackDetails(servicePackDetailsId);
-        return ResponseEntity.ok(response);
+        service.deleteServicePackDetails(servicePackDetailsId);
+        try{
+            return CoreApiResponse.success("Xóa Service Pack thành công");
+        } catch (RuntimeException e) {
+            return CoreApiResponse.error(HttpStatus.BAD_REQUEST, "Ko thể xóa: " + e.getMessage());
+        }
     }
 
     @GetMapping("/all")
-    public ResponseEntity<ListServicePackDetailsRest> getAllServicePackDetails() {
+    public CoreApiResponse<ListServicePackDetailsRest> getAllServicePackDetails() {
         ListServicePackDetailsRest response = service.getAllServicePackDetails();
-        return ResponseEntity.ok(response);
+        try{
+            return CoreApiResponse.success(response, "Lấy danh sách Service Pack Details thành công");
+        } catch (RuntimeException e) {
+            return CoreApiResponse.error(HttpStatus.BAD_REQUEST, "Lấy danh sách Service Pack Details thất bại: " + e.getMessage());
+        }
     }
 
-    @GetMapping("/{servicePackDetailsId}")
-    public ResponseEntity<ListServicePackDetailsRest> getServicePackDetailsById(
-            @PathVariable("servicePackDetailsId") Long servicePackDetailsId) {
+    @GetMapping("/detail")
+    public CoreApiResponse<ListServicePackDetailsRest> getServicePackDetailsById(
+            @RequestParam("servicePackDetailsId") Long servicePackDetailsId) {
         ListServicePackDetailsRest response = service.getServicePackDetailsById(servicePackDetailsId);
-        return ResponseEntity.ok(response);
+        try{
+            return CoreApiResponse.success(response, "Lấy thông tin Service Pack Details thành công");
+        } catch (RuntimeException e) {
+            return CoreApiResponse.error(HttpStatus.BAD_REQUEST, "Lấy thông tin Service Pack Details thất bại: " + e.getMessage());
+        }
     }
 }
 

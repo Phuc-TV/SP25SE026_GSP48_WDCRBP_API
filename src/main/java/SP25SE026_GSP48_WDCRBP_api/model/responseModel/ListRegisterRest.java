@@ -9,8 +9,6 @@ import java.util.List;
 @Getter
 @Setter
 public class ListRegisterRest {
-    private String status;
-    private String message;
     private List<Data> data;  // ✅ should be a list (not a single object)
 
     @Getter
@@ -18,7 +16,9 @@ public class ListRegisterRest {
     public static class Data {
         private Long woodworkerId;
         private Long userId;
-
+        private String fullName;
+        private String phone;
+        private String email;
         private String brandName;
         private String bio;
         private String imgUrl;
