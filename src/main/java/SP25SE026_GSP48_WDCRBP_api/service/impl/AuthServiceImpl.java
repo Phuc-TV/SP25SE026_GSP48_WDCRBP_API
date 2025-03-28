@@ -74,7 +74,7 @@ public class AuthServiceImpl implements AuthService {
 
         SecurityContextHolder.getContext().setAuthentication(authentication);
 
-        User user = userRepository.findByEmailOrPhone(loginDto.getEmailOrPhone(), loginDto.getEmailOrPhone())
+        User user = userRepository.findUserByEmailOrPhone(loginDto.getEmailOrPhone(), loginDto.getEmailOrPhone())
                 .orElseThrow(() -> new WDCRBPApiException(HttpStatus.BAD_REQUEST, "User not found"));
 
         // Truyền thẳng User vào để JWT chứa thông tin User
@@ -138,12 +138,6 @@ public class AuthServiceImpl implements AuthService {
 
     @Override
     public String signup(SignupRequest signupDto) {
-
-        // add check if username already exists
-        if (userRepository.existsByUsername(signupDto.getUsername())) {
-            throw new WDCRBPApiException(HttpStatus.BAD_REQUEST, "Username is already exist!");
-        }
-
         // add check if email already exists
         if (userRepository.existsByEmail(signupDto.getEmail())) {
             throw new WDCRBPApiException(HttpStatus.BAD_REQUEST, "Email is already exist!");
@@ -195,7 +189,7 @@ public class AuthServiceImpl implements AuthService {
     @Override
     public ResetPasswordRest sendOtpToEmail(String email) {
         // Check if user exists with the provided email
-        Optional<User> userOptional = userRepository.findByEmailOrPhone(email, email);
+        Optional<User> userOptional = userRepository.findUserByEmailOrPhone(email, email);
         if (userOptional.isEmpty()) {
             throw new RuntimeException("User with the provided email not found.");
         }
@@ -243,7 +237,7 @@ public class AuthServiceImpl implements AuthService {
         }
 
         // Find the user by email
-        Optional<User> userOptional = userRepository.findByEmailOrPhone(email, email);
+        Optional<User> userOptional = userRepository.findUserByEmailOrPhone(email, email);
         if (userOptional.isEmpty()) {
             throw new RuntimeException("User not found.");
         }
