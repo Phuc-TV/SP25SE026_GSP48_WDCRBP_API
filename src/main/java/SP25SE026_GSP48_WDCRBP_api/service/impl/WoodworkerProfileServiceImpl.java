@@ -3,7 +3,6 @@ package SP25SE026_GSP48_WDCRBP_api.service.impl;
 import SP25SE026_GSP48_WDCRBP_api.model.entity.User;
 import SP25SE026_GSP48_WDCRBP_api.model.entity.ServicePack;
 import SP25SE026_GSP48_WDCRBP_api.model.entity.WoodworkerProfile;
-import SP25SE026_GSP48_WDCRBP_api.model.requestModel.SignupRequest;
 import SP25SE026_GSP48_WDCRBP_api.model.requestModel.WoodworkerRequest;
 import SP25SE026_GSP48_WDCRBP_api.model.requestModel.WoodworkerUpdateStatusRequest;
 import SP25SE026_GSP48_WDCRBP_api.model.responseModel.WoodworkerProfileRest;
@@ -12,7 +11,6 @@ import SP25SE026_GSP48_WDCRBP_api.repository.UserRepository;
 import SP25SE026_GSP48_WDCRBP_api.repository.ServicePackRepository;
 import SP25SE026_GSP48_WDCRBP_api.repository.WoodworkerProfileRepository;
 import SP25SE026_GSP48_WDCRBP_api.service.AvailableServiceService;
-import SP25SE026_GSP48_WDCRBP_api.service.MailService;
 import SP25SE026_GSP48_WDCRBP_api.service.WoodworkerProfileService;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.modelmapper.ModelMapper;
@@ -21,7 +19,6 @@ import org.springframework.stereotype.Service;
 import java.time.temporal.ChronoUnit;
 
 
-import java.time.LocalDateTime;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
