@@ -74,6 +74,10 @@ public class AuthServiceImpl implements AuthService {
         User user = userRepository.findUserByEmailOrPhone(loginDto.getEmailOrPhone(), loginDto.getEmailOrPhone())
                 .orElseThrow(() -> new WDCRBPApiException(HttpStatus.BAD_REQUEST, "User not found"));
 
+        if(user.getStatus().equals(false)) {
+            throw new WDCRBPApiException(HttpStatus.BAD_REQUEST, "Tài khoản chưa được kích hoạt");
+        }
+
         // Truyền thẳng User vào để JWT chứa thông tin User
         String accessToken = jwtTokenProvider.generateAccessToken(user);
         String refreshToken = jwtTokenProvider.generateRefreshToken(user);
@@ -146,7 +150,13 @@ public class AuthServiceImpl implements AuthService {
 
         user.setRole("Customer");
 
+        user.setStatus(false);
+
+        String otp = generateOtp();
+        user.setOTP(otp);
         userRepository.save(user);
+
+        sendOtpEmail(user.getEmail(), otp);
 
         return "User registered successfully!";
     }
@@ -240,4 +250,27 @@ public class AuthServiceImpl implements AuthService {
 
         return new LoginOtpRest(accessToken, refreshToken);
     }
+
+    @Override
+    public LoginOtpRest otpChangeStatusAccount(LoginOtpRequest request) {
+        Optional<User> userOptional = userRepository.findUserByEmailOrPhone(request.getEmail(), request.getEmail());
+        if (userOptional.isEmpty()) {
+            throw new RuntimeException("Người dùng không tồn tại");
+        }
+
+        User user = userOptional.get();
+
+        if (user.getOTP() == null || !user.getOTP().equals(request.getOtp())) {
+            throw new RuntimeException("OTP không hợp lệ hoặc đã hết hạn");
+        }
+
+        // Clear OTP after use
+        user.setStatus(true);
+        user.setOTP(null);
+        userRepository.save(user);
+
+        return LoginOtpRest.builder()
+                .build();
+    }
+
 }
