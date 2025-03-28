@@ -26,4 +26,16 @@ public class ServicePack {
 
     @Column(nullable = true)
     private Short duration;
+
+    @Column(nullable = true)
+    private Short postLimitPerMonth;
+
+    @Column(nullable = true)
+    private Boolean productManagement;
+
+    @Column(nullable = true)
+    private Short searchResultPriority;
+
+    @Column(nullable = true)
+    private Boolean personalization;
 }
