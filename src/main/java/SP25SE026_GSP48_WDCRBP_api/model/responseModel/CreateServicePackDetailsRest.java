@@ -13,8 +13,6 @@ import lombok.Setter;
 @AllArgsConstructor
 public class CreateServicePackDetailsRest {
 
-    private String status;
-    private String message;
     private Data data;
 
     @Getter

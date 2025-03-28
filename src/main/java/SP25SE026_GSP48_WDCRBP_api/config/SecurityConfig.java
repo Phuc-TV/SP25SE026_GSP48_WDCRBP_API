@@ -76,6 +76,8 @@ public class SecurityConfig {
                                 .requestMatchers("api/payment/**").permitAll()
                                 .requestMatchers("/api/transaction/**").permitAll()
                                 .requestMatchers("/api/v1/ww/**").permitAll()
+                                .requestMatchers("/api/v1/service-pack/**").permitAll()
+                                .requestMatchers("/api/v1/service-pack-details/**").permitAll()
                                 .anyRequest().authenticated()
                 ).exceptionHandling((exception) -> exception
                         .authenticationEntryPoint(this.jwtAuthenticationEntryPoint) // Sử dụng JwtAuthenticationEntryPoint tùy chỉnh

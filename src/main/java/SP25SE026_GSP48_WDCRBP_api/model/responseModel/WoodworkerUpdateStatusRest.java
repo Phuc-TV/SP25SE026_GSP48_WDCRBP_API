@@ -9,7 +9,5 @@ import java.time.LocalDateTime;
 @Setter
 
 public class WoodworkerUpdateStatusRest {
-    private String status;
-    private String message;
     private LocalDateTime UpdatedAt;
 }

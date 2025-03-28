@@ -9,9 +9,6 @@ import java.time.LocalDateTime;
 @Setter
 public class WoodworkerProfileRest {
 
-    private String status;
-    private String message;
-
     private Data data;
 
     @Getter
@@ -23,6 +20,10 @@ public class WoodworkerProfileRest {
         private String imgUrl;
         private String businessType;
         private String taxCode;
+        private String address;
+        private String wardCode;
+        private String districtId;
+        private String cityId;
         private LocalDateTime createdAt;
         private LocalDateTime updatedAt;
     }

@@ -6,6 +6,7 @@ import SP25SE026_GSP48_WDCRBP_api.model.entity.WoodworkerProfile;
 import SP25SE026_GSP48_WDCRBP_api.model.requestModel.WoodworkerRequest;
 import SP25SE026_GSP48_WDCRBP_api.model.requestModel.WoodworkerUpdateStatusRequest;
 import SP25SE026_GSP48_WDCRBP_api.model.responseModel.DesignIdeaResponse;
+import SP25SE026_GSP48_WDCRBP_api.model.responseModel.ListRegisterRest;
 import SP25SE026_GSP48_WDCRBP_api.model.responseModel.WoodworkerProfileRest;
 import SP25SE026_GSP48_WDCRBP_api.model.responseModel.WoodworkerUpdateStatusRest;
 import SP25SE026_GSP48_WDCRBP_api.service.WoodworkerProfileService;
@@ -62,9 +63,9 @@ public class WoodworkerProfileController {
     public CoreApiResponse registerWoodworker(@RequestBody @Valid WoodworkerRequest request) {
         try {
             WoodworkerProfileRest response = woodworkerProfileService.registerWoodworker(request);
-            return CoreApiResponse.success(response);
+            return CoreApiResponse.success(response, "Đăng ký thành công");
         } catch (Exception e) {
-            return CoreApiResponse.error("Error registering woodworker: " + e.getMessage());
+            return CoreApiResponse.error("form đăng ký có sai sót: " + e.getMessage());
         }
     }
 
@@ -72,9 +73,20 @@ public class WoodworkerProfileController {
     public CoreApiResponse updateWoodworkerStatus(@RequestBody WoodworkerUpdateStatusRequest request) {
         try {
             WoodworkerUpdateStatusRest response = woodworkerProfileService.updateWoodworkerStatus(request);
-            return CoreApiResponse.success(response);
+            return CoreApiResponse.success(response, "Cập nhật trạng thái thành công");
         } catch (Exception e) {
-            return CoreApiResponse.error("Error updating woodworker status: " + e.getMessage());
+            return CoreApiResponse.error("Không thể cập nhật trạng thái: " + e.getMessage());
         }
+    }
+
+    @GetMapping("/listWW/inactive")
+    public CoreApiResponse getInactiveWoodworkers() {
+        List<ListRegisterRest.Data> result = woodworkerProfileService.getAllInactiveWoodworkers();
+
+        if (result.isEmpty()) {
+            return CoreApiResponse.error("Danh sách không có thợ mộc nào chưa kích hoạt tài khoản");
+        }
+
+        return CoreApiResponse.success(result, "Danh sách thợ mộc chưa kích hoạt tài khoản");
     }
 }
