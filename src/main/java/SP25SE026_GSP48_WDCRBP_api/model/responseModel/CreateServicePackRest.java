@@ -26,5 +26,9 @@ public class CreateServicePackRest {
         private Float price;
         private String description;
         private Short duration;
+        private Short postLimitPerMonth;
+        private Boolean productManagement;
+        private Short searchResultPriority;
+        private Boolean personalization;
     }
 }

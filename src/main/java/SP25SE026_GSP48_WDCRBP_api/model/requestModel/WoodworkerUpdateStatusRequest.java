@@ -9,9 +9,11 @@ import lombok.Setter;
 @Setter
 public class WoodworkerUpdateStatusRequest {
 
+    @NotEmpty(message = "Woodworker ID is required")
+    private String woodworkerId;
+
     @NotNull(message = "Status is required")
     private boolean status;
 
-    @NotEmpty(message = "Woodworker ID is required")
-    private String woodworkerId;
+    private String Description;
 }

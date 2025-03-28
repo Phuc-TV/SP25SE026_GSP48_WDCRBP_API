@@ -1,9 +1,11 @@
 package SP25SE026_GSP48_WDCRBP_api.model.requestModel;
 
+import jakarta.persistence.Column;
 import jakarta.validation.constraints.*;
 
 import lombok.Getter;
 import lombok.Setter;
+import org.apache.logging.log4j.message.Message;
 
 @Getter
 @Setter
@@ -22,4 +24,17 @@ public class CreateServicePackRequest {
     @NotNull(message = "Duration is required")
     @Positive(message = "Duration must be greater than 0")
     private Short duration;
+
+    @NotNull(message = "PostLimitPerMonth is required")
+    @Positive(message = "PostLimitPerMonth must be greater than 0")
+    private Short postLimitPerMonth;
+
+    @NotNull(message = "ProductManagement is required")
+    private Boolean productManagement;
+
+    @NotNull(message = "SearchResultPriority is required")
+    private Short searchResultPriority;
+
+    @NotNull(message = "Personalization is required")
+    private Boolean personalization;
 }

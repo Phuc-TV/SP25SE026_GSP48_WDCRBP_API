@@ -9,7 +9,7 @@ import java.util.List;
 @Getter
 @Setter
 public class ListRegisterRest {
-    private List<Data> data;  // ✅ should be a list (not a single object)
+    private List<Data> data;
 
     @Getter
     @Setter

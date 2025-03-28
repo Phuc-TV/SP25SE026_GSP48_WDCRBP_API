@@ -10,6 +10,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 @RequestMapping("/api/v1/service-pack")
 @CrossOrigin(origins = "*")
@@ -51,23 +53,28 @@ public class ServicePackController {
     }
 
     @GetMapping("/list")
-    public CoreApiResponse<ListServicePackRest> getAllServicePacks() {
-        ListServicePackRest response = servicePackService.getAllServicePacks();
-        try{
-            return CoreApiResponse.success(response, "Lấy danh sách Service Pack thành công");
-        } catch (RuntimeException e) {
-            return CoreApiResponse.error(HttpStatus.BAD_REQUEST, "Lấy danh sách Service Pack thất bại: " + e.getMessage());
+    public CoreApiResponse<List<ListServicePackRest.Data>> getAllServicePacks() {
+        List<ListServicePackRest.Data> result = servicePackService.getAllServicePacks();
+        if (result.isEmpty()) {
+            return CoreApiResponse.error(HttpStatus.NOT_FOUND, "Danh sách Service Pack trống");
         }
+        return CoreApiResponse.success(result, "Lấy danh sách Service Pack thành công");
     }
 
     @GetMapping("/detail")
     public CoreApiResponse<ListServicePackRest> getServicePackById(@RequestParam Long servicePackId) {
-        ListServicePackRest response = servicePackService.getServicePackById(servicePackId);
-        try{
+        try {
+            ListServicePackRest response = servicePackService.getServicePackById(servicePackId);
+
+            if (response == null || response.getData() == null || response.getData().isEmpty()) {
+                throw new RuntimeException("Service Pack not found with ID: " + servicePackId);
+            }
+
             return CoreApiResponse.success(response, "Lấy thông tin Service Pack thành công");
         } catch (RuntimeException e) {
-            return CoreApiResponse.error(HttpStatus.BAD_REQUEST, "Lấy thông tin Service Pack thất bại: " + e.getMessage());
+            return CoreApiResponse.error(HttpStatus.NOT_FOUND, "Lấy thông tin Service Pack thất bại: " + e.getMessage());
         }
     }
+
 
 }

@@ -180,35 +180,40 @@ public class WoodworkerProfileServiceImpl implements WoodworkerProfileService {
 
     @Override
     public WoodworkerUpdateStatusRest updateWoodworkerStatus(WoodworkerUpdateStatusRequest request) {
-        // Step 1: Validate woodworker ID exists
         Long woodworkerId = Long.parseLong(request.getWoodworkerId());
         Optional<WoodworkerProfile> woodworkerProfileOptional = wwRepository.findById(woodworkerId);
+
         if (woodworkerProfileOptional.isEmpty()) {
             throw new RuntimeException("Woodworker not found");
         }
 
-        // Step 2: Get woodworker profile and related user
         WoodworkerProfile woodworkerProfile = woodworkerProfileOptional.get();
-        User user = woodworkerProfile.getUser(); // thanks to @OneToOne relation
+        User user = woodworkerProfile.getUser();
 
         if (user == null) {
             throw new RuntimeException("User associated with this woodworker not found");
         }
 
-        // Step 3: Update status
-        woodworkerProfile.setStatus(request.isStatus());
-        woodworkerProfile.setUpdatedAt(LocalDateTime.now());
-        wwRepository.save(woodworkerProfile);
+        boolean requestedStatus = request.isStatus();
+        String reason = request.getDescription();
 
-        // Step 4: Get the plain password from TempPasswordStorage
-        String plainPassword = TempPasswordStorage.getPlainPassword(user.getUserId());
+        // 🟡 If status is false and there's a rejection reason, send rejection email instead
+        if (!requestedStatus && reason != null && !reason.trim().isEmpty()) {
+            mailServiceImpl.sendEmail(user.getEmail(), "Yêu cầu cập nhật trạng thái bị từ chối", "status-rejection", reason);
+        } else {
+            // ✅ Approve status update
+            woodworkerProfile.setStatus(true);
+            woodworkerProfile.setUpdatedAt(LocalDateTime.now());
+            wwRepository.save(woodworkerProfile);
 
-        // Step 5: Send password to email (only if available)
-        if (plainPassword != null) {
-            sendPasswordToUser(user.getEmail(), plainPassword);
+            // Send password to woodworker
+            String plainPassword = TempPasswordStorage.getPlainPassword(user.getUserId());
+            if (plainPassword != null) {
+                sendPasswordToUser(user.getEmail(), plainPassword);
+            }
         }
 
-        // Step 6: Return response
+        // Build response
         WoodworkerUpdateStatusRest response = new WoodworkerUpdateStatusRest();
         response.setUpdatedAt(woodworkerProfile.getUpdatedAt());
         return response;
