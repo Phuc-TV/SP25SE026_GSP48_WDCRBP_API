@@ -30,7 +30,7 @@ public class VNPayServiceImp implements VNPayService {
     private final OrderDepositRepository orderDepositRepository;
     private final PaymentMethodRepository paymentMethodRepository;
     private final TransactionRepository transactionRepository;
-    private final MailService mailService;
+    private final MailServiceImpl mailServiceImpl;
 
     @Override
     public PaymentRest processPayment(PaymentRequest request) {
@@ -127,7 +127,7 @@ public class VNPayServiceImp implements VNPayService {
                     .build();
             transactionRepository.save(txn);
 
-            mailService.sendEmail(email, "VNPay Payment Link", "payment", paymentUrl);
+            mailServiceImpl.sendEmail(email, "VNPay Payment Link", "payment", paymentUrl);
 
             return PaymentRest.builder()
                     .status("ok")

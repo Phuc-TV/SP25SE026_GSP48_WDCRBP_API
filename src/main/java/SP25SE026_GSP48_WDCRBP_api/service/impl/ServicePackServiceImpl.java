@@ -3,7 +3,6 @@ package SP25SE026_GSP48_WDCRBP_api.service.impl;
 import SP25SE026_GSP48_WDCRBP_api.model.entity.ServicePack;
 import SP25SE026_GSP48_WDCRBP_api.model.requestModel.CreateServicePackRequest;
 import SP25SE026_GSP48_WDCRBP_api.model.responseModel.CreateServicePackRest;
-import SP25SE026_GSP48_WDCRBP_api.model.responseModel.DeleteServicePackRest;
 import SP25SE026_GSP48_WDCRBP_api.model.responseModel.ListServicePackRest;
 import SP25SE026_GSP48_WDCRBP_api.repository.ServicePackRepository;
 import SP25SE026_GSP48_WDCRBP_api.service.ServicePackService;
@@ -50,8 +49,6 @@ public class ServicePackServiceImpl implements ServicePackService {
                 .build();
 
         return CreateServicePackRest.builder()
-                .status("Success")
-                .message("Service Pack created successfully.")
                 .data(responseData)
                 .build();
     }
@@ -80,24 +77,16 @@ public class ServicePackServiceImpl implements ServicePackService {
                 .build();
 
         return CreateServicePackRest.builder()
-                .status("Success")
-                .message("Service Pack updated successfully.")
                 .data(data)
                 .build();
     }
 
     @Override
-    public DeleteServicePackRest deleteServicePack(Long servicePackId) {
+    public void deleteServicePack(Long servicePackId) {
         ServicePack servicePack = servicePackRepository.findById(servicePackId)
                 .orElseThrow(() -> new RuntimeException("Service Pack not found with ID: " + servicePackId));
 
         servicePackRepository.delete(servicePack);
-
-        DeleteServicePackRest response = new DeleteServicePackRest();
-        response.setStatus("Success");
-        response.setMessage("Service Pack deleted successfully.");
-
-        return response;
     }
 
     @Override
@@ -115,8 +104,6 @@ public class ServicePackServiceImpl implements ServicePackService {
         }).toList();
 
         ListServicePackRest response = new ListServicePackRest();
-        response.setStatus("Success");
-        response.setMessage("Fetched all service packs successfully.");
         response.setData(dataList);
 
         return response;
@@ -135,11 +122,8 @@ public class ServicePackServiceImpl implements ServicePackService {
         dto.setDuration(pack.getDuration());
 
         ListServicePackRest response = new ListServicePackRest();
-        response.setStatus("Success");
-        response.setMessage("Fetched service pack by ID successfully.");
-        response.setData(List.of(dto));  // Wrap in list
+        response.setData(List.of(dto));
 
         return response;
     }
-
 }

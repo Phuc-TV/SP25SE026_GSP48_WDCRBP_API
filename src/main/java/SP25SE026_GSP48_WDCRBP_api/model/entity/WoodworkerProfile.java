@@ -1,6 +1,5 @@
 package SP25SE026_GSP48_WDCRBP_api.model.entity;
 
-import com.google.api.client.util.DateTime;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -44,6 +43,18 @@ public class WoodworkerProfile {
 
     @Column(nullable = true)
     private String imgUrl;
+
+    @Column(nullable = true)
+    private String address;
+
+    @Column(nullable = true)
+    private String wardCode;
+
+    @Column(nullable = true)
+    private String districtId;
+
+    @Column(nullable = true)
+    private String cityId;
 
     @Column(nullable = true)
     private LocalDateTime createdAt;

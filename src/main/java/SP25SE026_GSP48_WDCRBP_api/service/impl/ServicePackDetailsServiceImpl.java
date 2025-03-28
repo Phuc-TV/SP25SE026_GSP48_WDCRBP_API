@@ -4,7 +4,6 @@ import SP25SE026_GSP48_WDCRBP_api.model.entity.ServicePack;
 import SP25SE026_GSP48_WDCRBP_api.model.entity.ServicePackDetails;
 import SP25SE026_GSP48_WDCRBP_api.model.requestModel.CreateServicePackDetailsRequest;
 import SP25SE026_GSP48_WDCRBP_api.model.responseModel.CreateServicePackDetailsRest;
-import SP25SE026_GSP48_WDCRBP_api.model.responseModel.DeleteServicePackDetailsRest;
 import SP25SE026_GSP48_WDCRBP_api.model.responseModel.ListServicePackDetailsRest;
 import SP25SE026_GSP48_WDCRBP_api.repository.ServicePackDetailsRepository;
 import SP25SE026_GSP48_WDCRBP_api.repository.ServicePackRepository;
@@ -53,8 +52,6 @@ public class ServicePackDetailsServiceImpl implements ServicePackDetailsService 
                 .build();
 
         return CreateServicePackDetailsRest.builder()
-                .status("Success")
-                .message("ServicePackDetails created successfully")
                 .data(data)
                 .build();
     }
@@ -97,28 +94,17 @@ public class ServicePackDetailsServiceImpl implements ServicePackDetailsService 
                 .build();
 
         return CreateServicePackDetailsRest.builder()
-                .status("Success")
-                .message("ServicePackDetails updated successfully")
                 .data(data)
                 .build();
     }
 
     @Override
-    public DeleteServicePackDetailsRest deleteServicePackDetails(Long servicePackDetailsId) {
-        // Check if ServicePackDetails exists
+    public void deleteServicePackDetails(Long servicePackDetailsId) {
         Optional<ServicePackDetails> existingDetailsOpt = servicePackDetailsRepository.findById(servicePackDetailsId);
         if (existingDetailsOpt.isEmpty()) {
             throw new RuntimeException("ServicePackDetails with ID " + servicePackDetailsId + " does not exist");
         }
-
-        // Delete the entity
         servicePackDetailsRepository.deleteById(servicePackDetailsId);
-
-        // Prepare response
-        DeleteServicePackDetailsRest response = new DeleteServicePackDetailsRest();
-        response.setStatus("Success");
-        response.setMessage("ServicePackDetails deleted successfully");
-        return response;
     }
 
     @Override
@@ -127,8 +113,6 @@ public class ServicePackDetailsServiceImpl implements ServicePackDetailsService 
         List<ListServicePackDetailsRest.Data> dataList = detailsList.stream().map(this::mapToData).collect(Collectors.toList());
 
         ListServicePackDetailsRest response = new ListServicePackDetailsRest();
-        response.setStatus("Success");
-        response.setMessage("Retrieved all service pack details successfully");
         response.setData(dataList);
         return response;
     }
@@ -142,8 +126,6 @@ public class ServicePackDetailsServiceImpl implements ServicePackDetailsService 
 
         ListServicePackDetailsRest.Data data = mapToData(detailsOpt.get());
         ListServicePackDetailsRest response = new ListServicePackDetailsRest();
-        response.setStatus("Success");
-        response.setMessage("Retrieved service pack details successfully");
         response.setData(List.of(data));
         return response;
     }
