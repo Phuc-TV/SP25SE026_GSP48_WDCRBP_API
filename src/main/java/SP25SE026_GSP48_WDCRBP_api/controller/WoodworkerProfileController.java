@@ -14,6 +14,7 @@ import jakarta.validation.Valid;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -82,11 +83,9 @@ public class WoodworkerProfileController {
     @GetMapping("/listWW/inactive")
     public CoreApiResponse getInactiveWoodworkers() {
         List<ListRegisterRest.Data> result = woodworkerProfileService.getAllInactiveWoodworkers();
-
         if (result.isEmpty()) {
-            return CoreApiResponse.error("Danh sách không có thợ mộc nào chưa kích hoạt tài khoản");
+            return CoreApiResponse.error(HttpStatus.NOT_FOUND,"Danh sách không có thợ mộc nào chưa kích hoạt tài khoản");
         }
-
-        return CoreApiResponse.success(result, "Danh sách thợ mộc chưa kích hoạt tài khoản");
+            return CoreApiResponse.success(result, "Danh sách thợ mộc chưa kích hoạt tài khoản");
     }
 }
