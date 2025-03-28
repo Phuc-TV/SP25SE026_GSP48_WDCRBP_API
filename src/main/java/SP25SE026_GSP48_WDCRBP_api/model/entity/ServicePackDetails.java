@@ -28,6 +28,6 @@ public class ServicePackDetails {
     private Boolean personalization;
 
     @ManyToOne
-    @JoinColumn(name = "ServicePack", nullable = true)
+    @JoinColumn(name = "servicePackId", nullable = true)
     private ServicePack servicePack;
 }
