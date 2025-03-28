@@ -5,4 +5,5 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface ServicePackRepository extends JpaRepository<ServicePack, Long> {
     ServicePack findServicePackByServicePackId(Long servicePackId);
+    boolean existsByName(String name);
 }
