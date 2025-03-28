@@ -1,8 +1,10 @@
 package SP25SE026_GSP48_WDCRBP_api.service.impl;
 
 import SP25SE026_GSP48_WDCRBP_api.model.entity.ServicePack;
+import SP25SE026_GSP48_WDCRBP_api.model.entity.WoodworkerProfile;
 import SP25SE026_GSP48_WDCRBP_api.model.requestModel.CreateServicePackRequest;
 import SP25SE026_GSP48_WDCRBP_api.model.responseModel.CreateServicePackRest;
+import SP25SE026_GSP48_WDCRBP_api.model.responseModel.ListRegisterRest;
 import SP25SE026_GSP48_WDCRBP_api.model.responseModel.ListServicePackRest;
 import SP25SE026_GSP48_WDCRBP_api.repository.ServicePackRepository;
 import SP25SE026_GSP48_WDCRBP_api.service.ServicePackService;
@@ -46,6 +48,10 @@ public class ServicePackServiceImpl implements ServicePackService {
                 .price(saved.getPrice())
                 .description(saved.getDescription())
                 .duration(saved.getDuration())
+                .postLimitPerMonth(saved.getPostLimitPerMonth())
+                .productManagement(saved.getProductManagement())
+                .searchResultPriority(saved.getSearchResultPriority())
+                .personalization(saved.getPersonalization())
                 .build();
 
         return CreateServicePackRest.builder()
@@ -63,6 +69,10 @@ public class ServicePackServiceImpl implements ServicePackService {
         existing.setPrice(request.getPrice());
         existing.setDescription(request.getDescription());
         existing.setDuration(request.getDuration());
+        existing.setPostLimitPerMonth(request.getPostLimitPerMonth());
+        existing.setProductManagement(request.getProductManagement());
+        existing.setSearchResultPriority(request.getSearchResultPriority());
+        existing.setPersonalization(request.getPersonalization());
 
         // Save changes
         ServicePack updated = servicePackRepository.save(existing);
@@ -74,6 +84,10 @@ public class ServicePackServiceImpl implements ServicePackService {
                 .price(updated.getPrice())
                 .description(updated.getDescription())
                 .duration(updated.getDuration())
+                .postLimitPerMonth(updated.getPostLimitPerMonth())
+                .productManagement(updated.getProductManagement())
+                .searchResultPriority(updated.getSearchResultPriority())
+                .personalization(updated.getPersonalization())
                 .build();
 
         return CreateServicePackRest.builder()
@@ -90,23 +104,22 @@ public class ServicePackServiceImpl implements ServicePackService {
     }
 
     @Override
-    public ListServicePackRest getAllServicePacks() {
+    public List<ListServicePackRest.Data> getAllServicePacks() {
         List<ServicePack> packs = servicePackRepository.findAll();
 
-        List<ListServicePackRest.Data> dataList = packs.stream().map(pack -> {
+        return packs.stream().map(pack -> {
             ListServicePackRest.Data dto = new ListServicePackRest.Data();
             dto.setServicePackId(pack.getServicePackId());
             dto.setName(pack.getName());
             dto.setPrice(pack.getPrice());
             dto.setDescription(pack.getDescription());
             dto.setDuration(pack.getDuration());
+            dto.setPostLimitPerMonth(pack.getPostLimitPerMonth());
+            dto.setProductManagement(pack.getProductManagement());
+            dto.setSearchResultPriority(pack.getSearchResultPriority());
+            dto.setPersonalization(pack.getPersonalization());
             return dto;
         }).toList();
-
-        ListServicePackRest response = new ListServicePackRest();
-        response.setData(dataList);
-
-        return response;
     }
 
     @Override
@@ -120,6 +133,10 @@ public class ServicePackServiceImpl implements ServicePackService {
         dto.setPrice(pack.getPrice());
         dto.setDescription(pack.getDescription());
         dto.setDuration(pack.getDuration());
+        dto.setPostLimitPerMonth(pack.getPostLimitPerMonth());
+        dto.setProductManagement(pack.getProductManagement());
+        dto.setSearchResultPriority(pack.getSearchResultPriority());
+        dto.setPersonalization(pack.getPersonalization());
 
         ListServicePackRest response = new ListServicePackRest();
         response.setData(List.of(dto));

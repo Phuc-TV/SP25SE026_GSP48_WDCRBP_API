@@ -232,6 +232,10 @@ public class AuthServiceImpl implements AuthService {
 
         User user = userOptional.get();
 
+        if (user.getStatus() == false) {
+            throw new RuntimeException("Tài khoản chưa được kích hoạt");
+        }
+
         if (user.getOTP() == null || !user.getOTP().equals(request.getOtp())) {
             throw new RuntimeException("OTP không hợp lệ hoặc đã hết hạn");
         }

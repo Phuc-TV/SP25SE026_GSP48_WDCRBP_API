@@ -27,7 +27,7 @@ public class GHNApiController {
     }
 
     @PostMapping("/ward")
-    public CoreApiResponse getWard(@RequestBody int districtId) {
+    public CoreApiResponse getWard(@PathVariable int districtId) {
         return ghnApiService.getWard(districtId);
     }
 }

@@ -34,7 +34,7 @@ public class MailServiceImpl {
                         + "<p>Cảm ơn bạn đã sử dụng dịch vụ của chúng tôi.</p>"
                         + "<p>Nếu bạn không yêu cầu điều này, vui lòng liên hệ ngay với bộ phận hỗ trợ.</p>"
                         + "<hr style='margin-top: 30px;'>"
-                        + "<p style='font-size: 12px; color: #888;'>Dịch vụ thợ mộc</p>"
+                        + "<p style='font-size: 12px; color: #888;'>Nền tảng đặt dịch vụ thiết kế, chế tác & sửa chữa đồ gỗ</p>"
                         + "</div>";
             } else if ("payment".equalsIgnoreCase(messageType)) {
                 // Payment link email content
@@ -47,7 +47,7 @@ public class MailServiceImpl {
                         + "text-decoration: none; border-radius: 5px;'>Trả ngay</a>"
                         + "<p style='margin-top: 20px;'>Nếu bạn không yêu cầu, vui lòng bỏ qua email này.</p>"
                         + "<hr style='margin-top: 30px;'>"
-                        + "<p style='font-size: 12px; color: #888;'>Hệ thống thanh toán VNPay</p>"
+                        + "<p style='font-size: 12px; color: #888;'>Nền tảng đặt dịch vụ thiết kế, chế tác & sửa chữa đồ gỗ</p>"
                         + "</div>";
             } else if ("otp".equalsIgnoreCase(messageType)) {
                 // OTP email content
@@ -58,6 +58,17 @@ public class MailServiceImpl {
                         + "<p>Nếu bạn không yêu cầu điều này, vui lòng liên hệ ngay với bộ phận hỗ trợ.</p>"
                         + "<hr style='margin-top: 30px;'>"
                         + "<p style='font-size: 12px; color: #D17B49;'>Nền tảng đặt dịch vụ thiết kế, chế tác & sửa chữa đồ gỗ</p>"
+                        + "</div>";
+            } else if ("status-rejection".equalsIgnoreCase(messageType)) {
+                // Email for status rejection
+                htmlContent = "<div style='font-family: Arial, sans-serif; padding: 20px;'>"
+                        + "<h2 style='color: #F44336;'>Yêu cầu cập nhật trạng thái không được chấp nhận</h2>"
+                        + "<p>Kính gửi thợ mộc,</p>"
+                        + "<p>Chúng tôi rất tiếc phải thông báo rằng yêu cầu cập nhật trạng thái của bạn đã bị từ chối.</p>"
+                        + "<p><strong>Lý do:</strong> " + linkOrPassword + "</p>"
+                        + "<p>Vui lòng kiểm tra lại thông tin hoặc liên hệ bộ phận hỗ trợ để biết thêm chi tiết.</p>"
+                        + "<hr style='margin-top: 30px;'>"
+                        + "<p style='font-size: 12px; color: #888;'>Nền tảng đặt dịch vụ thiết kế, chế tác & sửa chữa đồ gỗ</p>"
                         + "</div>";
             }
 
