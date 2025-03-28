@@ -8,8 +8,6 @@ import java.util.List;
 @Getter
 @Setter
 public class ListServicePackDetailsRest {
-    private String status;
-    private String message;
     private List<Data> data;
 
     @Getter

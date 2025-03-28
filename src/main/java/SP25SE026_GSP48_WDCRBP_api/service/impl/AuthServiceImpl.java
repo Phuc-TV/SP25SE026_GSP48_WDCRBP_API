@@ -9,7 +9,6 @@ import SP25SE026_GSP48_WDCRBP_api.model.requestModel.LoginRequest;
 import SP25SE026_GSP48_WDCRBP_api.model.requestModel.SignupRequest;
 import SP25SE026_GSP48_WDCRBP_api.model.responseModel.AuthenticationResponse;
 import SP25SE026_GSP48_WDCRBP_api.model.responseModel.LoginOtpRest;
-import SP25SE026_GSP48_WDCRBP_api.model.responseModel.OtpSendRest;
 import SP25SE026_GSP48_WDCRBP_api.repository.AccessTokenRepository;
 import SP25SE026_GSP48_WDCRBP_api.repository.RefreshTokenRepository;
 import SP25SE026_GSP48_WDCRBP_api.repository.UserRepository;
@@ -185,27 +184,21 @@ public class AuthServiceImpl implements AuthService {
     }
 
     @Override
-    public OtpSendRest sendOtpToEmail(String email) {
+    public void sendOtpToEmail(String email) {
         Optional<User> userOptional = userRepository.findUserByEmailOrPhone(email, email);
         if (userOptional.isEmpty()) {
-            throw new RuntimeException("User with the provided email not found.");
+            throw new RuntimeException("Người dùng không tồn tại");
         }
 
         User user = userOptional.get();
 
         // Generate and set OTP
         String otp = generateOtp();
-        user.setOTP(otp);  // ✅ Save OTP to DB
-        userRepository.save(user); // 🔄 Persist OTP
+        user.setOTP(otp);
+        userRepository.save(user);
 
         // Send OTP via email
         sendOtpEmail(user.getEmail(), otp);
-
-        // Response
-        OtpSendRest response = new OtpSendRest();
-        response.setStatus("Success");
-        response.setMessage("OTP sent to your email.");
-        return response;
     }
 
     // Generate a random OTP (6 digits)
@@ -215,31 +208,36 @@ public class AuthServiceImpl implements AuthService {
 
     // Send OTP to the user's email
     private void sendOtpEmail(String email, String otp) {
-        String subject = "Your Password Reset OTP";
+        String subject = "OTP của bạn là";
         String messageType = "otp";
         mailServiceImpl.sendEmail(email, subject, messageType, otp);
     }
 
     @Override
-    public LoginOtpRest otpLogin(LoginOtpRequest request) {
+    public LoginOtpRest loginWithOtp(LoginOtpRequest request) {
         Optional<User> userOptional = userRepository.findUserByEmailOrPhone(request.getEmail(), request.getEmail());
         if (userOptional.isEmpty()) {
-            throw new RuntimeException("User not found.");
+            throw new RuntimeException("Người dùng không tồn tại");
         }
 
         User user = userOptional.get();
 
         if (user.getOTP() == null || !user.getOTP().equals(request.getOtp())) {
-            throw new RuntimeException("Invalid or expired OTP.");
+            throw new RuntimeException("OTP không hợp lệ hoặc đã hết hạn");
         }
 
-        // Clear OTP after use
         user.setOTP(null);
         userRepository.save(user);
 
-        return LoginOtpRest.builder()
-                .status("Success")
-                .message("OTP verified. Login successful!")
-                .build();
+        String accessToken = jwtTokenProvider.generateAccessToken(user);
+        String refreshToken = jwtTokenProvider.generateRefreshToken(user);
+
+        revokeRefreshToken(accessToken);
+        RefreshToken savedRefreshToken = saveUserRefreshToken(refreshToken);
+
+        revokeAllUserAccessTokens(user);
+        saveUserAccessToken(user, accessToken, savedRefreshToken);
+
+        return new LoginOtpRest(accessToken, refreshToken);
     }
 }

@@ -8,6 +8,6 @@ import lombok.Data;
 @Builder
 @AllArgsConstructor
 public class LoginOtpRest {
-    private String status;
-    private String message;
+    private String accessToken;
+    private String refreshToken;
 }

@@ -1,11 +1,11 @@
 package SP25SE026_GSP48_WDCRBP_api.controller;
 
+import SP25SE026_GSP48_WDCRBP_api.components.CoreApiResponse;
 import SP25SE026_GSP48_WDCRBP_api.model.requestModel.LoginOtpRequest;
 import SP25SE026_GSP48_WDCRBP_api.model.requestModel.LoginRequest;
 import SP25SE026_GSP48_WDCRBP_api.model.requestModel.SignupRequest;
 import SP25SE026_GSP48_WDCRBP_api.model.responseModel.AuthenticationResponse;
 import SP25SE026_GSP48_WDCRBP_api.model.responseModel.LoginOtpRest;
-import SP25SE026_GSP48_WDCRBP_api.model.responseModel.OtpSendRest;
 import SP25SE026_GSP48_WDCRBP_api.service.AuthService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -29,15 +29,23 @@ public class AuthController {
     }
 
     @PostMapping(value = {"/login"})
-    public ResponseEntity<AuthenticationResponse> login(@Valid @RequestBody LoginRequest loginDto){
-        AuthenticationResponse token = authService.login(loginDto);
-        return  ResponseEntity.ok(token);
+    public CoreApiResponse<AuthenticationResponse> login(@Valid @RequestBody LoginRequest loginDto){
+        try {
+            AuthenticationResponse token = authService.login(loginDto);
+            return  CoreApiResponse.success(token, "Đăng nhập thành công");
+        } catch (RuntimeException e) {
+            return CoreApiResponse.error(HttpStatus.BAD_REQUEST, "Login failed: " + e.getMessage());
+        }
     }
 
     @PostMapping(value = { "/register"})
-    public ResponseEntity<String> signup(@Valid @RequestBody SignupRequest signupDto){
-        String response = authService.signup(signupDto);
-        return new ResponseEntity<>(response, HttpStatus.CREATED);
+    public CoreApiResponse<String> signup(@Valid @RequestBody SignupRequest signupDto){
+        try{
+            String response = authService.signup(signupDto);
+            return CoreApiResponse.success(response, "Đăng ký thành công");
+        } catch (RuntimeException e) {
+            return CoreApiResponse.error(HttpStatus.BAD_REQUEST, "Register failed: " + e.getMessage());
+        }
     }
 
     @PostMapping("/refresh-token")
@@ -49,26 +57,22 @@ public class AuthController {
     }
 
     @PostMapping("/send-otp")
-    public ResponseEntity<OtpSendRest> sendOtp(@RequestParam String email) {
+    public CoreApiResponse<?> sendOtp(@RequestParam String email) {
         try {
-            // Step 1: Check if the email exists and send OTP
-            OtpSendRest response = authService.sendOtpToEmail(email);
-            return ResponseEntity.ok(response);
+            authService.sendOtpToEmail(email);
+            return CoreApiResponse.success("OTP đã gửi đến email của bạn");
         } catch (RuntimeException e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new OtpSendRest("Error", e.getMessage(), null));
+            return CoreApiResponse.error(HttpStatus.BAD_REQUEST, e.getMessage());
         }
     }
 
     @PostMapping("/login-otp")
-    public ResponseEntity<LoginOtpRest> loginWithOtp(@Valid @RequestBody LoginOtpRequest request) {
+    public CoreApiResponse<LoginOtpRest> loginWithOtp(@Valid @RequestBody LoginOtpRequest request) {
         try {
-            LoginOtpRest response = authService.otpLogin(request);
-            return ResponseEntity.ok(response);
+            LoginOtpRest response = authService.loginWithOtp(request);
+            return CoreApiResponse.success(response, "Đăng nhập thành công");
         } catch (RuntimeException e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                    .body(LoginOtpRest.builder()
-                            .message("Login failed: " + e.getMessage())
-                            .build());
+            return CoreApiResponse.error(HttpStatus.BAD_REQUEST, "Login failed: " + e.getMessage());
         }
     }
 }

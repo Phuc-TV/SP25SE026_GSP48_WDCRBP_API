@@ -5,6 +5,7 @@ import SP25SE026_GSP48_WDCRBP_api.model.entity.ServicePack;
 import SP25SE026_GSP48_WDCRBP_api.model.entity.WoodworkerProfile;
 import SP25SE026_GSP48_WDCRBP_api.model.requestModel.WoodworkerRequest;
 import SP25SE026_GSP48_WDCRBP_api.model.requestModel.WoodworkerUpdateStatusRequest;
+import SP25SE026_GSP48_WDCRBP_api.model.responseModel.ListRegisterRest;
 import SP25SE026_GSP48_WDCRBP_api.model.responseModel.WoodworkerProfileRest;
 import SP25SE026_GSP48_WDCRBP_api.model.responseModel.WoodworkerUpdateStatusRest;
 import SP25SE026_GSP48_WDCRBP_api.repository.UserRepository;
@@ -12,8 +13,11 @@ import SP25SE026_GSP48_WDCRBP_api.repository.ServicePackRepository;
 import SP25SE026_GSP48_WDCRBP_api.repository.WoodworkerProfileRepository;
 import SP25SE026_GSP48_WDCRBP_api.service.AvailableServiceService;
 import SP25SE026_GSP48_WDCRBP_api.service.WoodworkerProfileService;
+import SP25SE026_GSP48_WDCRBP_api.util.PasswordHashUtil;
+import SP25SE026_GSP48_WDCRBP_api.util.TempPasswordStorage;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.modelmapper.ModelMapper;
+import org.modelmapper.PropertyMap;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import java.time.temporal.ChronoUnit;
@@ -46,7 +50,7 @@ public class WoodworkerProfileServiceImpl implements WoodworkerProfileService {
     private ModelMapper modelMapper;
 
     @Autowired
-    private MailService mailService;
+    private MailServiceImpl mailServiceImpl;
 
     public WoodworkerProfileServiceImpl(WoodworkerProfileRepository repository,
                                         ServicePackRepository servicePackRepository,
@@ -99,109 +103,121 @@ public class WoodworkerProfileServiceImpl implements WoodworkerProfileService {
 
     @Override
     public WoodworkerProfileRest registerWoodworker(WoodworkerRequest request) {
-        // Check if email or phone already exists
-        Optional<User> existingUser = userRepository.findUserByEmailOrPhone(request.getEmail(), request.getPhone());
-        if (existingUser.isPresent()) {
-            throw new RuntimeException("Email or Phone is already registered. Please use a different email or phone.");
+        try {
+            // Step 1: Check if email or phone already exists in the User table
+            Optional<User> existingUser = userRepository.findUserByEmailOrPhone(request.getEmail(), request.getPhone());
+            if (existingUser.isPresent()) {
+                throw new RuntimeException("Email or Phone is already registered. Please use a different email or phone.");
+            }
+
+            // Step 2: Configure ModelMapper to skip the auto-generated woodworkerId field
+            ModelMapper customMapper = new ModelMapper();
+            customMapper.addMappings(new PropertyMap<WoodworkerRequest, WoodworkerProfile>() {
+                @Override
+                protected void configure() {
+                    // Skip the woodworkerId field because it's auto-generated
+                    skip(destination.getWoodworkerId());
+                }
+            });
+
+            // Map the request to the WoodworkerProfile entity
+            WoodworkerProfile woodworkerProfile = customMapper.map(request, WoodworkerProfile.class);
+            woodworkerProfile.setStatus(false);  // Default status
+            woodworkerProfile.setCreatedAt(LocalDateTime.now());
+            woodworkerProfile.setUpdatedAt(LocalDateTime.now());
+
+            // Step 3: Save the WoodworkerProfile without the user for now
+            WoodworkerProfile savedProfile = wwRepository.save(woodworkerProfile);
+
+            // Step 4: Create the new User
+            User user = createNewUser(request);
+
+            // Step 5: Associate the User with the WoodworkerProfile
+            savedProfile.setUser(user);
+
+            // Step 6: Save the updated WoodworkerProfile with the User
+            WoodworkerProfile finalProfile = wwRepository.save(savedProfile);
+
+            // Step 7: Map the saved profile to the response DTO (WoodworkerProfileRest)
+            WoodworkerProfileRest response = new WoodworkerProfileRest();
+
+            // Use ModelMapper to map from entity to response DTO
+            WoodworkerProfileRest.Data data = modelMapper.map(finalProfile, WoodworkerProfileRest.Data.class);
+            response.setData(data);
+
+            return response;
+        } catch (Exception e) {
+            throw new RuntimeException("Error during woodworker registration: " + e.getMessage());
         }
-
-        // Create the woodworker profile
-        WoodworkerProfile woodworkerProfile = modelMapper.map(request, WoodworkerProfile.class);
-        woodworkerProfile.setCreatedAt(LocalDateTime.now());
-        woodworkerProfile.setUpdatedAt(LocalDateTime.now());
-
-        // Save the woodworker profile
-        WoodworkerProfile savedProfile = wwRepository.save(woodworkerProfile);
-
-        // Create the user and assign userId to the woodworker profile
-        User newUser = createNewUser(request);
-
-        // Set the userId in the woodworker profile
-        savedProfile.setUser(newUser);
-        wwRepository.save(savedProfile);  // Save the updated woodworker profile with userId set
-
-        // Prepare the response
-        WoodworkerProfileRest response = new WoodworkerProfileRest();
-        response.setStatus("Success");
-        response.setMessage("Woodworker registered successfully.");
-
-        WoodworkerProfileRest.Data data = new WoodworkerProfileRest.Data();
-        data.setWoodworkerId(savedProfile.getWoodworkerId());
-        data.setBrandName(savedProfile.getBrandName());
-        data.setBio(savedProfile.getBio());
-        data.setImgUrl(savedProfile.getImgUrl());
-        data.setBusinessType(savedProfile.getBusinessType());
-        data.setTaxCode(savedProfile.getTaxCode());
-        data.setCreatedAt(savedProfile.getCreatedAt());
-        data.setUpdatedAt(savedProfile.getUpdatedAt());
-
-        response.setData(data);
-        return response;
     }
 
     private User createNewUser(WoodworkerRequest request) {
         try {
-            // Generate a random password for the new user
-            String randomPassword = RandomStringUtils.randomAlphabetic(8);  // Random password of length 8
+            String randomPassword = RandomStringUtils.randomAlphabetic(8);  // Generate random password
+            String hashedPassword = PasswordHashUtil.hashPassword(randomPassword);
 
-            // Create a new user object
             User user = new User();
-            user.setUsername(request.getFullName());  // Use fullName as the username
-            user.setPassword(randomPassword);  // Set the random password
-            user.setEmail(request.getEmail());  // Use the email from the request
-            user.setPhone(request.getPhone());  // Use the phone from the request
-            user.setRole("Woodworker");  // Set role as Woodworker
-            user.setStatus(true);  // Assuming we activate the user immediately
+            user.setUsername(request.getFullName());
+            user.setPassword(hashedPassword);
+            user.setEmail(request.getEmail());
+            user.setPhone(request.getPhone());
+            user.setRole("Woodworker");
+            user.setStatus(true);
             user.setCreatedAt(LocalDateTime.now());
 
-            // Save the user directly using UserRepository
-            return userRepository.save(user);  // Return the saved user object
+            User savedUser = userRepository.save(user);
+
+            // ✅ Store the plain password temporarily in memory
+            TempPasswordStorage.storePlainPassword(savedUser.getUserId(), randomPassword);
+
+            return savedUser;
 
         } catch (Exception e) {
-            throw new RuntimeException("Error during user creation after woodworker registration: " + e.getMessage());
+            throw new RuntimeException("Error during user creation: " + e.getMessage());
         }
     }
 
+
     @Override
     public WoodworkerUpdateStatusRest updateWoodworkerStatus(WoodworkerUpdateStatusRequest request) {
-        // Find the user by ID
-        Optional<User> userOptional = userRepository.findById(Long.parseLong(request.getUserId()));
-        if (userOptional.isEmpty()) {
-            throw new RuntimeException("User not found");
-        }
-
-        // Get the user object
-        User user = userOptional.get();
-
-        // Find the woodworker by ID
-        Optional<WoodworkerProfile> woodworkerProfileOptional = wwRepository.findById(Long.parseLong(request.getWoodworkerId()));
+        // Step 1: Validate woodworker ID exists
+        Long woodworkerId = Long.parseLong(request.getWoodworkerId());
+        Optional<WoodworkerProfile> woodworkerProfileOptional = wwRepository.findById(woodworkerId);
         if (woodworkerProfileOptional.isEmpty()) {
             throw new RuntimeException("Woodworker not found");
         }
 
-        // Get the woodworker profile
+        // Step 2: Get woodworker profile and related user
         WoodworkerProfile woodworkerProfile = woodworkerProfileOptional.get();
+        User user = woodworkerProfile.getUser(); // thanks to @OneToOne relation
 
-        // Update the status
+        if (user == null) {
+            throw new RuntimeException("User associated with this woodworker not found");
+        }
+
+        // Step 3: Update status
         woodworkerProfile.setStatus(request.isStatus());
-        woodworkerProfile.setUpdatedAt(LocalDateTime.now());  // Set the updated timestamp
-
-        // Save the updated profile
+        woodworkerProfile.setUpdatedAt(LocalDateTime.now());
         wwRepository.save(woodworkerProfile);
 
-        // Create the response object
+        // Step 4: Get the plain password from TempPasswordStorage
+        String plainPassword = TempPasswordStorage.getPlainPassword(user.getUserId());
+
+        // Step 5: Send password to email (only if available)
+        if (plainPassword != null) {
+            sendPasswordToUser(user.getEmail(), plainPassword);
+        }
+
+        // Step 6: Return response
         WoodworkerUpdateStatusRest response = new WoodworkerUpdateStatusRest();
-        response.setStatus("Success");
-        response.setMessage("Woodworker status updated successfully.");
         response.setUpdatedAt(woodworkerProfile.getUpdatedAt());
-        sendPasswordToUser(user.getEmail(), user.getPassword());
         return response;
     }
 
     private void sendPasswordToUser(String email, String password) {
         try {
             // Send the email with the password to the user
-            mailService.sendEmail(email, "Your Woodworker Account Password", "password", password);
+            mailServiceImpl.sendEmail(email, "Your Woodworker Account Password", "password", password);
         } catch (Exception e) {
             throw new RuntimeException("Failed to send password email: " + e.getMessage());
         }
@@ -225,6 +241,34 @@ public class WoodworkerProfileServiceImpl implements WoodworkerProfileService {
         availableServiceService.addAvailableService(obj);
 
         return obj;
+
+    }
+
+    @Override
+    public List<ListRegisterRest.Data> getAllInactiveWoodworkers() {
+        List<WoodworkerProfile> inactiveProfiles = wwRepository.findByStatusFalse();
+
+        return inactiveProfiles.stream().map(profile -> {
+            ListRegisterRest.Data dto = new ListRegisterRest.Data();
+            dto.setWoodworkerId(profile.getWoodworkerId());
+            dto.setUserId(profile.getUser() != null ? profile.getUser().getUserId() : null);
+            dto.setFullName(profile.getUser() != null ? profile.getUser().getUsername() : null);
+            dto.setEmail(profile.getUser() != null ? profile.getUser().getEmail() : null);
+            dto.setPhone(profile.getUser() != null ? profile.getUser().getPhone() : null);
+            dto.setBrandName(profile.getBrandName());
+            dto.setBio(profile.getBio());
+            dto.setImgUrl(profile.getImgUrl());
+            dto.setBusinessType(profile.getBusinessType());
+            dto.setTaxCode(profile.getTaxCode());
+            dto.setStatus(String.valueOf(profile.isStatus()));
+            dto.setAddress(profile.getAddress());
+            dto.setWardCode(profile.getWardCode());
+            dto.setDistrictId(profile.getDistrictId());
+            dto.setCityId(profile.getCityId());
+            dto.setCreatedAt(profile.getCreatedAt());
+            dto.setUpdatedAt(profile.getUpdatedAt());
+            return dto;
+        }).toList();
     }
 }
 
