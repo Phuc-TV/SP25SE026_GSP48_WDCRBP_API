@@ -3,12 +3,10 @@ package SP25SE026_GSP48_WDCRBP_api.controller;
 import SP25SE026_GSP48_WDCRBP_api.components.CoreApiResponse;
 import SP25SE026_GSP48_WDCRBP_api.model.dto.WoodworkerProfileDto;
 import SP25SE026_GSP48_WDCRBP_api.model.entity.WoodworkerProfile;
+import SP25SE026_GSP48_WDCRBP_api.model.requestModel.UpdateWoodworkerServicePackRequest;
 import SP25SE026_GSP48_WDCRBP_api.model.requestModel.WoodworkerRequest;
 import SP25SE026_GSP48_WDCRBP_api.model.requestModel.WoodworkerUpdateStatusRequest;
-import SP25SE026_GSP48_WDCRBP_api.model.responseModel.DesignIdeaResponse;
-import SP25SE026_GSP48_WDCRBP_api.model.responseModel.ListRegisterRest;
-import SP25SE026_GSP48_WDCRBP_api.model.responseModel.WoodworkerProfileRest;
-import SP25SE026_GSP48_WDCRBP_api.model.responseModel.WoodworkerUpdateStatusRest;
+import SP25SE026_GSP48_WDCRBP_api.model.responseModel.*;
 import SP25SE026_GSP48_WDCRBP_api.service.WoodworkerProfileService;
 import jakarta.validation.Valid;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
@@ -88,4 +86,16 @@ public class WoodworkerProfileController {
         }
             return CoreApiResponse.success(result, "Danh sách thợ mộc chưa kích hoạt tài khoản");
     }
+
+    @PutMapping("/addServicePack")
+    public CoreApiResponse<UpdateWoodworkerServicePackRest> addServicePackToWoodworker(
+            @Valid @RequestBody UpdateWoodworkerServicePackRequest request) {
+        try {
+            UpdateWoodworkerServicePackRest result = woodworkerProfileService.updateServicePackForWoodworker(request);
+            return CoreApiResponse.success(result, "Cập nhật gói dịch vụ cho thợ mộc thành công");
+        } catch (RuntimeException e) {
+            return CoreApiResponse.error(HttpStatus.BAD_REQUEST, "Thất bại khi cập nhật gói dịch vụ: " + e.getMessage());
+        }
+    }
+
 }

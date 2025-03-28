@@ -3,9 +3,11 @@ package SP25SE026_GSP48_WDCRBP_api.service.impl;
 import SP25SE026_GSP48_WDCRBP_api.model.entity.User;
 import SP25SE026_GSP48_WDCRBP_api.model.entity.ServicePack;
 import SP25SE026_GSP48_WDCRBP_api.model.entity.WoodworkerProfile;
+import SP25SE026_GSP48_WDCRBP_api.model.requestModel.UpdateWoodworkerServicePackRequest;
 import SP25SE026_GSP48_WDCRBP_api.model.requestModel.WoodworkerRequest;
 import SP25SE026_GSP48_WDCRBP_api.model.requestModel.WoodworkerUpdateStatusRequest;
 import SP25SE026_GSP48_WDCRBP_api.model.responseModel.ListRegisterRest;
+import SP25SE026_GSP48_WDCRBP_api.model.responseModel.UpdateWoodworkerServicePackRest;
 import SP25SE026_GSP48_WDCRBP_api.model.responseModel.WoodworkerProfileRest;
 import SP25SE026_GSP48_WDCRBP_api.model.responseModel.WoodworkerUpdateStatusRest;
 import SP25SE026_GSP48_WDCRBP_api.repository.UserRepository;
@@ -197,23 +199,30 @@ public class WoodworkerProfileServiceImpl implements WoodworkerProfileService {
         boolean requestedStatus = request.isStatus();
         String reason = request.getDescription();
 
-        // 🟡 If status is false and there's a rejection reason, send rejection email instead
+        // ❌ If status is false and there's a reason => reject and delete
         if (!requestedStatus && reason != null && !reason.trim().isEmpty()) {
-            mailServiceImpl.sendEmail(user.getEmail(), "Yêu cầu cập nhật trạng thái bị từ chối", "status-rejection", reason);
-        } else {
-            // ✅ Approve status update
-            woodworkerProfile.setStatus(true);
-            woodworkerProfile.setUpdatedAt(LocalDateTime.now());
-            wwRepository.save(woodworkerProfile);
+            mailServiceImpl.sendEmail(user.getEmail(),
+                    "Yêu cầu cập nhật trạng thái bị từ chối",
+                    "status-rejection",
+                    reason);
 
-            // Send password to woodworker
-            String plainPassword = TempPasswordStorage.getPlainPassword(user.getUserId());
-            if (plainPassword != null) {
-                sendPasswordToUser(user.getEmail(), plainPassword);
-            }
+            wwRepository.delete(woodworkerProfile); // 🚨 Delete from DB
+            userRepository.delete(user);
+            WoodworkerUpdateStatusRest response = new WoodworkerUpdateStatusRest();
+            response.setUpdatedAt(LocalDateTime.now());
+            return response;
         }
 
-        // Build response
+        // ✅ If approved, update and send password
+        woodworkerProfile.setStatus(true);
+        woodworkerProfile.setUpdatedAt(LocalDateTime.now());
+        wwRepository.save(woodworkerProfile);
+
+        String plainPassword = TempPasswordStorage.getPlainPassword(user.getUserId());
+        if (plainPassword != null) {
+            sendPasswordToUser(user.getEmail(), plainPassword);
+        }
+
         WoodworkerUpdateStatusRest response = new WoodworkerUpdateStatusRest();
         response.setUpdatedAt(woodworkerProfile.getUpdatedAt());
         return response;
@@ -275,5 +284,47 @@ public class WoodworkerProfileServiceImpl implements WoodworkerProfileService {
             return dto;
         }).toList();
     }
+
+    @Override
+    public UpdateWoodworkerServicePackRest updateServicePackForWoodworker(UpdateWoodworkerServicePackRequest request) {
+        WoodworkerProfile profile = wwRepository.findById(request.getWoodworkerId())
+                .orElseThrow(() -> new RuntimeException("Woodworker not found"));
+
+        if (!profile.isStatus()) {
+            throw new RuntimeException("Không thể cập nhật Service Pack vì thợ mộc chưa được kích hoạt.");
+        }
+
+        ServicePack servicePack = servicePackRepository.findById(request.getServicePackId())
+                .orElseThrow(() -> new RuntimeException("Service Pack not found"));
+
+        profile.setServicePack(servicePack);
+        profile.setServicePackStartDate(LocalDateTime.now());
+        profile.setServicePackEndDate(LocalDateTime.now().plusMonths(servicePack.getDuration()));
+        profile.setUpdatedAt(LocalDateTime.now());
+
+        wwRepository.save(profile);
+
+        UpdateWoodworkerServicePackRest.Data data = new UpdateWoodworkerServicePackRest.Data();
+        data.setWoodworkerId(profile.getWoodworkerId());
+        data.setServicePackId(servicePack.getServicePackId());
+        data.setServicePackStartDate(profile.getServicePackStartDate());
+        data.setServicePackEndDate(profile.getServicePackEndDate());
+        data.setBrandName(profile.getBrandName());
+        data.setBio(profile.getBio());
+        data.setImgUrl(profile.getImgUrl());
+        data.setBusinessType(profile.getBusinessType());
+        data.setTaxCode(profile.getTaxCode());
+        data.setAddress(profile.getAddress());
+        data.setWardCode(profile.getWardCode());
+        data.setDistrictId(profile.getDistrictId());
+        data.setCityId(profile.getCityId());
+        data.setCreatedAt(profile.getCreatedAt());
+        data.setUpdatedAt(profile.getUpdatedAt());
+
+        UpdateWoodworkerServicePackRest response = new UpdateWoodworkerServicePackRest();
+        response.setData(data);
+        return response;
+    }
+
 }
 
