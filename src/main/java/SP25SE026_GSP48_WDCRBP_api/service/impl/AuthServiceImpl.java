@@ -218,7 +218,7 @@ public class AuthServiceImpl implements AuthService {
 
     // Send OTP to the user's email
     private void sendOtpEmail(String email, String otp) {
-        String subject = "OTP của bạn là";
+        String subject = "[WDCRBP] Mã OTP xác nhận tài khoản";
         String messageType = "otp";
         mailServiceImpl.sendEmail(email, subject, messageType, otp);
     }

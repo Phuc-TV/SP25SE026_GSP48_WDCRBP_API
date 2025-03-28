@@ -54,10 +54,10 @@ public class MailServiceImpl {
                 htmlContent = "<div style='font-family: Arial, sans-serif; padding: 20px;'>"
                         + "<h2 style='color: #4CAF50;'>OTP của bạn tới rồi đây!</h2>"
                         + "<p>Kính gửi người dùng,</p>"
-                        + "<p>OTP của bạn để đặt lại mật khẩu là: <strong>" + linkOrPassword + "</strong></p>"
+                        + "<p>OTP của bạn là: <strong>" + linkOrPassword + "</strong></p>"
                         + "<p>Nếu bạn không yêu cầu điều này, vui lòng liên hệ ngay với bộ phận hỗ trợ.</p>"
                         + "<hr style='margin-top: 30px;'>"
-                        + "<p style='font-size: 12px; color: #D17B49;'>Dịch vụ thợ mộc</p>"
+                        + "<p style='font-size: 12px; color: #D17B49;'>Nền tảng đặt dịch vụ thiết kế, chế tác & sửa chữa đồ gỗ</p>"
                         + "</div>";
             }
 
