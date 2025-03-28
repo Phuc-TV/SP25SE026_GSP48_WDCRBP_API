@@ -11,7 +11,6 @@ import SP25SE026_GSP48_WDCRBP_api.repository.OrderDepositRepository;
 import SP25SE026_GSP48_WDCRBP_api.repository.PaymentMethodRepository;
 import SP25SE026_GSP48_WDCRBP_api.repository.TransactionRepository;
 import SP25SE026_GSP48_WDCRBP_api.repository.UserRepository;
-import SP25SE026_GSP48_WDCRBP_api.service.MailService;
 import SP25SE026_GSP48_WDCRBP_api.service.VNPayService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
