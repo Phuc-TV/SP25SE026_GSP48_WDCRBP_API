@@ -33,12 +33,16 @@ public class ServiceOrderServiceImpl implements ServiceOrderService {
     @Autowired
     private OrderProgressRepository orderProgressRepository;
 
+    @Autowired
+    private ConsultantAppointmentRepository consultantAppointmentRepository;
+
     public ServiceOrderServiceImpl (ServiceOrderRepository orderRepository,
                                     UserRepository userRepository,
                                     AvailableServiceRepository availableServiceRepository,
                                     RequestedProductRepository requestedProductRepository,
                                     OrderProgressRepository orderProgressRepository,
-                                    WoodworkerProfileRepository woodworkerProfileRepository)
+                                    WoodworkerProfileRepository woodworkerProfileRepository,
+                                    ConsultantAppointmentRepository consultantAppointmentRepository)
     {
         this.orderRepository = orderRepository;
         this.userRepository = userRepository;
@@ -46,6 +50,7 @@ public class ServiceOrderServiceImpl implements ServiceOrderService {
         this.requestedProductRepository = requestedProductRepository;
         this.orderProgressRepository = orderProgressRepository;
         this.woodworkerProfileRepository = woodworkerProfileRepository;
+        this.consultantAppointmentRepository = consultantAppointmentRepository;
     }
 
     @Override
@@ -127,7 +132,20 @@ public class ServiceOrderServiceImpl implements ServiceOrderService {
 
         if (serviceOrder.getRole().equals("Woodworker"))
         {
+            ConsultantAppointment consultantAppointment = new ConsultantAppointment();
+            consultantAppointment.setServiceOrder(serviceOrder);
+            consultantAppointment.setCreatedAt(LocalDateTime.now());
+            consultantAppointment.setMeetAddress("https://meet.google.com/qta-thit-eaj");
 
+            consultantAppointmentRepository.save(consultantAppointment);
+
+            serviceOrder.setConsultantAppointment(consultantAppointment);
+            orderRepository.save(serviceOrder);
+
+            String s = "Đang chờ khách hàng duyệt lịch hẹn";
+            OrderProgress orderProgress = orderProgressRepository.findOrderProgressByServiceOrder(serviceOrder);
+            orderProgress.setStatus(s);
+            orderProgressRepository.save(orderProgress);
         }
         else
             return null;

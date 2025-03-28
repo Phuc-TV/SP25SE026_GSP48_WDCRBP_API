@@ -103,7 +103,7 @@ public class WoodworkerProfileServiceImpl implements WoodworkerProfileService {
     @Override
     public WoodworkerProfileRest registerWoodworker(WoodworkerRequest request) {
         // Check if email or phone already exists
-        Optional<User> existingUser = userRepository.findByEmailOrPhone(request.getEmail(), request.getPhone());
+        Optional<User> existingUser = userRepository.findUserByEmailOrPhone(request.getEmail(), request.getPhone());
         if (existingUser.isPresent()) {
             throw new RuntimeException("Email or Phone is already registered. Please use a different email or phone.");
         }

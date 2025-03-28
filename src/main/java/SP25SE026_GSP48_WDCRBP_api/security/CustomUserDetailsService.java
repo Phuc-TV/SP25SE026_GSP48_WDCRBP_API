@@ -26,7 +26,7 @@ public class CustomUserDetailsService implements UserDetailsService {
     @Override
     public UserDetails loadUserByUsername(String emailOrPhone) throws UsernameNotFoundException {
         //allow user to log in by username or email
-        User user = userRepository.findByEmailOrPhone(emailOrPhone, emailOrPhone)
+        User user = userRepository.findUserByEmailOrPhone(emailOrPhone, emailOrPhone)
                 .orElseThrow(() -> new UsernameNotFoundException("User not found with username or email: " + emailOrPhone));
 
         GrantedAuthority authority = new SimpleGrantedAuthority(user.getRole());
