@@ -1,6 +1,7 @@
 package SP25SE026_GSP48_WDCRBP_api.service.impl;
 
 import SP25SE026_GSP48_WDCRBP_api.model.entity.User;
+import SP25SE026_GSP48_WDCRBP_api.model.entity.Wallet;
 import SP25SE026_GSP48_WDCRBP_api.model.entity.ServicePack;
 import SP25SE026_GSP48_WDCRBP_api.model.entity.WoodworkerProfile;
 import SP25SE026_GSP48_WDCRBP_api.model.requestModel.UpdateWoodworkerServicePackRequest;
@@ -12,6 +13,7 @@ import SP25SE026_GSP48_WDCRBP_api.model.responseModel.WoodworkerProfileRest;
 import SP25SE026_GSP48_WDCRBP_api.model.responseModel.WoodworkerUpdateStatusRest;
 import SP25SE026_GSP48_WDCRBP_api.repository.UserRepository;
 import SP25SE026_GSP48_WDCRBP_api.repository.ServicePackRepository;
+import SP25SE026_GSP48_WDCRBP_api.repository.WalletRepository;
 import SP25SE026_GSP48_WDCRBP_api.repository.WoodworkerProfileRepository;
 import SP25SE026_GSP48_WDCRBP_api.service.AvailableServiceService;
 import SP25SE026_GSP48_WDCRBP_api.service.WoodworkerProfileService;
@@ -54,6 +56,9 @@ public class WoodworkerProfileServiceImpl implements WoodworkerProfileService {
     @Autowired
     private MailServiceImpl mailServiceImpl;
 
+    @Autowired
+    private WalletRepository walletRepository;
+
     public WoodworkerProfileServiceImpl(WoodworkerProfileRepository repository,
                                         ServicePackRepository servicePackRepository,
                                         AvailableServiceService availableServiceService,
@@ -71,7 +76,7 @@ public class WoodworkerProfileServiceImpl implements WoodworkerProfileService {
 
         for (WoodworkerProfile profile : list) {
             if (profile != null) {
-                if (profile.getServicePack().getName().equals("Gold")) {
+                if (profile.getServicePack() != null && profile.getServicePack().getName().equals("Gold")) {
                     woodworkerProfileList.add(profile);
                 }
             }
@@ -79,7 +84,7 @@ public class WoodworkerProfileServiceImpl implements WoodworkerProfileService {
 
         for (WoodworkerProfile profile : list) {
             if (profile != null) {
-                if (profile.getServicePack().getName().equals("Sliver")) {
+                if (profile.getServicePack() != null && profile.getServicePack().getName().equals("Sliver")) {
                     woodworkerProfileList.add(profile);
                 }
             }
@@ -87,7 +92,7 @@ public class WoodworkerProfileServiceImpl implements WoodworkerProfileService {
 
         for (WoodworkerProfile profile : list) {
             if (profile != null) {
-                if (profile.getServicePack().getName().equals("Bronze")) {
+                if (profile.getServicePack() != null && profile.getServicePack().getName().equals("Bronze")) {
                     woodworkerProfileList.add(profile);
                 }
             }
@@ -106,13 +111,10 @@ public class WoodworkerProfileServiceImpl implements WoodworkerProfileService {
     @Override
     public WoodworkerProfileRest registerWoodworker(WoodworkerRequest request) {
         try {
-            // Step 1: Check if email or phone already exists in the User table
             Optional<User> existingUser = userRepository.findUserByEmailOrPhone(request.getEmail(), request.getPhone());
             if (existingUser.isPresent()) {
                 throw new RuntimeException("Email or Phone is already registered. Please use a different email or phone.");
             }
-
-            // Step 2: Configure ModelMapper to skip the auto-generated woodworkerId field
             ModelMapper customMapper = new ModelMapper();
             customMapper.addMappings(new PropertyMap<WoodworkerRequest, WoodworkerProfile>() {
                 @Override
@@ -121,29 +123,15 @@ public class WoodworkerProfileServiceImpl implements WoodworkerProfileService {
                     skip(destination.getWoodworkerId());
                 }
             });
-
-            // Map the request to the WoodworkerProfile entity
             WoodworkerProfile woodworkerProfile = customMapper.map(request, WoodworkerProfile.class);
             woodworkerProfile.setStatus(false);  // Default status
             woodworkerProfile.setCreatedAt(LocalDateTime.now());
             woodworkerProfile.setUpdatedAt(LocalDateTime.now());
-
-            // Step 3: Save the WoodworkerProfile without the user for now
             WoodworkerProfile savedProfile = wwRepository.save(woodworkerProfile);
-
-            // Step 4: Create the new User
             User user = createNewUser(request);
-
-            // Step 5: Associate the User with the WoodworkerProfile
             savedProfile.setUser(user);
-
-            // Step 6: Save the updated WoodworkerProfile with the User
             WoodworkerProfile finalProfile = wwRepository.save(savedProfile);
-
-            // Step 7: Map the saved profile to the response DTO (WoodworkerProfileRest)
             WoodworkerProfileRest response = new WoodworkerProfileRest();
-
-            // Use ModelMapper to map from entity to response DTO
             WoodworkerProfileRest.Data data = modelMapper.map(finalProfile, WoodworkerProfileRest.Data.class);
             response.setData(data);
 
@@ -166,10 +154,7 @@ public class WoodworkerProfileServiceImpl implements WoodworkerProfileService {
             user.setRole("Woodworker");
             user.setStatus(true);
             user.setCreatedAt(LocalDateTime.now());
-
             User savedUser = userRepository.save(user);
-
-            // ✅ Store the plain password temporarily in memory
             TempPasswordStorage.storePlainPassword(savedUser.getUserId(), randomPassword);
 
             return savedUser;
@@ -178,7 +163,6 @@ public class WoodworkerProfileServiceImpl implements WoodworkerProfileService {
             throw new RuntimeException("Error during user creation: " + e.getMessage());
         }
     }
-
 
     @Override
     public WoodworkerUpdateStatusRest updateWoodworkerStatus(WoodworkerUpdateStatusRequest request) {
@@ -199,21 +183,19 @@ public class WoodworkerProfileServiceImpl implements WoodworkerProfileService {
         boolean requestedStatus = request.isStatus();
         String reason = request.getDescription();
 
-        // ❌ If status is false and there's a reason => reject and delete
         if (!requestedStatus && reason != null && !reason.trim().isEmpty()) {
             mailServiceImpl.sendEmail(user.getEmail(),
                     "Yêu cầu cập nhật trạng thái bị từ chối",
                     "status-rejection",
                     reason);
 
-            wwRepository.delete(woodworkerProfile); // 🚨 Delete from DB
+            wwRepository.delete(woodworkerProfile);
             userRepository.delete(user);
             WoodworkerUpdateStatusRest response = new WoodworkerUpdateStatusRest();
             response.setUpdatedAt(LocalDateTime.now());
             return response;
         }
 
-        // ✅ If approved, update and send password
         woodworkerProfile.setStatus(true);
         woodworkerProfile.setUpdatedAt(LocalDateTime.now());
         wwRepository.save(woodworkerProfile);
@@ -221,6 +203,16 @@ public class WoodworkerProfileServiceImpl implements WoodworkerProfileService {
         String plainPassword = TempPasswordStorage.getPlainPassword(user.getUserId());
         if (plainPassword != null) {
             sendPasswordToUser(user.getEmail(), plainPassword);
+        }
+
+        if (walletRepository.findByUser_UserId(user.getUserId()).isEmpty()) {
+            Wallet wallet = Wallet.builder()
+                    .user(user)
+                    .balance(0f)
+                    .createdAt(LocalDateTime.now())
+                    .updatedAt(LocalDateTime.now())
+                    .build();
+            walletRepository.save(wallet);
         }
 
         WoodworkerUpdateStatusRest response = new WoodworkerUpdateStatusRest();
@@ -246,8 +238,6 @@ public class WoodworkerProfileServiceImpl implements WoodworkerProfileService {
 
         obj.setServicePack(servicePack);
         obj.setServicePackStartDate(LocalDateTime.now());
-
-        // Cộng Duration vào LocalDateTime
         obj.setServicePackEndDate(LocalDateTime.now().plus(servicePack.getDuration(), ChronoUnit.MONTHS));
 
         wwRepository.save(obj);

@@ -7,17 +7,14 @@ import jakarta.validation.constraints.NotEmpty;
 import lombok.Getter;
 import lombok.Setter;
 
-import java.io.Serializable;
-
 @Getter
 @Setter
-public class PaymentRequest implements Serializable {
-
+public class PaymentWalletRequest {
     @NotEmpty(message = "User ID cannot be empty")
     private String userId;
 
-    @NotEmpty(message = "Order Deposit ID cannot be empty")
-    private String orderDepositId;
+    @NotEmpty(message = "Wallet ID cannot be empty")
+    private String walletId;
 
     private String transactionType;
 

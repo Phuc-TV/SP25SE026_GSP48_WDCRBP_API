@@ -16,5 +16,5 @@ public interface AuthService {
     AuthenticationResponse refreshToken(HttpServletRequest request, HttpServletResponse response) throws IOException;
     void sendOtpToEmail(String email);
     LoginOtpRest loginWithOtp(LoginOtpRequest request);
-    LoginOtpRest otpChangeStatusAccount(LoginOtpRequest request);
+    void otpChangeStatusAccount(LoginOtpRequest request);
 }

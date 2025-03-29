@@ -77,10 +77,10 @@ public class AuthController {
     }
 
     @PostMapping("/verification-otp")
-    public CoreApiResponse<LoginOtpRest> VerificationAccountWithOtp(@Valid @RequestBody LoginOtpRequest request) {
+    public CoreApiResponse<?> VerificationAccountWithOtp(@Valid @RequestBody LoginOtpRequest request) {
         try {
-            LoginOtpRest response = authService.otpChangeStatusAccount(request);
-            return CoreApiResponse.success(response, "Bạn đã xác thực tài khoản thành công");
+            authService.otpChangeStatusAccount(request);
+            return CoreApiResponse.success("Bạn đã xác thực tài khoản thành công");
         } catch (RuntimeException e) {
             return CoreApiResponse.error(HttpStatus.BAD_REQUEST, "xác thực không thành công: " + e.getMessage());
         }

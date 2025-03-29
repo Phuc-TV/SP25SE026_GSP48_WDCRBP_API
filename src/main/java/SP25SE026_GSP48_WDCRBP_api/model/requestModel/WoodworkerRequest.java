@@ -16,7 +16,7 @@ public class WoodworkerRequest {
     private String fullName;
 
     @NotEmpty(message = "Email is required")
-    @Email(message = "Email should be valid")
+    @Email(regexp = ".+@.+\\..+", message = "Email format is invalid")
     private String email;
 
     @NotEmpty(message = "Phone number is required")
