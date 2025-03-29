@@ -26,7 +26,7 @@ public class GHNApiController {
         return ghnApiService.getDistricts(provinceId);
     }
 
-    @PostMapping("/ward")
+    @PostMapping("/ward/{districtId}")
     public CoreApiResponse getWard(@PathVariable int districtId) {
         return ghnApiService.getWard(districtId);
     }

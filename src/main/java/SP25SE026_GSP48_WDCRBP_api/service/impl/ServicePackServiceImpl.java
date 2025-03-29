@@ -34,14 +34,11 @@ public class ServicePackServiceImpl implements ServicePackService {
 
     @Override
     public CreateServicePackRest createServicePack(CreateServicePackRequest request) {
-
         if (servicePackRepository.existsByName(request.getName())) {
             throw new RuntimeException("Service Pack with this name already exists.");
         }
-
         ServicePack servicePack = modelMapper.map(request, ServicePack.class);
         ServicePack saved = servicePackRepository.save(servicePack);
-
         CreateServicePackRest.Data responseData = CreateServicePackRest.Data.builder()
                 .servicePackId(saved.getServicePackId())
                 .name(saved.getName())
@@ -53,7 +50,6 @@ public class ServicePackServiceImpl implements ServicePackService {
                 .searchResultPriority(saved.getSearchResultPriority())
                 .personalization(saved.getPersonalization())
                 .build();
-
         return CreateServicePackRest.builder()
                 .data(responseData)
                 .build();
@@ -63,8 +59,6 @@ public class ServicePackServiceImpl implements ServicePackService {
     public CreateServicePackRest updateServicePack(Long servicePackId, CreateServicePackRequest request) {
         ServicePack existing = servicePackRepository.findById(servicePackId)
                 .orElseThrow(() -> new RuntimeException("Service Pack not found with ID: " + servicePackId));
-
-        // Update values
         existing.setName(request.getName());
         existing.setPrice(request.getPrice());
         existing.setDescription(request.getDescription());
@@ -73,11 +67,7 @@ public class ServicePackServiceImpl implements ServicePackService {
         existing.setProductManagement(request.getProductManagement());
         existing.setSearchResultPriority(request.getSearchResultPriority());
         existing.setPersonalization(request.getPersonalization());
-
-        // Save changes
         ServicePack updated = servicePackRepository.save(existing);
-
-        // Prepare response
         CreateServicePackRest.Data data = CreateServicePackRest.Data.builder()
                 .servicePackId(updated.getServicePackId())
                 .name(updated.getName())
@@ -89,7 +79,6 @@ public class ServicePackServiceImpl implements ServicePackService {
                 .searchResultPriority(updated.getSearchResultPriority())
                 .personalization(updated.getPersonalization())
                 .build();
-
         return CreateServicePackRest.builder()
                 .data(data)
                 .build();
@@ -99,14 +88,12 @@ public class ServicePackServiceImpl implements ServicePackService {
     public void deleteServicePack(Long servicePackId) {
         ServicePack servicePack = servicePackRepository.findById(servicePackId)
                 .orElseThrow(() -> new RuntimeException("Service Pack not found with ID: " + servicePackId));
-
         servicePackRepository.delete(servicePack);
     }
 
     @Override
     public List<ListServicePackRest.Data> getAllServicePacks() {
         List<ServicePack> packs = servicePackRepository.findAll();
-
         return packs.stream().map(pack -> {
             ListServicePackRest.Data dto = new ListServicePackRest.Data();
             dto.setServicePackId(pack.getServicePackId());
@@ -126,7 +113,6 @@ public class ServicePackServiceImpl implements ServicePackService {
     public ListServicePackRest getServicePackById(Long servicePackId) {
         ServicePack pack = servicePackRepository.findById(servicePackId)
                 .orElseThrow(() -> new RuntimeException("Service Pack not found with ID: " + servicePackId));
-
         ListServicePackRest.Data dto = new ListServicePackRest.Data();
         dto.setServicePackId(pack.getServicePackId());
         dto.setName(pack.getName());
@@ -137,10 +123,8 @@ public class ServicePackServiceImpl implements ServicePackService {
         dto.setProductManagement(pack.getProductManagement());
         dto.setSearchResultPriority(pack.getSearchResultPriority());
         dto.setPersonalization(pack.getPersonalization());
-
         ListServicePackRest response = new ListServicePackRest();
         response.setData(List.of(dto));
-
         return response;
     }
 }

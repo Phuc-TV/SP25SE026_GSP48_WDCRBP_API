@@ -3,6 +3,7 @@ package SP25SE026_GSP48_WDCRBP_api.service.impl;
 import SP25SE026_GSP48_WDCRBP_api.model.entity.AccessToken;
 import SP25SE026_GSP48_WDCRBP_api.model.entity.RefreshToken;
 import SP25SE026_GSP48_WDCRBP_api.model.entity.User;
+import SP25SE026_GSP48_WDCRBP_api.model.entity.Wallet;
 import SP25SE026_GSP48_WDCRBP_api.model.exception.WDCRBPApiException;
 import SP25SE026_GSP48_WDCRBP_api.model.requestModel.LoginOtpRequest;
 import SP25SE026_GSP48_WDCRBP_api.model.requestModel.LoginRequest;
@@ -12,6 +13,7 @@ import SP25SE026_GSP48_WDCRBP_api.model.responseModel.LoginOtpRest;
 import SP25SE026_GSP48_WDCRBP_api.repository.AccessTokenRepository;
 import SP25SE026_GSP48_WDCRBP_api.repository.RefreshTokenRepository;
 import SP25SE026_GSP48_WDCRBP_api.repository.UserRepository;
+import SP25SE026_GSP48_WDCRBP_api.repository.WalletRepository;
 import SP25SE026_GSP48_WDCRBP_api.security.JwtTokenProvider;
 import SP25SE026_GSP48_WDCRBP_api.service.AuthService;
 import jakarta.servlet.http.HttpServletRequest;
@@ -30,6 +32,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
+import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
@@ -62,6 +65,9 @@ public class AuthServiceImpl implements AuthService {
     @Autowired
     private MailServiceImpl mailServiceImpl;
 
+    @Autowired
+    private WalletRepository walletRepository;
+
     private static final Map<String, String> otpMap = new HashMap<>();
 
     @Override
@@ -72,7 +78,7 @@ public class AuthServiceImpl implements AuthService {
         SecurityContextHolder.getContext().setAuthentication(authentication);
 
         User user = userRepository.findUserByEmailOrPhone(loginDto.getEmailOrPhone(), loginDto.getEmailOrPhone())
-                .orElseThrow(() -> new WDCRBPApiException(HttpStatus.BAD_REQUEST, "User not found"));
+                .orElseThrow(() -> new WDCRBPApiException(HttpStatus.BAD_REQUEST, "Không tìm thấy tài khoản"));
 
         if(user.getStatus().equals(false)) {
             throw new WDCRBPApiException(HttpStatus.BAD_REQUEST, "Tài khoản chưa được kích hoạt");
@@ -141,7 +147,7 @@ public class AuthServiceImpl implements AuthService {
     public String signup(SignupRequest signupDto) {
         // add check if email already exists
         if (userRepository.existsByEmail(signupDto.getEmail())) {
-            throw new WDCRBPApiException(HttpStatus.BAD_REQUEST, "Đã có tài khoản sử dụng email đó rồi !");
+            throw new WDCRBPApiException(HttpStatus.BAD_REQUEST, "Đã có tài khoản sử dụng email đó rồi!");
         }
 
         User user = modelMapper.map(signupDto, User.class);
@@ -158,19 +164,19 @@ public class AuthServiceImpl implements AuthService {
 
         sendOtpEmail(user.getEmail(), otp);
 
-        return "User registered successfully!";
+        return "Tài khoản đã được đăng ký thành công!";
     }
 
     @Override
     public AuthenticationResponse refreshToken(HttpServletRequest request, HttpServletResponse response) throws IOException {
         final String authHeader = request.getHeader(HttpHeaders.AUTHORIZATION);
         if (authHeader == null || !authHeader.startsWith("Bearer ")) {
-            throw new WDCRBPApiException(HttpStatus.BAD_REQUEST, "Invalid token format");
+            throw new WDCRBPApiException(HttpStatus.BAD_REQUEST, "Token không đúng định dạng");
         }
 
         String refreshToken = authHeader.substring(7);
         RefreshToken token = refreshTokenRepository.findByToken(refreshToken)
-                .orElseThrow(() -> new WDCRBPApiException(HttpStatus.BAD_REQUEST, "Refresh token not found"));
+                .orElseThrow(() -> new WDCRBPApiException(HttpStatus.BAD_REQUEST, "Không tìm thấy refresh token"));
 
         User user = jwtTokenProvider.getUserFromToken(refreshToken); // 🔥 Load User trực tiếp từ JWT
 
@@ -190,7 +196,7 @@ public class AuthServiceImpl implements AuthService {
                     .build();
         }
 
-        throw new WDCRBPApiException(HttpStatus.BAD_REQUEST, "Invalid refresh token");
+        throw new WDCRBPApiException(HttpStatus.BAD_REQUEST, "Refresh token không hợp lệ");
     }
 
     @Override
@@ -199,26 +205,18 @@ public class AuthServiceImpl implements AuthService {
         if (userOptional.isEmpty()) {
             throw new RuntimeException("Người dùng không tồn tại");
         }
-
         User user = userOptional.get();
-
-        // Generate and set OTP
         String otp = generateOtp();
         user.setOTP(otp);
         userRepository.save(user);
-
-        // Send OTP via email
         sendOtpEmail(user.getEmail(), otp);
     }
 
-    // Generate a random OTP (6 digits)
     private String generateOtp() {
         return RandomStringUtils.randomNumeric(6);  // OTP is a 6-digit number
     }
-
-    // Send OTP to the user's email
     private void sendOtpEmail(String email, String otp) {
-        String subject = "[WDCRBP] Mã OTP xác nhận tài khoản";
+        String subject = "[WDCRBP] Mã OTP của bạn";
         String messageType = "otp";
         mailServiceImpl.sendEmail(email, subject, messageType, otp);
     }
@@ -229,52 +227,45 @@ public class AuthServiceImpl implements AuthService {
         if (userOptional.isEmpty()) {
             throw new RuntimeException("Người dùng không tồn tại");
         }
-
         User user = userOptional.get();
-
         if (user.getStatus() == false) {
             throw new RuntimeException("Tài khoản chưa được kích hoạt");
         }
-
         if (user.getOTP() == null || !user.getOTP().equals(request.getOtp())) {
             throw new RuntimeException("OTP không hợp lệ hoặc đã hết hạn");
         }
-
         user.setOTP(null);
         userRepository.save(user);
-
         String accessToken = jwtTokenProvider.generateAccessToken(user);
         String refreshToken = jwtTokenProvider.generateRefreshToken(user);
-
         revokeRefreshToken(accessToken);
         RefreshToken savedRefreshToken = saveUserRefreshToken(refreshToken);
-
         revokeAllUserAccessTokens(user);
         saveUserAccessToken(user, accessToken, savedRefreshToken);
-
         return new LoginOtpRest(accessToken, refreshToken);
     }
 
     @Override
-    public LoginOtpRest otpChangeStatusAccount(LoginOtpRequest request) {
+    public void otpChangeStatusAccount(LoginOtpRequest request) {
         Optional<User> userOptional = userRepository.findUserByEmailOrPhone(request.getEmail(), request.getEmail());
         if (userOptional.isEmpty()) {
             throw new RuntimeException("Người dùng không tồn tại");
         }
-
         User user = userOptional.get();
-
         if (user.getOTP() == null || !user.getOTP().equals(request.getOtp())) {
             throw new RuntimeException("OTP không hợp lệ hoặc đã hết hạn");
         }
-
-        // Clear OTP after use
         user.setStatus(true);
         user.setOTP(null);
         userRepository.save(user);
-
-        return LoginOtpRest.builder()
-                .build();
+        if (walletRepository.findAll().stream().noneMatch(w -> w.getUser().getUserId().equals(user.getUserId()))) {
+            Wallet wallet = Wallet.builder()
+                    .user(user)
+                    .balance(0f)
+                    .createdAt(LocalDateTime.now())
+                    .updatedAt(LocalDateTime.now())
+                    .build();
+            walletRepository.save(wallet);
+        }
     }
-
 }
