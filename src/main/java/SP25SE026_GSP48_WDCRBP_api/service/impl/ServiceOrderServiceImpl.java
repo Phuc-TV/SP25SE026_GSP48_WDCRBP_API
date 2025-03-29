@@ -126,7 +126,7 @@ public class ServiceOrderServiceImpl implements ServiceOrderService {
     }
 
     @Override
-    public ServiceOrder acceptServiceOrder(Long serviceOrderId)
+    public ServiceOrder acceptServiceOrder(Long serviceOrderId, LocalDateTime timeMeeting, String linkMeeting)
     {
         ServiceOrder serviceOrder = orderRepository.findById(serviceOrderId).orElse(null);
 
@@ -135,11 +135,13 @@ public class ServiceOrderServiceImpl implements ServiceOrderService {
             ConsultantAppointment consultantAppointment = new ConsultantAppointment();
             consultantAppointment.setServiceOrder(serviceOrder);
             consultantAppointment.setCreatedAt(LocalDateTime.now());
-            consultantAppointment.setMeetAddress("https://meet.google.com/qta-thit-eaj");
+            consultantAppointment.setDateTime(timeMeeting);
+            consultantAppointment.setMeetAddress(linkMeeting);
 
             consultantAppointmentRepository.save(consultantAppointment);
 
             serviceOrder.setConsultantAppointment(consultantAppointment);
+            serviceOrder.setRole("Customer");
             orderRepository.save(serviceOrder);
 
             String s = "Đang chờ khách hàng duyệt lịch hẹn";
@@ -147,8 +149,18 @@ public class ServiceOrderServiceImpl implements ServiceOrderService {
             orderProgress.setStatus(s);
             orderProgressRepository.save(orderProgress);
         }
-        else
-            return null;
+        else if (serviceOrder.getRole().equals("Customer"))
+        {
+                serviceOrder.setRole("Customer");
+                orderRepository.save(serviceOrder);
+
+                String s = "Đang làm hợp đồng";
+                OrderProgress orderProgress = orderProgressRepository.findOrderProgressByServiceOrder(serviceOrder);
+                orderProgress.setStatus(s);
+                orderProgressRepository.save(orderProgress);
+        }
         return serviceOrder;
     }
+
+
 }
