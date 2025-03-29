@@ -137,11 +137,13 @@ public class ServiceOrderServiceImpl implements ServiceOrderService {
             consultantAppointment.setCreatedAt(LocalDateTime.now());
             consultantAppointment.setDateTime(timeMeeting);
             consultantAppointment.setMeetAddress(linkMeeting);
+            consultantAppointment.setMeetAddress("https://meet.google.com/qta-thit-eaj");
 
             consultantAppointmentRepository.save(consultantAppointment);
 
             serviceOrder.setConsultantAppointment(consultantAppointment);
             serviceOrder.setRole("Customer");
+
             orderRepository.save(serviceOrder);
 
             String s = "Đang chờ khách hàng duyệt lịch hẹn";
@@ -161,6 +163,8 @@ public class ServiceOrderServiceImpl implements ServiceOrderService {
         }
         return serviceOrder;
     }
-
-
+        else
+            return null;
+        return serviceOrder;
+    }
 }
