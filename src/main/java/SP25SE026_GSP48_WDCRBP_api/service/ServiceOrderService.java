@@ -2,6 +2,7 @@ package SP25SE026_GSP48_WDCRBP_api.service;
 
 import SP25SE026_GSP48_WDCRBP_api.model.entity.ServiceOrder;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 public interface ServiceOrderService {
@@ -9,5 +10,5 @@ public interface ServiceOrderService {
 
     ServiceOrder addServiceOrderCustomize(Long availableServiceId, Long userId, Long designIdeaVariantId);
 
-    ServiceOrder acceptServiceOrder(Long serviceOrderId);
+    ServiceOrder acceptServiceOrder(Long serviceOrderId, LocalDateTime timeMeeting, String linkMeeting);
 }

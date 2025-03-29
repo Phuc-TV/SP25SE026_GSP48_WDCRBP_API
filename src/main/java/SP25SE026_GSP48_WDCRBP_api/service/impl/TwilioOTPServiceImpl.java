@@ -56,7 +56,7 @@ public class TwilioOTPServiceImpl implements TwilioOTPService {
         if (twilioVerifyServiceSid.isPresent()) {
             twilioVerifyServiceSidValue = twilioVerifyServiceSid.get().getValue();
         } else {
-            throw new RuntimeException("Không tìm thấy cấu hình với description là 'Twilio_Account_sid'");
+            throw new RuntimeException("Không tìm thấy cấu hình với description là TTwilio_VerifyService_Sid");
         }
 
         Twilio.init(twilioAccountSidValue, twilioAuthTokenValue);
