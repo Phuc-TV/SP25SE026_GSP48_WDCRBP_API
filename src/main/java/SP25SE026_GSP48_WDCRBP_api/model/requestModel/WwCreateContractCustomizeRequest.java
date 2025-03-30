@@ -1,8 +1,5 @@
 package SP25SE026_GSP48_WDCRBP_api.model.requestModel;
 
-import SP25SE026_GSP48_WDCRBP_api.model.entity.ServiceOrder;
-import jakarta.persistence.Column;
-import jakarta.persistence.Id;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -14,7 +11,7 @@ import java.time.LocalDateTime;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class ContractCustomizeRequest {
+public class WwCreateContractCustomizeRequest {
     private String woodworkerSignature;
 
     private String warrantyPolicy;
@@ -24,6 +21,4 @@ public class ContractCustomizeRequest {
     private LocalDateTime warrantyPeriod;
 
     private Long serviceOrderId;
-
-    private Float totalAmount;
 }

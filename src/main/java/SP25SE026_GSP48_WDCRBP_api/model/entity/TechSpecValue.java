@@ -11,7 +11,6 @@ import lombok.*;
 @Entity
 @Table(name = "TechSpecValue")
 public class TechSpecValue {
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long techSpecValueId;
@@ -22,7 +21,4 @@ public class TechSpecValue {
 
     @Column(nullable = true)
     private String value;
-
-    @Column(nullable = true)
-    private String dataType;
 }
