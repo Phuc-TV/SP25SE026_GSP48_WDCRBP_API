@@ -26,7 +26,7 @@ import java.util.*;
 @RequiredArgsConstructor
 public class VNPayServiceImp implements VNPayService {
 
-    private static final String PAYMENT_URL = "http://localhost:5173/payment-successfull";
+    private static final String PAYMENT_URL = "http://localhost:5173/payment-success";
     private static final String AES_KEY = "YourSecretKey123";
     private final UserRepository userRepository;
     private final OrderDepositRepository orderDepositRepository;
@@ -85,14 +85,11 @@ public class VNPayServiceImp implements VNPayService {
             transactionRepository.save(txn);
             // Create a payment URL
             String encryptedTransactionId = AESUtil.encrypt(String.valueOf(txn.getTransactionId()), AES_KEY);
-
-            // Create a payment URL
-            String returnUrl = PAYMENT_URL + "&&transactionId=" + URLEncoder.encode(encryptedTransactionId, StandardCharsets.UTF_8);
-            // VNPay URL creation
+            Map<String, String> vnp_Params = new HashMap<>();
+            String returnUrl = PAYMENT_URL + "?" + "transactionId=" + URLEncoder.encode(encryptedTransactionId, StandardCharsets.UTF_8);
             long vnpAmount = amount * 100;
             String vnp_TxnRef = UUID.randomUUID().toString().replace("-", "").substring(0, 12);
             String vnp_IpAddr = "127.0.0.1";
-            Map<String, String> vnp_Params = new HashMap<>();
             vnp_Params.put("vnp_Version", VnPayConfig.vnp_Version);
             vnp_Params.put("vnp_Command", VnPayConfig.vnp_Command);
             vnp_Params.put("vnp_TmnCode", VnPayConfig.vnp_TmnCode);
@@ -194,17 +191,18 @@ public class VNPayServiceImp implements VNPayService {
             String encryptedWoodworkerId = AESUtil.encrypt(String.valueOf(dbUser.getUserId()), AES_KEY);
             String encryptedServicePackId = AESUtil.encrypt(String.valueOf(parsedServicePackId), AES_KEY);
 
-            String returnUrl = PAYMENT_URL +
-                    "&&WoodworkerId=" + URLEncoder.encode(encryptedWoodworkerId, StandardCharsets.UTF_8) +
-                    "&&ServicePackId=" + URLEncoder.encode(encryptedServicePackId, StandardCharsets.UTF_8);
+            Map<String, String> vnp_Params = new HashMap<>();
 
+            String returnUrl = PAYMENT_URL + "?" +
+                    "WoodworkerId=" + URLEncoder.encode(encryptedWoodworkerId, StandardCharsets.UTF_8) +
+                    "&ServicePackId=" + URLEncoder.encode(encryptedServicePackId, StandardCharsets.UTF_8);
+            vnp_Params.put("vnp_ReturnUrl", returnUrl);
 
             // VNPay URL creation
             long vnpAmount = amount * 100;
             String vnp_TxnRef = UUID.randomUUID().toString().replace("-", "").substring(0, 12);
             String vnp_IpAddr = "127.0.0.1";
 
-            Map<String, String> vnp_Params = new HashMap<>();
             vnp_Params.put("vnp_Version", VnPayConfig.vnp_Version);
             vnp_Params.put("vnp_Command", VnPayConfig.vnp_Command);
             vnp_Params.put("vnp_TmnCode", VnPayConfig.vnp_TmnCode);
@@ -215,7 +213,6 @@ public class VNPayServiceImp implements VNPayService {
             vnp_Params.put("vnp_Locale", "vn");
             vnp_Params.put("vnp_IpAddr", vnp_IpAddr);
             vnp_Params.put("vnp_OrderType", "other");
-            vnp_Params.put("vnp_ReturnUrl", returnUrl);
 
             TimeZone tz = TimeZone.getTimeZone("Asia/Ho_Chi_Minh");
             Calendar cal = Calendar.getInstance(tz);
@@ -316,17 +313,14 @@ public class VNPayServiceImp implements VNPayService {
 
             String encryptedWalletId = AESUtil.encrypt(String.valueOf(txn.getWallet().getWalletId()), AES_KEY);
             String encryptedTransactionId = AESUtil.encrypt(String.valueOf(txn.getTransactionId()), AES_KEY);
-
-            String returnUrl = PAYMENT_URL +
-                    "&&WalletId=" + URLEncoder.encode(encryptedWalletId, StandardCharsets.UTF_8) +
-                    "&&TransactionId=" + URLEncoder.encode(encryptedTransactionId, StandardCharsets.UTF_8);
-
-            // VNPay URL creation
+            Map<String, String> vnp_Params = new HashMap<>();
+            String returnUrl = PAYMENT_URL + "?" +
+                    "WalletId=" + URLEncoder.encode(encryptedWalletId, StandardCharsets.UTF_8) +
+                    "&TransactionId=" + URLEncoder.encode(encryptedTransactionId, StandardCharsets.UTF_8);
+            vnp_Params.put("vnp_ReturnUrl", returnUrl);
             long vnpAmount = amount * 100;
             String vnp_TxnRef = UUID.randomUUID().toString().replace("-", "").substring(0, 12);
             String vnp_IpAddr = "127.0.0.1";
-
-            Map<String, String> vnp_Params = new HashMap<>();
             vnp_Params.put("vnp_Version", VnPayConfig.vnp_Version);
             vnp_Params.put("vnp_Command", VnPayConfig.vnp_Command);
             vnp_Params.put("vnp_TmnCode", VnPayConfig.vnp_TmnCode);
