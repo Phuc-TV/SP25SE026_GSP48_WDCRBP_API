@@ -31,7 +31,7 @@ public class WoodworkerProfileController {
     private ModelMapper modelMapper;
 
     // Lấy danh sách tất cả các Woodworker với service pack "Gold", "Silver", "Bronze"
-    @GetMapping("/woodworkers")
+    @GetMapping
     public CoreApiResponse getAllWoodWorker() {
         List<WoodworkerProfileListResponseDto> wwList = woodworkerProfileService.getAllWoodWorker()
                 .stream().map(idea -> modelMapper.map(idea, WoodworkerProfileListResponseDto.class))
@@ -41,14 +41,14 @@ public class WoodworkerProfileController {
     }
 
     // Lấy thông tin của một Woodworker theo ID
-    @GetMapping("/woodworkers/{wwId}")
+    @GetMapping("/{wwId}")
     public CoreApiResponse getWoodworkerById(@PathVariable Long wwId) {
         return CoreApiResponse.success(modelMapper.map(
                 woodworkerProfileService.getWoodworkerById(wwId), WoodworkerProfileDetailResponseDto.class
         ));
     }
 
-    @GetMapping("/woodworkers/users/{userId}")
+    @GetMapping("/user/{userId}")
     public CoreApiResponse getWoodworkerProfileByUserId(@PathVariable Long userId) {
         return CoreApiResponse.success(modelMapper.map(
                 woodworkerProfileService.getWoodworkerByUserId(userId), WoodworkerProfileDetailResponseDto.class
@@ -85,7 +85,7 @@ public class WoodworkerProfileController {
         }
     }
 
-    @GetMapping("/listWW/inactive")
+    @GetMapping("/inactive")
     public CoreApiResponse getInactiveWoodworkers() {
         List<ListRegisterRest.Data> result = woodworkerProfileService.getAllInactiveWoodworkers();
        try{
