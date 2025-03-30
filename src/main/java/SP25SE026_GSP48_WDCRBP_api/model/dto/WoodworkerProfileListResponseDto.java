@@ -26,7 +26,7 @@ public class WoodworkerProfileListResponseDto {
 
     private String address;
 
-    private User user;
+    private String cityId;
 
     private ServicePack servicePack;
 }
