@@ -1,6 +1,7 @@
 package SP25SE026_GSP48_WDCRBP_api.service.impl;
 
 import SP25SE026_GSP48_WDCRBP_api.model.entity.*;
+import SP25SE026_GSP48_WDCRBP_api.model.requestModel.AddServiceOrderRequest;
 import SP25SE026_GSP48_WDCRBP_api.repository.*;
 import SP25SE026_GSP48_WDCRBP_api.service.ServiceOrderService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -83,12 +84,13 @@ public class ServiceOrderServiceImpl implements ServiceOrderService {
     }
 
     @Override
-    public ServiceOrder addServiceOrderCustomize(Long availableServiceId, Long userId, Long designIdeaVariantId)
+    public ServiceOrder addServiceOrderCustomize(AddServiceOrderRequest addServiceOrderRequest)
     {
         //Create ServiceOrder
-        User user = userRepository.findById(userId).orElse(null);
+        User user = userRepository.findById(addServiceOrderRequest.getUserId()).orElse(null);
 
-        AvailableService availableService = availableServiceRepository.findById(availableServiceId).orElse(null);
+        AvailableService availableService =
+                availableServiceRepository.findById(addServiceOrderRequest.getAvailableServiceId()).orElse(null);
 
         ServiceOrder serviceOrder = new ServiceOrder();
         serviceOrder.setAvailableService(availableService);
@@ -103,12 +105,12 @@ public class ServiceOrderServiceImpl implements ServiceOrderService {
         ServiceOrder newServiceOrder = orderRepository.findAll().get(t-1);
 
         DesignIdeaVariant designIdeaVariant =
-                designIdeaVariantRepository.findDesignIdeaVariantByDesignIdeaVariantId(designIdeaVariantId);
+                designIdeaVariantRepository.findDesignIdeaVariantByDesignIdeaVariantId(addServiceOrderRequest.getDesignIdeaVariantId());
 
         RequestedProduct requestedProduct = new RequestedProduct();
         requestedProduct.setDesignIdeaVariant(designIdeaVariant);
         requestedProduct.setServiceOrder(newServiceOrder);
-        requestedProduct.setTotalAmount(designIdeaVariant.getPrice());
+        requestedProduct.setTotalAmount(designIdeaVariant.getPrice() * addServiceOrderRequest.getQuantity());
         requestedProduct.setCreatedAt(LocalDateTime.now());
 
         requestedProductRepository.save(requestedProduct);
@@ -133,11 +135,17 @@ public class ServiceOrderServiceImpl implements ServiceOrderService {
         if (serviceOrder.getRole().equals("Woodworker"))
         {
             ConsultantAppointment consultantAppointment = new ConsultantAppointment();
+
+            if (consultantAppointmentRepository.findConsultantAppointmentByServiceOrder(serviceOrder) != null)
+            {
+                consultantAppointment =
+                        consultantAppointmentRepository.findConsultantAppointmentByServiceOrder(serviceOrder);
+            }
+
             consultantAppointment.setServiceOrder(serviceOrder);
             consultantAppointment.setCreatedAt(LocalDateTime.now());
             consultantAppointment.setDateTime(timeMeeting);
             consultantAppointment.setMeetAddress(linkMeeting);
-            consultantAppointment.setMeetAddress("https://meet.google.com/qta-thit-eaj");
 
             consultantAppointmentRepository.save(consultantAppointment);
 
@@ -163,8 +171,19 @@ public class ServiceOrderServiceImpl implements ServiceOrderService {
         }
         return serviceOrder;
     }
-        else
-            return null;
-        return serviceOrder;
+
+    @Override
+    public ServiceOrder customerFeedback(Long serviceOrderId, String feedback)
+    {
+        ServiceOrder serviceOrder = orderRepository.findServiceOrderByOrderId(serviceOrderId);
+
+        if (serviceOrder.getRole().equals("Customer"))
+        {
+            serviceOrder.setFeedback(feedback);
+            serviceOrder.setRole("Woodworker");
+            orderRepository.save(serviceOrder);
+            return serviceOrder;
+        }
+        return null;
     }
 }

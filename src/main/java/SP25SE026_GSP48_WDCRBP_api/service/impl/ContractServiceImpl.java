@@ -1,7 +1,7 @@
 package SP25SE026_GSP48_WDCRBP_api.service.impl;
 
 import SP25SE026_GSP48_WDCRBP_api.model.entity.*;
-import SP25SE026_GSP48_WDCRBP_api.model.requestModel.ContractCustomizeRequest;
+import SP25SE026_GSP48_WDCRBP_api.model.requestModel.WwCreateContractCustomizeRequest;
 import SP25SE026_GSP48_WDCRBP_api.repository.*;
 import SP25SE026_GSP48_WDCRBP_api.service.ContractService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,40 +30,72 @@ public class ContractServiceImpl implements ContractService {
     @Autowired
     private ServiceDepositRepository serviceDepositRepository;
 
+    @Autowired
+    private RequestedProductRepository requestedProductRepository;
+
     public ContractServiceImpl(ContractRepository contractRepository,
                                ServiceOrderRepository serviceRepository,
                                UserRepository userRepository,
                                OrderDepositRepository orDepositRepository,
-                               OrderProgressRepository orderProgressRepository)
+                               OrderProgressRepository orderProgressRepository,
+                               RequestedProductRepository requestedProductRepository)
     {
         this.contractRepository = contractRepository;
         this.serviceRepository = serviceRepository;
         this.userRepository = userRepository;
         this.orderProgressRepository = orderProgressRepository;
         this.orderDepositRepository = orDepositRepository;
+        this.requestedProductRepository = requestedProductRepository;
     }
 
     @Override
-    public Contract createContractCustomize(ContractCustomizeRequest contractCustomizeRequest)
+    public Contract createContractCustomize(WwCreateContractCustomizeRequest wwCreateContractCustomizeRequest)
     {
-        Contract contract = new Contract();
-        contract.setWarrantyPeriod(contractCustomizeRequest.getWarrantyPeriod());
-        contract.setWarrantyPolicy(contractCustomizeRequest.getWarrantyPolicy());
-        contract.setCompleteDate(contractCustomizeRequest.getCompleteDate());
-        contract.setSignDate(LocalDateTime.now());
-
         ServiceOrder serviceOrder =
-                serviceRepository.findServiceOrderByOrderId(contractCustomizeRequest.getServiceOrderId());
+                serviceRepository.findServiceOrderByOrderId(wwCreateContractCustomizeRequest.getServiceOrderId());
+        Contract contract1 = contractRepository.findContractByServiceOrder(serviceOrder);
 
-        serviceOrder.setTotalAmount(contractCustomizeRequest.getTotalAmount());
-        serviceRepository.save(serviceOrder);
+        if (contract1 == null)
+        {
+            Contract contract = new Contract();
+            contract.setWarrantyPeriod(wwCreateContractCustomizeRequest.getWarrantyPeriod());
+            contract.setWarrantyPolicy(wwCreateContractCustomizeRequest.getWarrantyPolicy());
+            contract.setCompleteDate(wwCreateContractCustomizeRequest.getCompleteDate());
+            contract.setSignDate(LocalDateTime.now());
 
-        contract.setServiceOrder(serviceOrder);
-        contractRepository.save(contract);
+            RequestedProduct requestedProduct =
+                    requestedProductRepository.findRequestedProductByServiceOrder(serviceOrder);
 
-        serviceRepository.save(serviceOrder);
+            serviceOrder.setTotalAmount(requestedProduct.getTotalAmount());
+            serviceOrder.setRole("Customer");
+            serviceRepository.save(serviceOrder);
 
-        return contract;
+            contract.setContractTotalAmount(requestedProduct.getTotalAmount());
+            contract.setServiceOrder(serviceOrder);
+            contractRepository.save(contract);
+
+            serviceRepository.save(serviceOrder);
+            return contract;
+        }
+        else
+        {
+            if (wwCreateContractCustomizeRequest.getWarrantyPolicy() != null)
+                contract1.setWarrantyPolicy(wwCreateContractCustomizeRequest.getWarrantyPolicy());
+
+            if (wwCreateContractCustomizeRequest.getCompleteDate() != null)
+                contract1.setCompleteDate(wwCreateContractCustomizeRequest.getCompleteDate());
+
+            if (wwCreateContractCustomizeRequest.getWarrantyPeriod() != null)
+                contract1.setWarrantyPeriod(wwCreateContractCustomizeRequest.getWarrantyPeriod());
+
+            contractRepository.save(contract1);
+
+            serviceOrder.setFeedback("");
+            serviceOrder.setRole("Customer");
+            serviceRepository.save(serviceOrder);
+
+            return contract1;
+        }
     }
 
     @Override

@@ -1,6 +1,7 @@
 package SP25SE026_GSP48_WDCRBP_api.controller;
 
 import SP25SE026_GSP48_WDCRBP_api.components.CoreApiResponse;
+import SP25SE026_GSP48_WDCRBP_api.model.dto.CategoryDto;
 import SP25SE026_GSP48_WDCRBP_api.model.entity.Category;
 import SP25SE026_GSP48_WDCRBP_api.service.CategoryService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,7 +22,7 @@ public class CategoryController {
     @GetMapping("/getAllCategory")
     public CoreApiResponse getAllCategory()
     {
-        List<Category> categories = categoryService.listAllCategory();
+        List<CategoryDto> categories = categoryService.listAllCategory();
 
         if (categories == null)
             return CoreApiResponse.error("Empty list");

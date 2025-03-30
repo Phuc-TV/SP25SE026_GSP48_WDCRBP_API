@@ -11,6 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 @Service
@@ -99,19 +100,15 @@ public class DesignIdeaServiceImpl implements DesignIdeaService {
     @Override
     public DesignIdea addDesignIdea(WoodworkProductDto woodworkProductDto)
     {
-        // Save DesignIdea
-        DesignIdea idea = new DesignIdea();
-
-        idea.setName(woodworkProductDto.getName());
-        idea.setImg_urls(woodworkProductDto.getImg());
-
+        HashMap<Integer, DesignIdeaConfigValue> configValueHashMap = new HashMap<Integer,DesignIdeaConfigValue>();
         Category category = categoryRepository.findCategoriesByCategoryId(woodworkProductDto.getCategoryId());
 
+        // Save DesignIdea
+        DesignIdea idea = new DesignIdea();
         idea.setCategory(category);
-
+        idea.setName(woodworkProductDto.getName());
+        idea.setImg_urls(woodworkProductDto.getImg());
         ideaRepository.save(idea);
-
-        DesignIdea designIdea = ideaRepository.findDesignIdeaByName(idea.getName());
 
         //Save DesignIdeaConfig and DesignIdeaConfigValue
         List<ConfigurationDto> configurationDtos = woodworkProductDto.getConfigurations();
@@ -120,7 +117,7 @@ public class DesignIdeaServiceImpl implements DesignIdeaService {
         {
             DesignIdeaConfig designIdeaConfig = new DesignIdeaConfig();
             designIdeaConfig.setSpecifications(configurationDto.getName());
-            designIdeaConfig.setDesignIdea(designIdea);
+            designIdeaConfig.setDesignIdea(idea);
 
             designIdeaConfigRepository.save(designIdeaConfig);
 
@@ -135,6 +132,8 @@ public class DesignIdeaServiceImpl implements DesignIdeaService {
                 designIdeaConfigValue.setDesignIdeaConfig(designIdeaConfig1);
 
                 designIdeaConfigValueRepository.save(designIdeaConfigValue);
+
+                configValueHashMap.put(configValueDto.getId(), designIdeaConfigValue);
             }
         }
 
@@ -145,46 +144,17 @@ public class DesignIdeaServiceImpl implements DesignIdeaService {
         {
             DesignIdeaVariant designIdeaVariant = new DesignIdeaVariant();
             designIdeaVariant.setPrice(priceDto.getPrice());
-
-            List<DesignIdeaVariant> designIdeaVariants = designIdeaVariantRepository.findAll();
-            int t = designIdeaVariants.size();
-
+            designIdeaVariant.setDesignIdea(idea);
             designIdeaVariantRepository.save(designIdeaVariant);
 
-            DesignIdeaVariant designIdeaVariant1 = designIdeaVariants.get(t+1);
-
-            List<Integer> config = priceDto.getConfig();
-            List<Integer> configVale = priceDto.getConfigValue();
-
-            int i = 0;
-            for (int index = 0; index < config.size(); index++)
+            List<Integer> configValueList = priceDto.getConfigValue();
+            for (Integer configValueId : configValueList)
             {
-                List<ConfigurationDto> configurationDtoss = woodworkProductDto.getConfigurations();
-                for (ConfigurationDto configurationDto : configurationDtoss)
-                {
-                    if (configurationDto.getId() == config.get(i))
-                    {
-                        DesignIdeaConfig designIdeaConfig =
-                                designIdeaConfigRepository.findDesignIdeaConfigBySpecifications(configurationDto.getName());
-                        List<ConfigValueDto> configValueDtos = configurationDto.getValues();
-                        for (ConfigValueDto configValueDto : configValueDtos)
-                        {
-                            if (configValueDto.getId() == configVale.get(i))
-                            {
-                                DesignIdeaVariantConfig designIdeaVariantConfig = new DesignIdeaVariantConfig();
-                                designIdeaVariantConfig.setDesignIdeaVariant(designIdeaVariant1);
+                DesignIdeaVariantConfig designIdeaVariantConfig = new DesignIdeaVariantConfig();
+                designIdeaVariantConfig.setDesignIdeaVariant(designIdeaVariant);
+                designIdeaVariantConfig.setDesignIdeaConfigValue(configValueHashMap.get(configValueId));
 
-                                DesignIdeaConfigValue designIdeaConfigValue =
-                                        designIdeaConfigValueRepository.findDesignIdeaConfigValueByDesignIdeaConfig(designIdeaConfig);
-                                designIdeaVariantConfig.setDesignIdeaConfigValue(designIdeaConfigValue);
-
-                                designIdeaVariantConfigRepository.save(designIdeaVariantConfig);
-                            }
-                        }
-                        i++;
-                        break;
-                    }
-                }
+                designIdeaVariantConfigRepository.save(designIdeaVariantConfig);
             }
         }
 
