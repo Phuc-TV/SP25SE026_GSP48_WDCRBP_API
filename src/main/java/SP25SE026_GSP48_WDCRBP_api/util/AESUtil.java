@@ -47,19 +47,24 @@ public class AESUtil {
     public static Map<String, String> decryptMultipleFromQuery(String queryString, String key) throws Exception {
         Map<String, String> result = new HashMap<>();
 
-        // Normalize & split
+        // Decode URL-encoded string
         String decodedQuery = URLDecoder.decode(queryString, StandardCharsets.UTF_8);
-        String[] pairs = decodedQuery.split("&&");
+        String[] pairs = decodedQuery.split("&");  // 🛠 Use '&' instead of '&&'
 
         for (String pair : pairs) {
             String[] parts = pair.split("=");
             if (parts.length == 2) {
                 String param = parts[0];
                 String encrypted = parts[1];
-                String decrypted = decrypt(encrypted, key);
-                result.put(param, decrypted);
+                try {
+                    String decrypted = decrypt(encrypted, key);
+                    result.put(param, decrypted);
+                } catch (Exception e) {
+                    result.put(param, "Failed to decrypt");
+                }
             }
         }
+
         return result;
     }
 }
