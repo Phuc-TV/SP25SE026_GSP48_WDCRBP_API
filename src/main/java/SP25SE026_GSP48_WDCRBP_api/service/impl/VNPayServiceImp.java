@@ -87,7 +87,7 @@ public class VNPayServiceImp implements VNPayService {
             String encryptedTransactionId = AESUtil.encrypt(String.valueOf(txn.getTransactionId()), AES_KEY);
             Map<String, String> vnp_Params = new HashMap<>();
             String returnUrl = PAYMENT_URL + "?" + "transactionId=" + URLEncoder.encode(encryptedTransactionId, StandardCharsets.UTF_8);
-            long vnpAmount = amount ;
+            long vnpAmount = amount * 100 ;
             String vnp_TxnRef = UUID.randomUUID().toString().replace("-", "").substring(0, 12);
             String vnp_IpAddr = "127.0.0.1";
             vnp_Params.put("vnp_Version", VnPayConfig.vnp_Version);
@@ -199,7 +199,7 @@ public class VNPayServiceImp implements VNPayService {
             vnp_Params.put("vnp_ReturnUrl", returnUrl);
 
             // VNPay URL creation
-            long vnpAmount = amount ;
+            long vnpAmount = amount * 100 ;
             String vnp_TxnRef = UUID.randomUUID().toString().replace("-", "").substring(0, 12);
             String vnp_IpAddr = "127.0.0.1";
 
@@ -318,7 +318,7 @@ public class VNPayServiceImp implements VNPayService {
                     "WalletId=" + URLEncoder.encode(encryptedWalletId, StandardCharsets.UTF_8) +
                     "&TransactionId=" + URLEncoder.encode(encryptedTransactionId, StandardCharsets.UTF_8);
             vnp_Params.put("vnp_ReturnUrl", returnUrl);
-            long vnpAmount = amount ;
+            long vnpAmount = amount * 100 ;
             String vnp_TxnRef = UUID.randomUUID().toString().replace("-", "").substring(0, 12);
             String vnp_IpAddr = "127.0.0.1";
             vnp_Params.put("vnp_Version", VnPayConfig.vnp_Version);
