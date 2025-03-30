@@ -1,7 +1,8 @@
 package SP25SE026_GSP48_WDCRBP_api.controller;
 
 import SP25SE026_GSP48_WDCRBP_api.components.CoreApiResponse;
-import SP25SE026_GSP48_WDCRBP_api.model.dto.WoodworkerProfileDto;
+import SP25SE026_GSP48_WDCRBP_api.model.dto.WoodworkerProfileDetailResponseDto;
+import SP25SE026_GSP48_WDCRBP_api.model.dto.WoodworkerProfileListResponseDto;
 import SP25SE026_GSP48_WDCRBP_api.model.requestModel.UpdateWoodworkerServicePackRequest;
 import SP25SE026_GSP48_WDCRBP_api.model.requestModel.WoodworkerRequest;
 import SP25SE026_GSP48_WDCRBP_api.model.requestModel.WoodworkerUpdateStatusRequest;
@@ -30,23 +31,27 @@ public class WoodworkerProfileController {
     private ModelMapper modelMapper;
 
     // Lấy danh sách tất cả các Woodworker với service pack "Gold", "Silver", "Bronze"
-    @GetMapping("/listWW")
+    @GetMapping("/woodworkers")
     public CoreApiResponse getAllWoodWorker() {
-        List<WoodworkerProfileDto> ideas = woodworkerProfileService.getAllWoodWorker()
-                .stream().map(idea -> modelMapper.map(idea, WoodworkerProfileDto.class))
+        List<WoodworkerProfileListResponseDto> wwList = woodworkerProfileService.getAllWoodWorker()
+                .stream().map(idea -> modelMapper.map(idea, WoodworkerProfileListResponseDto.class))
                 .toList();
-        if (ideas == null || ideas.isEmpty()) {
-            return CoreApiResponse.error("No data found");
-        }
 
-        return CoreApiResponse.success(ideas);
+        return CoreApiResponse.success(wwList);
     }
 
     // Lấy thông tin của một Woodworker theo ID
-    @GetMapping("/listWW/{wwId}")
+    @GetMapping("/woodworkers/{wwId}")
     public CoreApiResponse getWoodworkerById(@PathVariable Long wwId) {
         return CoreApiResponse.success(modelMapper.map(
-                woodworkerProfileService.getWoodworkerById(wwId), WoodworkerProfileDto.class
+                woodworkerProfileService.getWoodworkerById(wwId), WoodworkerProfileDetailResponseDto.class
+        ));
+    }
+
+    @GetMapping("/woodworkers/users/{userId}")
+    public CoreApiResponse getWoodworkerProfileByUserId(@PathVariable Long userId) {
+        return CoreApiResponse.success(modelMapper.map(
+                woodworkerProfileService.getWoodworkerByUserId(userId), WoodworkerProfileDetailResponseDto.class
         ));
     }
 
@@ -54,10 +59,10 @@ public class WoodworkerProfileController {
     @SecurityRequirement(name = "Bear Authentication")
     @PostMapping("/addServicePack/{wwId}")
     public CoreApiResponse addServicePack(@PathVariable Long wwId, @RequestParam Long servicePackId) {
-        WoodworkerProfileDto woodworkerProfileDto = modelMapper.map(
-                woodworkerProfileService.addServicePack(servicePackId, wwId), WoodworkerProfileDto.class
+        WoodworkerProfileListResponseDto woodworkerProfileListResponseDto = modelMapper.map(
+                woodworkerProfileService.addServicePack(servicePackId, wwId), WoodworkerProfileListResponseDto.class
         );
-        return CoreApiResponse.success(woodworkerProfileDto);
+        return CoreApiResponse.success(woodworkerProfileListResponseDto);
     }
 
     @PostMapping("/ww-register")

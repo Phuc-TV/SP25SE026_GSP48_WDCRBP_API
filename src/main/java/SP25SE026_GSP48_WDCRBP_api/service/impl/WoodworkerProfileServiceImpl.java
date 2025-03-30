@@ -109,6 +109,12 @@ public class WoodworkerProfileServiceImpl implements WoodworkerProfileService {
     }
 
     @Override
+    public WoodworkerProfile getWoodworkerByUserId(Long userId) {
+        return wwRepository.findByUser_UserId(userId).orElse(null);
+    }
+
+
+    @Override
     public WoodworkerProfileRest registerWoodworker(WoodworkerRequest request) {
         try {
             Optional<User> existingUser = userRepository.findUserByEmailOrPhone(request.getEmail(), request.getPhone());

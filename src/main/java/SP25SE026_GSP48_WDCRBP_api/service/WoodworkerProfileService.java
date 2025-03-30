@@ -16,6 +16,8 @@ public interface WoodworkerProfileService {
 
     WoodworkerProfile getWoodworkerById(Long id);
 
+    WoodworkerProfile getWoodworkerByUserId(Long userId);
+
     WoodworkerProfileRest registerWoodworker(WoodworkerRequest request);
 
     WoodworkerUpdateStatusRest updateWoodworkerStatus(WoodworkerUpdateStatusRequest request);
