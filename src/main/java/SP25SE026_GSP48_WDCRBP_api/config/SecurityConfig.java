@@ -81,13 +81,10 @@ public class SecurityConfig {
                                 .requestMatchers("/api/v1/service-pack/**").permitAll()
                                 .requestMatchers("/api/v1/service-pack-details/**").permitAll()
                                 .requestMatchers("/api/v1/user/**").permitAll()
-<<<<<<< Updated upstream
                                 .requestMatchers("/api/meet/**").permitAll()
-=======
                                 .requestMatchers("/api/v1/designIdea/**").permitAll()
                                 .requestMatchers("/api/wallet/**").permitAll()
                                 .requestMatchers("/api/v1/decrypt/**").permitAll()
->>>>>>> Stashed changes
                                 .anyRequest().authenticated()
                 ).exceptionHandling((exception) -> exception
                         .authenticationEntryPoint(this.jwtAuthenticationEntryPoint) // Sử dụng JwtAuthenticationEntryPoint tùy chỉnh
