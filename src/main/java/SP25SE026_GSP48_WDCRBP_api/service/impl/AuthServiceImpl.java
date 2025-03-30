@@ -270,8 +270,6 @@ public class AuthServiceImpl implements AuthService {
 
     @Override
     public void resetPasswordWithOTP(String email, String otp, ResetPasswordOTPRequest request) {
-        String AES_KEY = "YourSecretKey123";
-
         User user = userRepository.findUserByEmailOrPhone(email, email)
                 .orElseThrow(() -> new RuntimeException("Không tìm thấy tài khoản với email này."));
 
@@ -283,13 +281,10 @@ public class AuthServiceImpl implements AuthService {
             throw new RuntimeException("Mật khẩu xác nhận không khớp.");
         }
 
-        try {
-            String encryptedPassword = AESUtil.encrypt(request.getNewPassword(), AES_KEY);
-            user.setPassword(encryptedPassword);
-            user.setOTP(null); // clear OTP after use
-            userRepository.save(user);
-        } catch (Exception e) {
-            throw new RuntimeException("Lỗi mã hóa mật khẩu: " + e.getMessage(), e);
-        }
+        // 👉 Use hash instead of encryption
+        String hashedPassword = passwordEncoder.encode(request.getNewPassword());
+        user.setPassword(hashedPassword);
+        user.setOTP(null); // clear OTP after use
+        userRepository.save(user);
     }
 }

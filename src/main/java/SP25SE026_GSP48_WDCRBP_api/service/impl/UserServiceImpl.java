@@ -6,10 +6,9 @@ import SP25SE026_GSP48_WDCRBP_api.model.requestModel.ChangePasswordRequest;
 import SP25SE026_GSP48_WDCRBP_api.model.responseModel.UserInfoResponse;
 import SP25SE026_GSP48_WDCRBP_api.repository.UserRepository;
 import SP25SE026_GSP48_WDCRBP_api.service.UserService;
-import SP25SE026_GSP48_WDCRBP_api.util.AESUtil;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -18,6 +17,8 @@ public class UserServiceImpl implements UserService {
     private UserRepository userRepository;
     @Autowired
     private ModelMapper modelMapper;
+    @Autowired
+    private PasswordEncoder passwordEncoder;
 
     public UserServiceImpl(UserRepository userRepository)
     {
@@ -44,29 +45,21 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public void changePassword(Long userId, ChangePasswordRequest request) {
-        try {
-            String AES_KEY = "YourSecretKey123";
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy người dùng"));
 
-            User user = userRepository.findById(userId)
-                    .orElseThrow(() -> new RuntimeException("Không tìm thấy người dùng"));
-
-            String decryptedPassword = AESUtil.decrypt(user.getPassword(), AES_KEY);
-            if (!decryptedPassword.equals(request.getOldPassword())) {
-                throw new RuntimeException("Mật khẩu cũ không đúng");
-            }
-
-            if (!request.getNewPassword().equals(request.getConfirmPassword())) {
-                throw new RuntimeException("Mật khẩu mới và mật khẩu xác nhận không khớp");
-            }
-
-            String encryptedNewPassword = AESUtil.encrypt(request.getNewPassword(), AES_KEY);
-            user.setPassword(encryptedNewPassword);
-            userRepository.save(user);
-
-        } catch (RuntimeException e) {
-            throw e; // Rethrow so controller can catch
-        } catch (Exception e) {
-            throw new RuntimeException("Thay đổi mật khẩu không thành công: " + e.getMessage(), e);
+        // Check if old password matches the stored hashed password
+        if (!passwordEncoder.matches(request.getOldPassword(), user.getPassword())) {
+            throw new RuntimeException("Mật khẩu cũ không đúng");
         }
+
+        if (!request.getNewPassword().equals(request.getConfirmPassword())) {
+            throw new RuntimeException("Mật khẩu mới và mật khẩu xác nhận không khớp");
+        }
+
+        // Hash the new password before saving
+        String hashedNewPassword = passwordEncoder.encode(request.getNewPassword());
+        user.setPassword(hashedNewPassword);
+        userRepository.save(user);
     }
 }
