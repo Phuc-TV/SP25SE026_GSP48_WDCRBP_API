@@ -14,19 +14,19 @@ public class GHNApiController {
     @Autowired
     private GHNApiService ghnApiService;
 
-    @GetMapping("/getProvinces")
+    @GetMapping("/provinces")
     public CoreApiResponse getProvinces()
     {
         return ghnApiService.getProvinces();
     }
 
-    @GetMapping("/getDistricts/{provinceId}")
+    @GetMapping("/districts/{provinceId}")
     public CoreApiResponse getDistricts(@PathVariable int provinceId)
     {
         return ghnApiService.getDistricts(provinceId);
     }
 
-    @PostMapping("/ward")
+    @GetMapping("/wards/{districtId}")
     public CoreApiResponse getWard(@PathVariable int districtId) {
         return ghnApiService.getWard(districtId);
     }

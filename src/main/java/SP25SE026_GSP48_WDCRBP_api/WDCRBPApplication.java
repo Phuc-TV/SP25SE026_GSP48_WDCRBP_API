@@ -29,7 +29,7 @@ public class WDCRBPApplication {
         CorsConfiguration corsConfiguration = new CorsConfiguration();
         corsConfiguration.setAllowCredentials(true);
         corsConfiguration.setAllowedOrigins(
-                List.of("http://localhost:5173", "https://wdcrbp.vercel.app/"));
+                List.of("http://localhost:5173", "https://wdcrbp.vercel.app/", "http://10.0.2.2:8080/api/v1"));
         corsConfiguration.setAllowedHeaders(Arrays.asList("Origin", ACCESS_CONTROL_ALLOW_ORIGIN, "Content-Type",
                 "Accept", "Authorization", "Origin, Accept", "X-Requested-With",
                 "Access-Control-Request-Method", "Access-Control-Request-Headers"));

@@ -41,12 +41,13 @@ public class GHNApiServiceImpl implements GHNApiService {
         // Tạo header với token
         HttpHeaders headers = new HttpHeaders();
         headers.set("Token", token); // Key header theo yêu cầu của API GHN
+        headers.set("Content-Type", "application/json");
 
         HttpEntity<?> entity = new HttpEntity<>(headers);
 
         // Gọi API bên ngoài
         RestTemplate restTemplate = new RestTemplate();
-        String url = "https://online-gateway.ghn.vn/shiip/public-api/master-data/province";
+        String url = "https://dev-online-gateway.ghn.vn/shiip/public-api/master-data/province";
         ResponseEntity<String> response = restTemplate.exchange(url, HttpMethod.GET, entity, String.class);
 
         // Chuyển chuỗi JSON trả về thành object (Map) để FE dễ truy xuất các trường riêng biệt
@@ -71,7 +72,7 @@ public class GHNApiServiceImpl implements GHNApiService {
 
         // Tạo header với token và Content-Type
         HttpHeaders headers = new HttpHeaders();
-        headers.set("token", token);
+        headers.set("Token", token);
         headers.set("Content-Type", "application/json");
 
         // Tạo body chứa province_id
@@ -82,7 +83,7 @@ public class GHNApiServiceImpl implements GHNApiService {
 
         // Sử dụng HttpComponentsClientHttpRequestFactory để hỗ trợ GET có body
         RestTemplate restTemplate = new RestTemplate(new HttpComponentsClientHttpRequestFactory());
-        String url = "https://online-gateway.ghn.vn/shiip/public-api/master-data/district";
+        String url = "https://dev-online-gateway.ghn.vn/shiip/public-api/master-data/district";
         ResponseEntity<String> response = restTemplate.exchange(url, HttpMethod.GET, entity, String.class);
 
         // Chuyển chuỗi JSON trả về thành Map để FE dễ lấy giá trị
@@ -109,7 +110,7 @@ public class GHNApiServiceImpl implements GHNApiService {
 
         // Tạo header với token và Content-Type
         HttpHeaders headers = new HttpHeaders();
-        headers.set("token", token);
+        headers.set("Token", token);
         headers.set("Content-Type", "application/json");
 
         // Tạo body chứa district_id
@@ -121,7 +122,7 @@ public class GHNApiServiceImpl implements GHNApiService {
         // Sử dụng HttpComponentsClientHttpRequestFactory để hỗ trợ POST có body
         RestTemplate restTemplate = new RestTemplate(new HttpComponentsClientHttpRequestFactory());
         // URL theo tài liệu, sử dụng POST
-        String url = "https://online-gateway.ghn.vn/shiip/public-api/master-data/ward?district_id";
+        String url = "https://dev-online-gateway.ghn.vn/shiip/public-api/master-data/ward?district_id\n";
         ResponseEntity<String> response = restTemplate.exchange(url, HttpMethod.POST, entity, String.class);
 
         ObjectMapper objectMapper = new ObjectMapper();
@@ -134,4 +135,3 @@ public class GHNApiServiceImpl implements GHNApiService {
         }
     }
 }
-

@@ -1,9 +1,7 @@
 package SP25SE026_GSP48_WDCRBP_api.controller;
 
 import SP25SE026_GSP48_WDCRBP_api.components.CoreApiResponse;
-import SP25SE026_GSP48_WDCRBP_api.model.requestModel.LoginOtpRequest;
-import SP25SE026_GSP48_WDCRBP_api.model.requestModel.LoginRequest;
-import SP25SE026_GSP48_WDCRBP_api.model.requestModel.SignupRequest;
+import SP25SE026_GSP48_WDCRBP_api.model.requestModel.*;
 import SP25SE026_GSP48_WDCRBP_api.model.responseModel.AuthenticationResponse;
 import SP25SE026_GSP48_WDCRBP_api.model.responseModel.LoginOtpRest;
 import SP25SE026_GSP48_WDCRBP_api.service.AuthService;
@@ -77,12 +75,23 @@ public class AuthController {
     }
 
     @PostMapping("/verification-otp")
-    public CoreApiResponse<LoginOtpRest> VerificationAccountWithOtp(@Valid @RequestBody LoginOtpRequest request) {
+    public CoreApiResponse<?> VerificationAccountWithOtp(@Valid @RequestBody LoginOtpRequest request) {
         try {
-            LoginOtpRest response = authService.otpChangeStatusAccount(request);
-            return CoreApiResponse.success(response, "Bạn đã xác thực tài khoản thành công");
+            authService.otpChangeStatusAccount(request);
+            return CoreApiResponse.success("Bạn đã xác thực tài khoản thành công");
         } catch (RuntimeException e) {
             return CoreApiResponse.error(HttpStatus.BAD_REQUEST, "xác thực không thành công: " + e.getMessage());
+        }
+    }
+
+    @PostMapping("/reset-password")
+    public CoreApiResponse<Void> resetPassword(@RequestParam String email, @RequestParam String otp,
+                                               @RequestBody @Valid ResetPasswordOTPRequest request) {
+        try {
+            authService.resetPasswordWithOTP(email, otp, request);
+            return CoreApiResponse.success("Đặt lại mật khẩu thành công.");
+        } catch (Exception e) {
+            return CoreApiResponse.error(HttpStatus.BAD_REQUEST, "Đặt lại mật khẩu thất bại: " + e.getMessage());
         }
     }
 }

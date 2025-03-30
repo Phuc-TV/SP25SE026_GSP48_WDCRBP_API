@@ -1,8 +1,8 @@
 package SP25SE026_GSP48_WDCRBP_api.controller;
 
 import SP25SE026_GSP48_WDCRBP_api.components.CoreApiResponse;
-import SP25SE026_GSP48_WDCRBP_api.model.dto.WoodworkerProfileDto;
-import SP25SE026_GSP48_WDCRBP_api.model.entity.WoodworkerProfile;
+import SP25SE026_GSP48_WDCRBP_api.model.dto.WoodworkerProfileDetailResponseDto;
+import SP25SE026_GSP48_WDCRBP_api.model.dto.WoodworkerProfileListItemResponseDto;
 import SP25SE026_GSP48_WDCRBP_api.model.requestModel.UpdateWoodworkerServicePackRequest;
 import SP25SE026_GSP48_WDCRBP_api.model.requestModel.WoodworkerRequest;
 import SP25SE026_GSP48_WDCRBP_api.model.requestModel.WoodworkerUpdateStatusRequest;
@@ -11,6 +11,8 @@ import SP25SE026_GSP48_WDCRBP_api.service.WoodworkerProfileService;
 import jakarta.validation.Valid;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import org.modelmapper.ModelMapper;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
@@ -21,6 +23,7 @@ import java.util.List;
 @CrossOrigin(origins = "*")
 @RequestMapping("/api/v1/ww")
 public class WoodworkerProfileController {
+    private static final Logger log = LoggerFactory.getLogger(WoodworkerProfileController.class);
     @Autowired
     private WoodworkerProfileService woodworkerProfileService;
 
@@ -28,23 +31,27 @@ public class WoodworkerProfileController {
     private ModelMapper modelMapper;
 
     // Lấy danh sách tất cả các Woodworker với service pack "Gold", "Silver", "Bronze"
-    @GetMapping("/listWW")
+    @GetMapping
     public CoreApiResponse getAllWoodWorker() {
-        List<WoodworkerProfileDto> ideas = woodworkerProfileService.getAllWoodWorker()
-                .stream().map(idea -> modelMapper.map(idea, WoodworkerProfileDto.class))
+        List<WoodworkerProfileListItemResponseDto> wwList = woodworkerProfileService.getAllWoodWorker()
+                .stream().map(idea -> modelMapper.map(idea, WoodworkerProfileListItemResponseDto.class))
                 .toList();
-        if (ideas == null || ideas.isEmpty()) {
-            return CoreApiResponse.error("No data found");
-        }
 
-        return CoreApiResponse.success(ideas);
+        return CoreApiResponse.success(wwList);
     }
 
     // Lấy thông tin của một Woodworker theo ID
-    @GetMapping("/listWW/{wwId}")
+    @GetMapping("/{wwId}")
     public CoreApiResponse getWoodworkerById(@PathVariable Long wwId) {
         return CoreApiResponse.success(modelMapper.map(
-                woodworkerProfileService.getWoodworkerById(wwId), WoodworkerProfileDto.class
+                woodworkerProfileService.getWoodworkerById(wwId), WoodworkerProfileDetailResponseDto.class
+        ));
+    }
+
+    @GetMapping("/user/{userId}")
+    public CoreApiResponse getWoodworkerProfileByUserId(@PathVariable Long userId) {
+        return CoreApiResponse.success(modelMapper.map(
+                woodworkerProfileService.getWoodworkerByUserId(userId), WoodworkerProfileDetailResponseDto.class
         ));
     }
 
@@ -52,10 +59,10 @@ public class WoodworkerProfileController {
     @SecurityRequirement(name = "Bear Authentication")
     @PostMapping("/addServicePack/{wwId}")
     public CoreApiResponse addServicePack(@PathVariable Long wwId, @RequestParam Long servicePackId) {
-        WoodworkerProfileDto woodworkerProfileDto = modelMapper.map(
-                woodworkerProfileService.addServicePack(servicePackId, wwId), WoodworkerProfileDto.class
+        WoodworkerProfileListItemResponseDto woodworkerProfileListItemResponseDto = modelMapper.map(
+                woodworkerProfileService.addServicePack(servicePackId, wwId), WoodworkerProfileListItemResponseDto.class
         );
-        return CoreApiResponse.success(woodworkerProfileDto);
+        return CoreApiResponse.success(woodworkerProfileListItemResponseDto);
     }
 
     @PostMapping("/ww-register")
@@ -64,7 +71,7 @@ public class WoodworkerProfileController {
             WoodworkerProfileRest response = woodworkerProfileService.registerWoodworker(request);
             return CoreApiResponse.success(response, "Đăng ký thành công");
         } catch (Exception e) {
-            return CoreApiResponse.error("form đăng ký có sai sót: " + e.getMessage());
+            return CoreApiResponse.error(HttpStatus.BAD_REQUEST, "form đăng ký có sai sót: " + e.getMessage());
         }
     }
 
@@ -74,17 +81,18 @@ public class WoodworkerProfileController {
             WoodworkerUpdateStatusRest response = woodworkerProfileService.updateWoodworkerStatus(request);
             return CoreApiResponse.success(response, "Cập nhật trạng thái thành công");
         } catch (Exception e) {
-            return CoreApiResponse.error("Không thể cập nhật trạng thái: " + e.getMessage());
+            return CoreApiResponse.error(HttpStatus.BAD_REQUEST, "Không thể cập nhật trạng thái: " + e.getMessage());
         }
     }
 
-    @GetMapping("/listWW/inactive")
+    @GetMapping("/inactive")
     public CoreApiResponse getInactiveWoodworkers() {
         List<ListRegisterRest.Data> result = woodworkerProfileService.getAllInactiveWoodworkers();
-        if (result.isEmpty()) {
-            return CoreApiResponse.error(HttpStatus.NOT_FOUND,"Danh sách không có thợ mộc nào chưa kích hoạt tài khoản");
-        }
+       try{
             return CoreApiResponse.success(result, "Danh sách thợ mộc chưa kích hoạt tài khoản");
+        } catch (Exception e) {
+            return CoreApiResponse.error(HttpStatus.BAD_REQUEST, "Không thể lấy danh sách thợ mộc chưa kích hoạt tài khoản: " + e.getMessage());
+        }
     }
 
     @PutMapping("/addServicePack")

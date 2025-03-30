@@ -1,5 +1,6 @@
 package SP25SE026_GSP48_WDCRBP_api.service.impl;
 
+import SP25SE026_GSP48_WDCRBP_api.constant.ServiceOrderStatus;
 import SP25SE026_GSP48_WDCRBP_api.model.entity.*;
 import SP25SE026_GSP48_WDCRBP_api.model.requestModel.AddServiceOrderRequest;
 import SP25SE026_GSP48_WDCRBP_api.repository.*;
@@ -119,8 +120,7 @@ public class ServiceOrderServiceImpl implements ServiceOrderService {
         OrderProgress orderProgress = new OrderProgress();
         orderProgress.setServiceOrder(serviceOrder);
 
-        String s = "Đang chờ thợ mộc duyệt";
-        orderProgress.setStatus(s);
+        orderProgress.setStatus(ServiceOrderStatus.DANG_CHO_THO_MOC_DUYET);
 
         orderProgressRepository.save(orderProgress);
 
@@ -154,9 +154,8 @@ public class ServiceOrderServiceImpl implements ServiceOrderService {
 
             orderRepository.save(serviceOrder);
 
-            String s = "Đang chờ khách hàng duyệt lịch hẹn";
             OrderProgress orderProgress = orderProgressRepository.findOrderProgressByServiceOrder(serviceOrder);
-            orderProgress.setStatus(s);
+            orderProgress.setStatus(ServiceOrderStatus.DANG_CHO_KHACH_DUYET_LICH_HEN);
             orderProgressRepository.save(orderProgress);
         }
         else if (serviceOrder.getRole().equals("Customer"))
@@ -164,9 +163,8 @@ public class ServiceOrderServiceImpl implements ServiceOrderService {
                 serviceOrder.setRole("Customer");
                 orderRepository.save(serviceOrder);
 
-                String s = "Đang làm hợp đồng";
                 OrderProgress orderProgress = orderProgressRepository.findOrderProgressByServiceOrder(serviceOrder);
-                orderProgress.setStatus(s);
+                orderProgress.setStatus(ServiceOrderStatus.DANG_LAM_HOP_DONG);
                 orderProgressRepository.save(orderProgress);
         }
         return serviceOrder;

@@ -1,5 +1,6 @@
 package SP25SE026_GSP48_WDCRBP_api.model.responseModel;
 
+import SP25SE026_GSP48_WDCRBP_api.model.entity.WoodworkerProfile;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -22,5 +23,5 @@ public class DesignIdeaResponse {
 
     private Short totalReviews;
 
-    private Long woodworkerProfileId;
+    private WoodworkerProfile woodworkerProfile;
 }
