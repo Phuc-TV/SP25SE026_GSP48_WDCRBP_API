@@ -43,6 +43,10 @@ public class WoodworkerProfileDetailResponseDto {
 
     private Short totalReviews;
 
+    private LocalDateTime servicePackStartDate;
+
+    private LocalDateTime servicePackEndDate;
+
     private User user;
 
     private ServicePack servicePack;

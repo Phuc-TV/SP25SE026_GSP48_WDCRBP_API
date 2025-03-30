@@ -3,9 +3,12 @@ package SP25SE026_GSP48_WDCRBP_api.util;
 import javax.crypto.Cipher;
 import javax.crypto.spec.GCMParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
+import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
 import java.security.SecureRandom;
 import java.util.Base64;
+import java.util.HashMap;
+import java.util.Map;
 
 public class AESUtil {
     private static final String AES_ALGORITHM = "AES";
@@ -39,5 +42,24 @@ public class AESUtil {
         cipher.init(Cipher.DECRYPT_MODE, getKeySpec(key), parameterSpec);
         byte[] decryptedBytes = cipher.doFinal(decodedData, GCM_IV_LENGTH, decodedData.length - GCM_IV_LENGTH);
         return new String(decryptedBytes, StandardCharsets.UTF_8);
+    }
+
+    public static Map<String, String> decryptMultipleFromQuery(String queryString, String key) throws Exception {
+        Map<String, String> result = new HashMap<>();
+
+        // Normalize & split
+        String decodedQuery = URLDecoder.decode(queryString, StandardCharsets.UTF_8);
+        String[] pairs = decodedQuery.split("&&");
+
+        for (String pair : pairs) {
+            String[] parts = pair.split("=");
+            if (parts.length == 2) {
+                String param = parts[0];
+                String encrypted = parts[1];
+                String decrypted = decrypt(encrypted, key);
+                result.put(param, decrypted);
+            }
+        }
+        return result;
     }
 }
