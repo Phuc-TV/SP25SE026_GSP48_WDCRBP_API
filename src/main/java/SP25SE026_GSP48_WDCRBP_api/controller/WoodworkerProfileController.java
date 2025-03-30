@@ -2,7 +2,7 @@ package SP25SE026_GSP48_WDCRBP_api.controller;
 
 import SP25SE026_GSP48_WDCRBP_api.components.CoreApiResponse;
 import SP25SE026_GSP48_WDCRBP_api.model.dto.WoodworkerProfileDetailResponseDto;
-import SP25SE026_GSP48_WDCRBP_api.model.dto.WoodworkerProfileListResponseDto;
+import SP25SE026_GSP48_WDCRBP_api.model.dto.WoodworkerProfileListItemResponseDto;
 import SP25SE026_GSP48_WDCRBP_api.model.requestModel.UpdateWoodworkerServicePackRequest;
 import SP25SE026_GSP48_WDCRBP_api.model.requestModel.WoodworkerRequest;
 import SP25SE026_GSP48_WDCRBP_api.model.requestModel.WoodworkerUpdateStatusRequest;
@@ -33,8 +33,8 @@ public class WoodworkerProfileController {
     // Lấy danh sách tất cả các Woodworker với service pack "Gold", "Silver", "Bronze"
     @GetMapping
     public CoreApiResponse getAllWoodWorker() {
-        List<WoodworkerProfileListResponseDto> wwList = woodworkerProfileService.getAllWoodWorker()
-                .stream().map(idea -> modelMapper.map(idea, WoodworkerProfileListResponseDto.class))
+        List<WoodworkerProfileListItemResponseDto> wwList = woodworkerProfileService.getAllWoodWorker()
+                .stream().map(idea -> modelMapper.map(idea, WoodworkerProfileListItemResponseDto.class))
                 .toList();
 
         return CoreApiResponse.success(wwList);
@@ -59,10 +59,10 @@ public class WoodworkerProfileController {
     @SecurityRequirement(name = "Bear Authentication")
     @PostMapping("/addServicePack/{wwId}")
     public CoreApiResponse addServicePack(@PathVariable Long wwId, @RequestParam Long servicePackId) {
-        WoodworkerProfileListResponseDto woodworkerProfileListResponseDto = modelMapper.map(
-                woodworkerProfileService.addServicePack(servicePackId, wwId), WoodworkerProfileListResponseDto.class
+        WoodworkerProfileListItemResponseDto woodworkerProfileListItemResponseDto = modelMapper.map(
+                woodworkerProfileService.addServicePack(servicePackId, wwId), WoodworkerProfileListItemResponseDto.class
         );
-        return CoreApiResponse.success(woodworkerProfileListResponseDto);
+        return CoreApiResponse.success(woodworkerProfileListItemResponseDto);
     }
 
     @PostMapping("/ww-register")
