@@ -5,9 +5,7 @@ import SP25SE026_GSP48_WDCRBP_api.model.entity.RefreshToken;
 import SP25SE026_GSP48_WDCRBP_api.model.entity.User;
 import SP25SE026_GSP48_WDCRBP_api.model.entity.Wallet;
 import SP25SE026_GSP48_WDCRBP_api.model.exception.WDCRBPApiException;
-import SP25SE026_GSP48_WDCRBP_api.model.requestModel.LoginOtpRequest;
-import SP25SE026_GSP48_WDCRBP_api.model.requestModel.LoginRequest;
-import SP25SE026_GSP48_WDCRBP_api.model.requestModel.SignupRequest;
+import SP25SE026_GSP48_WDCRBP_api.model.requestModel.*;
 import SP25SE026_GSP48_WDCRBP_api.model.responseModel.AuthenticationResponse;
 import SP25SE026_GSP48_WDCRBP_api.model.responseModel.LoginOtpRest;
 import SP25SE026_GSP48_WDCRBP_api.repository.AccessTokenRepository;
@@ -16,6 +14,7 @@ import SP25SE026_GSP48_WDCRBP_api.repository.UserRepository;
 import SP25SE026_GSP48_WDCRBP_api.repository.WalletRepository;
 import SP25SE026_GSP48_WDCRBP_api.security.JwtTokenProvider;
 import SP25SE026_GSP48_WDCRBP_api.service.AuthService;
+import SP25SE026_GSP48_WDCRBP_api.util.AESUtil;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.apache.commons.lang3.RandomStringUtils;
@@ -266,6 +265,31 @@ public class AuthServiceImpl implements AuthService {
                     .updatedAt(LocalDateTime.now())
                     .build();
             walletRepository.save(wallet);
+        }
+    }
+
+    @Override
+    public void resetPasswordWithOTP(String email, String otp, ResetPasswordOTPRequest request) {
+        String AES_KEY = "YourSecretKey123";
+
+        User user = userRepository.findUserByEmailOrPhone(email, email)
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy tài khoản với email này."));
+
+        if (user.getOTP() == null || !user.getOTP().equals(otp)) {
+            throw new RuntimeException("OTP không chính xác hoặc đã hết hạn.");
+        }
+
+        if (!request.getNewPassword().equals(request.getConfirmPassword())) {
+            throw new RuntimeException("Mật khẩu xác nhận không khớp.");
+        }
+
+        try {
+            String encryptedPassword = AESUtil.encrypt(request.getNewPassword(), AES_KEY);
+            user.setPassword(encryptedPassword);
+            user.setOTP(null); // clear OTP after use
+            userRepository.save(user);
+        } catch (Exception e) {
+            throw new RuntimeException("Lỗi mã hóa mật khẩu: " + e.getMessage(), e);
         }
     }
 }
