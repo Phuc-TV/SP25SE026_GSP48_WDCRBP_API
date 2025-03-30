@@ -2,6 +2,8 @@ package SP25SE026_GSP48_WDCRBP_api.service;
 
 import SP25SE026_GSP48_WDCRBP_api.model.requestModel.LoginOtpRequest;
 import SP25SE026_GSP48_WDCRBP_api.model.requestModel.LoginRequest;
+import SP25SE026_GSP48_WDCRBP_api.model.requestModel.ResetPasswordOTPRequest;
+import SP25SE026_GSP48_WDCRBP_api.model.requestModel.ResetPasswordRequest;
 import SP25SE026_GSP48_WDCRBP_api.model.requestModel.SignupRequest;
 import SP25SE026_GSP48_WDCRBP_api.model.responseModel.AuthenticationResponse;
 import SP25SE026_GSP48_WDCRBP_api.model.responseModel.LoginOtpRest;
@@ -17,4 +19,5 @@ public interface AuthService {
     void sendOtpToEmail(String email);
     LoginOtpRest loginWithOtp(LoginOtpRequest request);
     void otpChangeStatusAccount(LoginOtpRequest request);
+    void resetPasswordWithOTP(String email, String otp, ResetPasswordOTPRequest request);
 }

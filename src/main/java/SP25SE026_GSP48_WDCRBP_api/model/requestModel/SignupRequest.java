@@ -19,7 +19,7 @@ public class SignupRequest {
     @NotEmpty(message = "Password should not be empty!")
     private String password;
 
-    @Email(regexp = ".+@.+\\..+", message = "Email is invalid!")
+
     private String email;
 
     @NotEmpty(message = "Phone number should not be empty!")
