@@ -5,6 +5,7 @@ import SP25SE026_GSP48_WDCRBP_api.constant.TransactionTypeConstant;
 import SP25SE026_GSP48_WDCRBP_api.model.entity.ServicePack;
 import SP25SE026_GSP48_WDCRBP_api.model.entity.Transaction;
 import SP25SE026_GSP48_WDCRBP_api.model.entity.User;
+import SP25SE026_GSP48_WDCRBP_api.model.entity.WoodworkerProfile;
 import SP25SE026_GSP48_WDCRBP_api.model.exception.WDCRBPApiException;
 import SP25SE026_GSP48_WDCRBP_api.model.requestModel.PaymentOrderRequest;
 import SP25SE026_GSP48_WDCRBP_api.model.requestModel.PaymentServicePackRequest;
@@ -35,6 +36,7 @@ public class VNPayServiceImp implements VNPayService {
     private final ServicePackRepository servicePackRepository;
     private final WalletRepository walletRepository;
     private final MailServiceImpl mailServiceImpl;
+    private final WoodworkerProfileRepository woodworkerProfileRepository;
 
     @Override
     public PaymentRes processOrderPayment(PaymentOrderRequest request) {
@@ -157,6 +159,12 @@ public class VNPayServiceImp implements VNPayService {
                 throw new WDCRBPApiException(HttpStatus.FORBIDDEN, "Chỉ có thợ mộc mới được phép mua gói dịch vụ.");
             }
 
+            // use userId to get the woodworkerId
+            WoodworkerProfile woodworkerProfile = woodworkerProfileRepository.findByUserId(dbUser.getUserId())
+                    .orElseThrow(() -> new WDCRBPApiException(HttpStatus.NOT_FOUND, "Không tìm thấy hồ sơ thợ mộc cho người dùng: " + userId));
+
+            Long wwId = woodworkerProfile.getWoodworkerId();
+
             Transaction txn = Transaction.builder()
                     .transactionType(TransactionTypeConstant.THANH_TOAN_QUA_CONG)
                     .amount(amount)
@@ -167,7 +175,7 @@ public class VNPayServiceImp implements VNPayService {
                     .build();
             transactionRepository.save(txn);
 
-            String encryptedWoodworkerId = AESUtil.encrypt(String.valueOf(dbUser.getUserId()), AES_KEY);
+            String encryptedWoodworkerId = AESUtil.encrypt(String.valueOf(wwId), AES_KEY);
             String encryptedServicePackId = AESUtil.encrypt(String.valueOf(parsedServicePackId), AES_KEY);
             String encryptedTransactionId = AESUtil.encrypt(String.valueOf(txn.getTransactionId()), AES_KEY);
 

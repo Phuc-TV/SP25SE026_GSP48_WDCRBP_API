@@ -11,4 +11,5 @@ public interface WoodworkerProfileRepository extends JpaRepository<WoodworkerPro
     Optional<WoodworkerProfile> findByUserEmailOrUserPhone(String email, String phone);
     List<WoodworkerProfile> findByStatusFalse();
     Optional<WoodworkerProfile> findByUser_UserId(Long userId);
+    Optional<WoodworkerProfile> findByUserId(Long userId);
 }
