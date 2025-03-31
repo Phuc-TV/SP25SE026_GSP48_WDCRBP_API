@@ -13,11 +13,13 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 public class CategoryDto {
+    private Long id;
+
     private String categoryName;
 
     private String description;
 
     private String categoryLevel;
 
-    private List<CategoryChildrenDto> children;
+    private List<CategoryDto> children;
 }

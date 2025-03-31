@@ -1,25 +1,17 @@
 package SP25SE026_GSP48_WDCRBP_api.model.responseModel;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
 import lombok.Getter;
-import lombok.NoArgsConstructor;
 import lombok.Setter;
+
+import java.util.List;
 
 @Getter
 @Setter
-@Builder
-@NoArgsConstructor
-@AllArgsConstructor
-public class CreateServicePackRest {
-
-    private Data data;
+public class ListServicePackRes {
+    private List<Data> data;
 
     @Getter
     @Setter
-    @Builder
-    @NoArgsConstructor
-    @AllArgsConstructor
     public static class Data {
         private Long servicePackId;
         private String name;

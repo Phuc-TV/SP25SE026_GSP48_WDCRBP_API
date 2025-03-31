@@ -1,11 +1,9 @@
 package SP25SE026_GSP48_WDCRBP_api.service.impl;
 
 import SP25SE026_GSP48_WDCRBP_api.model.entity.ServicePack;
-import SP25SE026_GSP48_WDCRBP_api.model.entity.WoodworkerProfile;
 import SP25SE026_GSP48_WDCRBP_api.model.requestModel.CreateServicePackRequest;
-import SP25SE026_GSP48_WDCRBP_api.model.responseModel.CreateServicePackRest;
-import SP25SE026_GSP48_WDCRBP_api.model.responseModel.ListRegisterRest;
-import SP25SE026_GSP48_WDCRBP_api.model.responseModel.ListServicePackRest;
+import SP25SE026_GSP48_WDCRBP_api.model.responseModel.CreateServicePackRes;
+import SP25SE026_GSP48_WDCRBP_api.model.responseModel.ListServicePackRes;
 import SP25SE026_GSP48_WDCRBP_api.repository.ServicePackRepository;
 import SP25SE026_GSP48_WDCRBP_api.service.ServicePackService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -33,13 +31,13 @@ public class ServicePackServiceImpl implements ServicePackService {
     }
 
     @Override
-    public CreateServicePackRest createServicePack(CreateServicePackRequest request) {
+    public CreateServicePackRes createServicePack(CreateServicePackRequest request) {
         if (servicePackRepository.existsByName(request.getName())) {
             throw new RuntimeException("Service Pack with this name already exists.");
         }
         ServicePack servicePack = modelMapper.map(request, ServicePack.class);
         ServicePack saved = servicePackRepository.save(servicePack);
-        CreateServicePackRest.Data responseData = CreateServicePackRest.Data.builder()
+        CreateServicePackRes.Data responseData = CreateServicePackRes.Data.builder()
                 .servicePackId(saved.getServicePackId())
                 .name(saved.getName())
                 .price(saved.getPrice())
@@ -50,13 +48,13 @@ public class ServicePackServiceImpl implements ServicePackService {
                 .searchResultPriority(saved.getSearchResultPriority())
                 .personalization(saved.getPersonalization())
                 .build();
-        return CreateServicePackRest.builder()
+        return CreateServicePackRes.builder()
                 .data(responseData)
                 .build();
     }
 
     @Override
-    public CreateServicePackRest updateServicePack(Long servicePackId, CreateServicePackRequest request) {
+    public CreateServicePackRes updateServicePack(Long servicePackId, CreateServicePackRequest request) {
         ServicePack existing = servicePackRepository.findById(servicePackId)
                 .orElseThrow(() -> new RuntimeException("Service Pack not found with ID: " + servicePackId));
         existing.setName(request.getName());
@@ -68,7 +66,7 @@ public class ServicePackServiceImpl implements ServicePackService {
         existing.setSearchResultPriority(request.getSearchResultPriority());
         existing.setPersonalization(request.getPersonalization());
         ServicePack updated = servicePackRepository.save(existing);
-        CreateServicePackRest.Data data = CreateServicePackRest.Data.builder()
+        CreateServicePackRes.Data data = CreateServicePackRes.Data.builder()
                 .servicePackId(updated.getServicePackId())
                 .name(updated.getName())
                 .price(updated.getPrice())
@@ -79,7 +77,7 @@ public class ServicePackServiceImpl implements ServicePackService {
                 .searchResultPriority(updated.getSearchResultPriority())
                 .personalization(updated.getPersonalization())
                 .build();
-        return CreateServicePackRest.builder()
+        return CreateServicePackRes.builder()
                 .data(data)
                 .build();
     }
@@ -92,10 +90,10 @@ public class ServicePackServiceImpl implements ServicePackService {
     }
 
     @Override
-    public List<ListServicePackRest.Data> getAllServicePacks() {
+    public List<ListServicePackRes.Data> getAllServicePacks() {
         List<ServicePack> packs = servicePackRepository.findAll();
         return packs.stream().map(pack -> {
-            ListServicePackRest.Data dto = new ListServicePackRest.Data();
+            ListServicePackRes.Data dto = new ListServicePackRes.Data();
             dto.setServicePackId(pack.getServicePackId());
             dto.setName(pack.getName());
             dto.setPrice(pack.getPrice());
@@ -110,10 +108,10 @@ public class ServicePackServiceImpl implements ServicePackService {
     }
 
     @Override
-    public ListServicePackRest getServicePackById(Long servicePackId) {
+    public ListServicePackRes getServicePackById(Long servicePackId) {
         ServicePack pack = servicePackRepository.findById(servicePackId)
                 .orElseThrow(() -> new RuntimeException("Service Pack not found with ID: " + servicePackId));
-        ListServicePackRest.Data dto = new ListServicePackRest.Data();
+        ListServicePackRes.Data dto = new ListServicePackRes.Data();
         dto.setServicePackId(pack.getServicePackId());
         dto.setName(pack.getName());
         dto.setPrice(pack.getPrice());
@@ -123,7 +121,7 @@ public class ServicePackServiceImpl implements ServicePackService {
         dto.setProductManagement(pack.getProductManagement());
         dto.setSearchResultPriority(pack.getSearchResultPriority());
         dto.setPersonalization(pack.getPersonalization());
-        ListServicePackRest response = new ListServicePackRest();
+        ListServicePackRes response = new ListServicePackRes();
         response.setData(List.of(dto));
         return response;
     }

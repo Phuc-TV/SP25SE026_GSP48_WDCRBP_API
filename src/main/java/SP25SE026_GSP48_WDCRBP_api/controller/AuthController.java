@@ -3,7 +3,7 @@ package SP25SE026_GSP48_WDCRBP_api.controller;
 import SP25SE026_GSP48_WDCRBP_api.components.CoreApiResponse;
 import SP25SE026_GSP48_WDCRBP_api.model.requestModel.*;
 import SP25SE026_GSP48_WDCRBP_api.model.responseModel.AuthenticationResponse;
-import SP25SE026_GSP48_WDCRBP_api.model.responseModel.LoginOtpRest;
+import SP25SE026_GSP48_WDCRBP_api.model.responseModel.LoginOtpRes;
 import SP25SE026_GSP48_WDCRBP_api.service.AuthService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -65,9 +65,9 @@ public class AuthController {
     }
 
     @PostMapping("/login-otp")
-    public CoreApiResponse<LoginOtpRest> loginWithOtp(@Valid @RequestBody LoginOtpRequest request) {
+    public CoreApiResponse<LoginOtpRes> loginWithOtp(@Valid @RequestBody LoginOtpRequest request) {
         try {
-            LoginOtpRest response = authService.loginWithOtp(request);
+            LoginOtpRes response = authService.loginWithOtp(request);
             return CoreApiResponse.success(response, "Đăng nhập thành công");
         } catch (RuntimeException e) {
             return CoreApiResponse.error(HttpStatus.BAD_REQUEST, "Login failed: " + e.getMessage());

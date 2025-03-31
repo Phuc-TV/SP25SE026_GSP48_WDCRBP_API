@@ -23,47 +23,42 @@ public class CategoryServiceImpl implements CategoryService {
     }
 
     @Override
-    public List<CategoryDto> listAllCategory()
-    {
-        List<Category> categoriesList = new ArrayList<>();
-        List<Category> categorie = categoryRepository.findAll();
+    public List<CategoryDto> listAllCategory() {
+        List<Category> allCategories = categoryRepository.findAll();
+        List<CategoryDto> levelOneCategories = new ArrayList<>();
 
-        for (Category category : categorie)
-        {
-            if (category.getParentId() != null)
-            {
-                categoriesList.add(category);
+        // Only grab level 1 categories
+        for (Category category : allCategories) {
+            if ("1".equals(category.getCategoryLevel())) {
+                CategoryDto dto = convertToDto(category);
+                dto.setChildren(buildChildren(allCategories, category.getCategoryId()));
+                levelOneCategories.add(dto);
             }
         }
+        return levelOneCategories;
+    }
 
-        List<CategoryDto> categories = new ArrayList<>();
-
-        for (Category category : categoriesList)
-        {
-            CategoryDto categoryDto = new CategoryDto();
-            categoryDto.setCategoryLevel("1");
-            categoryDto.setCategoryName(category.getCategoryName());
-            categoryDto.setDescription(category.getDescription());
-
-            List<CategoryChildrenDto> categoryChildrenDtos = new ArrayList<>();
-
-            for (Category categoryy : categorie)
-            {
-                if (categoryy.getParentId().equals(category.getCategoryId()))
-                {
-                    CategoryChildrenDto categoryChildrenDto = new CategoryChildrenDto();
-                    categoryChildrenDto.setCategoryName(categoryy.getCategoryName());
-                    categoryChildrenDto.setCategoryLevel("2");
-                    categoryChildrenDto.setDescription(categoryy.getDescription());
-
-                    categoryChildrenDtos.add(categoryChildrenDto);
-                }
+    // Recursively build children (works for level 2, 3, 4, ...)
+    private List<CategoryDto> buildChildren(List<Category> allCategories, Long parentId) {
+        List<CategoryDto> children = new ArrayList<>();
+        for (Category category : allCategories) {
+            if (parentId.equals(category.getParentId())) {
+                CategoryDto childDto = convertToDto(category);
+                childDto.setChildren(buildChildren(allCategories, category.getCategoryId()));
+                children.add(childDto);
             }
-            categoryDto.setChildren(categoryChildrenDtos);
-            categories.add(categoryDto);
         }
+        return children.isEmpty() ? null : children;
+    }
 
-        return categories;
+    private CategoryDto convertToDto(Category category) {
+        CategoryDto dto = new CategoryDto();
+        dto.setId(category.getCategoryId());
+        dto.setCategoryName(category.getCategoryName());
+        dto.setDescription(category.getDescription());
+        dto.setCategoryLevel(category.getCategoryLevel());
+        // children will be set separately
+        return dto;
     }
 }
 

@@ -6,8 +6,8 @@ import SP25SE026_GSP48_WDCRBP_api.model.exception.WDCRBPApiException;
 import SP25SE026_GSP48_WDCRBP_api.model.requestModel.PaymentOrderRequest;
 import SP25SE026_GSP48_WDCRBP_api.model.requestModel.PaymentServicePackRequest;
 import SP25SE026_GSP48_WDCRBP_api.model.requestModel.WalletRequest;
-import SP25SE026_GSP48_WDCRBP_api.model.responseModel.ListTransactionRest;
-import SP25SE026_GSP48_WDCRBP_api.model.responseModel.WalletRest;
+import SP25SE026_GSP48_WDCRBP_api.model.responseModel.ListTransactionRes;
+import SP25SE026_GSP48_WDCRBP_api.model.responseModel.WalletRes;
 import SP25SE026_GSP48_WDCRBP_api.repository.*;
 import SP25SE026_GSP48_WDCRBP_api.service.WalletService;
 import lombok.RequiredArgsConstructor;
@@ -46,7 +46,7 @@ public class WalletServiceImpl implements WalletService {
     @Autowired
     private WoodworkerProfileRepository woodworkerProfileRepository;
     @Override
-    public WalletRest getWalletByUserId(Long userId) {
+    public WalletRes getWalletByUserId(Long userId) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new WDCRBPApiException(HttpStatus.NOT_FOUND, "Không tìm thấy người dùng với ID: " + userId));
 
@@ -59,7 +59,7 @@ public class WalletServiceImpl implements WalletService {
             throw new WDCRBPApiException(HttpStatus.NOT_FOUND, "Không tìm thấy người dùng hoặc ví.");
         }
 
-        WalletRest rest = new WalletRest();
+        WalletRes rest = new WalletRes();
         rest.setWalletId(wallet.getWalletId());
         rest.setBalance(wallet.getBalance());
         rest.setCreatedAt(wallet.getCreatedAt());
@@ -70,7 +70,7 @@ public class WalletServiceImpl implements WalletService {
     }
 
     @Override
-    public WalletRest updateBalanceWallet(WalletRequest walletRequest) {
+    public WalletRes updateBalanceWallet(WalletRequest walletRequest) {
         // Fetch wallet by walletId
         Wallet wallet = walletRepository.findById(walletRequest.getWalletId())
                 .orElseThrow(() -> new WDCRBPApiException(HttpStatus.NOT_FOUND, "Không tìm thấy ví với ID: " + walletRequest.getWalletId()));
@@ -90,18 +90,18 @@ public class WalletServiceImpl implements WalletService {
         walletRepository.save(wallet);
 
         // Prepare and return the response DTO
-        WalletRest walletRest = new WalletRest();
-        walletRest.setWalletId(wallet.getWalletId());
-        walletRest.setBalance(wallet.getBalance());
-        walletRest.setCreatedAt(wallet.getCreatedAt());
-        walletRest.setUpdatedAt(wallet.getUpdatedAt());
-        walletRest.setUserId(wallet.getUser().getUserId());
+        WalletRes walletRes = new WalletRes();
+        walletRes.setWalletId(wallet.getWalletId());
+        walletRes.setBalance(wallet.getBalance());
+        walletRes.setCreatedAt(wallet.getCreatedAt());
+        walletRes.setUpdatedAt(wallet.getUpdatedAt());
+        walletRes.setUserId(wallet.getUser().getUserId());
 
-        return walletRest;
+        return walletRes;
     }
 
     @Override
-    public ListTransactionRest createWalletOrderPayment(PaymentOrderRequest request) {
+    public ListTransactionRes createWalletOrderPayment(PaymentOrderRequest request) {
         Long userId = Long.parseLong(request.getUserId());
         Long orderDepositId = Long.parseLong(request.getOrderDepositId());
         Long amount = request.getAmount();
@@ -136,7 +136,7 @@ public class WalletServiceImpl implements WalletService {
         transactionRepository.save(txn);
         String successMessage = "Thanh toán của bạn đã thành công!";
         mailServiceImpl.sendEmail(email, "Thanh toán thành công", "payment", successMessage);
-        ListTransactionRest.Data transactionData = new ListTransactionRest.Data();
+        ListTransactionRes.Data transactionData = new ListTransactionRes.Data();
         transactionData.setTransactionId(txn.getTransactionId());
         transactionData.setTransactionType(txn.getTransactionType());
         transactionData.setAmount(txn.getAmount());
@@ -146,13 +146,13 @@ public class WalletServiceImpl implements WalletService {
         transactionData.setUserId(txn.getUser().getUserId());
         transactionData.setOrderDepositId(txn.getOrderDeposit() != null ? txn.getOrderDeposit().getOrderDepositId() : null);
         transactionData.setWalletId(txn.getWallet().getWalletId());
-        ListTransactionRest response = new ListTransactionRest();
+        ListTransactionRes response = new ListTransactionRes();
         response.setData(Collections.singletonList(transactionData));
         return response;
     }
 
     @Override
-    public ListTransactionRest createWalletServicePackPayment(PaymentServicePackRequest request) {
+    public ListTransactionRes createWalletServicePackPayment(PaymentServicePackRequest request) {
         Long userId = Long.parseLong(request.getUserId());
         Long servicePackId = Long.parseLong(request.getServicePackId());
         String email = request.getEmail();
@@ -213,7 +213,7 @@ public class WalletServiceImpl implements WalletService {
         mailServiceImpl.sendEmail(email, "[WDCRBP] Kích hoạt gói dịch vụ thành công", "buy-pack-success", servicePack.getDescription());
 
         // Step 8: Build and return the response DTO
-        ListTransactionRest.Data transactionData = new ListTransactionRest.Data();
+        ListTransactionRes.Data transactionData = new ListTransactionRes.Data();
         transactionData.setTransactionId(txn.getTransactionId());
         transactionData.setTransactionType(txn.getTransactionType());
         transactionData.setAmount(txn.getAmount());
@@ -224,7 +224,7 @@ public class WalletServiceImpl implements WalletService {
         transactionData.setOrderDepositId(txn.getOrderDeposit() != null ? txn.getOrderDeposit().getOrderDepositId() : null);
         transactionData.setWalletId(txn.getWallet().getWalletId());
 
-        ListTransactionRest response = new ListTransactionRest();
+        ListTransactionRes response = new ListTransactionRes();
         response.setData(Collections.singletonList(transactionData));
 
         return response;

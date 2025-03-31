@@ -9,7 +9,7 @@ import SP25SE026_GSP48_WDCRBP_api.model.exception.WDCRBPApiException;
 import SP25SE026_GSP48_WDCRBP_api.model.requestModel.PaymentOrderRequest;
 import SP25SE026_GSP48_WDCRBP_api.model.requestModel.PaymentServicePackRequest;
 import SP25SE026_GSP48_WDCRBP_api.model.requestModel.PaymentWalletRequest;
-import SP25SE026_GSP48_WDCRBP_api.model.responseModel.PaymentRest;
+import SP25SE026_GSP48_WDCRBP_api.model.responseModel.PaymentRes;
 import SP25SE026_GSP48_WDCRBP_api.repository.*;
 import SP25SE026_GSP48_WDCRBP_api.service.VNPayService;
 import SP25SE026_GSP48_WDCRBP_api.util.AESUtil;
@@ -37,7 +37,7 @@ public class VNPayServiceImp implements VNPayService {
     private final MailServiceImpl mailServiceImpl;
 
     @Override
-    public PaymentRest processOrderPayment(PaymentOrderRequest request) {
+    public PaymentRes processOrderPayment(PaymentOrderRequest request) {
         long amount = request.getAmount();
         String email = request.getEmail();
         String userId = request.getUserId();
@@ -118,7 +118,7 @@ public class VNPayServiceImp implements VNPayService {
             query.append("&vnp_SecureHash=").append(vnp_SecureHash);
             String paymentUrl = VnPayConfig.vnp_PayUrl + "?" + query;
             mailServiceImpl.sendEmail(email, "VNPay Payment Link", "payment", paymentUrl);
-            return PaymentRest.builder()
+            return PaymentRes.builder()
                     .status("ok")
                     .message("Payment URL đã được tạo thành công và gửi đến email của bạn.")
                     .URL(paymentUrl)
@@ -135,7 +135,7 @@ public class VNPayServiceImp implements VNPayService {
     }
 
     @Override
-    public PaymentRest processServicePackPayment(PaymentServicePackRequest request) {
+    public PaymentRes processServicePackPayment(PaymentServicePackRequest request) {
         Long servicePackId = Long.parseLong(request.getServicePackId());
 
         // Fetch the ServicePack (assuming the ServicePack is an entity already in your database)
@@ -169,12 +169,14 @@ public class VNPayServiceImp implements VNPayService {
 
             String encryptedWoodworkerId = AESUtil.encrypt(String.valueOf(dbUser.getUserId()), AES_KEY);
             String encryptedServicePackId = AESUtil.encrypt(String.valueOf(parsedServicePackId), AES_KEY);
+            String encryptedTransactionId = AESUtil.encrypt(String.valueOf(txn.getTransactionId()), AES_KEY);
 
             Map<String, String> vnp_Params = new HashMap<>();
 
             String returnUrl = PAYMENT_URL + "?" +
                     "WoodworkerId=" + URLEncoder.encode(encryptedWoodworkerId, StandardCharsets.UTF_8) +
-                    "&ServicePackId=" + URLEncoder.encode(encryptedServicePackId, StandardCharsets.UTF_8);
+                    "&ServicePackId=" + URLEncoder.encode(encryptedServicePackId, StandardCharsets.UTF_8) +
+                    "&TransactionId=" + URLEncoder.encode(encryptedTransactionId, StandardCharsets.UTF_8);
             vnp_Params.put("vnp_ReturnUrl", returnUrl);
 
             // VNPay URL creation
@@ -226,7 +228,7 @@ public class VNPayServiceImp implements VNPayService {
 
             mailServiceImpl.sendEmail(email, "VNPay Payment Link", "payment", paymentUrl);
 
-            return PaymentRest.builder()
+            return PaymentRes.builder()
                     .status("ok")
                     .message("Payment URL đã được tạo thành công và gửi đến email của bạn.")
                     .URL(paymentUrl)
@@ -243,7 +245,7 @@ public class VNPayServiceImp implements VNPayService {
     }
 
     @Override
-    public PaymentRest processWalletPayment(PaymentWalletRequest request) {
+    public PaymentRes processWalletPayment(PaymentWalletRequest request) {
         long amount = request.getAmount();
         String email = request.getEmail();
         String userId = request.getUserId();
@@ -334,7 +336,7 @@ public class VNPayServiceImp implements VNPayService {
 
             mailServiceImpl.sendEmail(email, "VNPay Payment Link", "payment", paymentUrl);
 
-            return PaymentRest.builder()
+            return PaymentRes.builder()
                     .status("ok")
                     .message("Payment URL đã được tạo thành công và gửi đến email của bạn.")
                     .URL(paymentUrl)
