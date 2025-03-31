@@ -30,6 +30,9 @@ public class AvailableService {
     @Column(nullable = true)
     private Boolean status;
 
+    @Column(nullable = true)
+    private Boolean operatingStatus;
+
     @ManyToOne
     @JoinColumn(name = "serviceId", nullable = true)
     private Service service;
