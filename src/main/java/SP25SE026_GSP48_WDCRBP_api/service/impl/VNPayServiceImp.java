@@ -160,7 +160,7 @@ public class VNPayServiceImp implements VNPayService {
             }
 
             // use userId to get the woodworkerId
-            WoodworkerProfile woodworkerProfile = woodworkerProfileRepository.findByUserId(dbUser.getUserId())
+            WoodworkerProfile woodworkerProfile = woodworkerProfileRepository.findByUser_UserId(dbUser.getUserId())
                     .orElseThrow(() -> new WDCRBPApiException(HttpStatus.NOT_FOUND, "Không tìm thấy hồ sơ thợ mộc cho người dùng: " + userId));
 
             Long wwId = woodworkerProfile.getWoodworkerId();
