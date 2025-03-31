@@ -70,6 +70,17 @@ public class MailServiceImpl {
                         + "<hr style='margin-top: 30px;'>"
                         + "<p style='font-size: 12px; color: #888;'>Nền tảng đặt dịch vụ thiết kế, chế tác & sửa chữa đồ gỗ</p>"
                         + "</div>";
+            } else if ("buy-pack-success".equalsIgnoreCase(messageType)) {
+                // Email for successful service pack purchase
+                htmlContent = "<div style='font-family: Arial, sans-serif; padding: 20px;'>"
+                        + "<h2 style='color: #4CAF50;'>Mua gói dịch vụ thành công</h2>"
+                        + "<p>Kính gửi thợ mộc,</p>"
+                        + "<p>Chúc mừng bạn đã mua gói dịch vụ thành công!</p>"
+                        + "<p>Gói dịch vụ của bạn là: <strong>" + linkOrPassword + "</strong></p>"
+                        + "<p>Cảm ơn bạn đã sử dụng dịch vụ của chúng tôi.</p>"
+                        + "<hr style='margin-top: 30px;'>"
+                        + "<p style='font-size: 12px; color: #888;'>Nền tảng đặt dịch vụ thiết kế, chế tác & sửa chữa đồ gỗ</p>"
+                        + "</div>";
             }
 
             // Set the email content as HTML
