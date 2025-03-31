@@ -7,6 +7,7 @@ import SP25SE026_GSP48_WDCRBP_api.model.requestModel.CategoryRequest;
 import SP25SE026_GSP48_WDCRBP_api.model.responseModel.CategoryRes;
 import SP25SE026_GSP48_WDCRBP_api.service.CategoryService;
 import jakarta.validation.Valid;
+import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
@@ -20,14 +21,31 @@ public class CategoryController {
     @Autowired
     private CategoryService categoryService;
 
-    @GetMapping("/getAllCategory")
-    public CoreApiResponse getAllCategory()
+    @Autowired
+    private ModelMapper modelMapper;
+
+    @GetMapping("/nested")
+    public CoreApiResponse getAllCategoryWithChildren()
     {
-        List<CategoryDto> categories = categoryService.listAllCategory();
+        List<CategoryDto> categories = categoryService.listAllCategoryWithChildren();
 
         if (categories == null)
             return CoreApiResponse.error("Empty list");
         return CoreApiResponse.success(categories);
+    }
+
+    @GetMapping()
+    public CoreApiResponse getAllCategory()
+    {
+        try {
+            List<CategoryRes> categoryResList = categoryService.listAllCategory().stream()
+                    .map(category -> modelMapper.map(category, CategoryRes.class))
+                    .toList();
+
+            return CoreApiResponse.success(categoryResList);
+        } catch (Exception e) {
+            return CoreApiResponse.error(HttpStatus.BAD_REQUEST, "Không lấy được danh mục" + e.getMessage());
+        }
     }
 
     @PostMapping

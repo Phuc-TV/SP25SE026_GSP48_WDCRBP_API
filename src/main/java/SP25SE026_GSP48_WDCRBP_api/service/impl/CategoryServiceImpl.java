@@ -24,7 +24,7 @@ public class CategoryServiceImpl implements CategoryService {
     }
 
     @Override
-    public List<CategoryDto> listAllCategory() {
+    public List<CategoryDto> listAllCategoryWithChildren() {
         List<Category> allCategories = categoryRepository.findAll();
         List<CategoryDto> levelOneCategories = new ArrayList<>();
 
@@ -37,6 +37,13 @@ public class CategoryServiceImpl implements CategoryService {
             }
         }
         return levelOneCategories;
+    }
+
+    @Override
+    public List<Category> listAllCategory() {
+        List<Category> allCategories = categoryRepository.findAll();
+
+        return allCategories;
     }
 
     // Recursively build children (works for level 2, 3, 4, ...)
