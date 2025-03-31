@@ -11,4 +11,5 @@ public interface AvailableServiceRepository extends JpaRepository<AvailableServi
     List<AvailableService> findAvailableServicesByWoodworkerProfile(WoodworkerProfile woodworkerProfile);
 
     AvailableService findFirstByAvailableServiceId(Long availableServiceId);
+
 }

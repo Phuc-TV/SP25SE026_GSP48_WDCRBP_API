@@ -15,7 +15,7 @@ import java.util.List;
 
 @CrossOrigin(origins = "*")
 @RestController
-@RequestMapping("/api/service-orders")
+@RequestMapping("/api/v1/service-orders")
 public class ServiceOrderController {
 
     @Autowired

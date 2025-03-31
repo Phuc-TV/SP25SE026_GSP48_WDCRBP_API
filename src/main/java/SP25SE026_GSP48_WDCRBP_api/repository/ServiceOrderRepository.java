@@ -13,4 +13,6 @@ public interface ServiceOrderRepository extends JpaRepository<ServiceOrder, Long
     List<ServiceOrder> findServiceOrderByAvailableService(AvailableService availableService);
 
     ServiceOrder findServiceOrderByOrderId(Long orderId);
+
+    List<ServiceOrder> findAllByAvailableService_AvailableServiceIdIn(List<Long> availableServiceIds);
 }
