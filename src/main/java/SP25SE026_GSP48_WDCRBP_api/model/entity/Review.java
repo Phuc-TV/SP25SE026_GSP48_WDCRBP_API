@@ -36,4 +36,13 @@ public class Review {
 
     @Column(nullable = true)
     private LocalDateTime updatedAt;
+
+    @Column(nullable = true)
+    private String woodworkerResponse;
+
+    @Column(nullable = true)
+    private boolean WookworkerResponseStatus;
+
+    @Column(nullable = true)
+    private LocalDateTime responseAt;
 }

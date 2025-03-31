@@ -2,6 +2,7 @@ package SP25SE026_GSP48_WDCRBP_api.controller;
 
 import SP25SE026_GSP48_WDCRBP_api.components.CoreApiResponse;
 import SP25SE026_GSP48_WDCRBP_api.model.requestModel.ChangePasswordRequest;
+import SP25SE026_GSP48_WDCRBP_api.model.requestModel.UpdateUserProfileRequest;
 import SP25SE026_GSP48_WDCRBP_api.service.UserService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -39,4 +40,14 @@ public class UserController {
             return CoreApiResponse.error(HttpStatus.BAD_REQUEST, "Đã thay đổi mật khẩu thất bại" + e.getMessage());
         }
     }
+
+    @PostMapping("/update-profile")
+    public CoreApiResponse<?> updateUserProfile(@RequestBody @Valid UpdateUserProfileRequest request) {
+        try {
+            return userService.updateUserProfile(request);
+        } catch (RuntimeException e) {
+            return CoreApiResponse.error(HttpStatus.BAD_REQUEST, "Lỗi khi cập nhật thông tin người dùng: " + e.getMessage());
+        }
+    }
+
 }
