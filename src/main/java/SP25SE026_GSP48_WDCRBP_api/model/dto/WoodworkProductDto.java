@@ -12,6 +12,7 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 public class WoodworkProductDto {
+    private Long woodworkerId;
     private String name;
     private String img;
     private String description;

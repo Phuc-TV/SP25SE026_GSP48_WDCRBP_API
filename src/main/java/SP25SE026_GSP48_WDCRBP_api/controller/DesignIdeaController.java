@@ -4,7 +4,8 @@ import SP25SE026_GSP48_WDCRBP_api.components.CoreApiResponse;
 import SP25SE026_GSP48_WDCRBP_api.model.dto.DesignIdeaVariantDto;
 import SP25SE026_GSP48_WDCRBP_api.model.dto.WoodworkProductDto;
 import SP25SE026_GSP48_WDCRBP_api.model.entity.DesignIdea;
-import SP25SE026_GSP48_WDCRBP_api.model.responseModel.DesignIdeaResponse;
+import SP25SE026_GSP48_WDCRBP_api.model.responseModel.DesignIdeaDetailRes;
+import SP25SE026_GSP48_WDCRBP_api.model.responseModel.DesignIdeaListItemRes;
 import SP25SE026_GSP48_WDCRBP_api.service.DesignIdeaService;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import org.modelmapper.ModelMapper;
@@ -26,56 +27,70 @@ public class DesignIdeaController {
     @GetMapping("/getAllDesignIdeasByWWId/{wwId}")
     public CoreApiResponse getAllDesignIdeasByWWId(@PathVariable Long wwId)
     {
-        List<DesignIdeaResponse> ideas = designIdeaService.getAllDesignIdeasByWWId(wwId)
-                .stream().map(idea -> modelMapper.map(idea, DesignIdeaResponse.class))
-                .toList();
-        if (ideas == null)
-            return CoreApiResponse.error("No data found");
+        try {
+            List<DesignIdeaListItemRes> ideas = designIdeaService.getAllDesignIdeasByWWId(wwId)
+                    .stream().map(idea -> modelMapper.map(idea, DesignIdeaListItemRes.class))
+                    .toList();
 
-        return CoreApiResponse.success(ideas);
+            return CoreApiResponse.success(ideas);
+        } catch (Exception e) {
+            return CoreApiResponse.error("Không tìm thấy dữ liệu");
+        }
     }
 
     @GetMapping("/getDesignById/{Id}")
     public CoreApiResponse getDesignById(@PathVariable Long Id)
     {
-        return CoreApiResponse.success(designIdeaService.getDesignById(Id));
+        try {
+            return CoreApiResponse.success(modelMapper.map(designIdeaService.getDesignById(Id), DesignIdeaDetailRes.class));
+        } catch (Exception e) {
+            return CoreApiResponse.error("Không tìm thấy dữ liệu");
+        }
     }
 
     @GetMapping("/getAllDesignIdea")
     public CoreApiResponse getAllDesignIdea()
     {
-        List<DesignIdea> ideass = designIdeaService.getAllDesignIdea();
+        try {
+            List<DesignIdeaListItemRes> ideas = designIdeaService.getAllDesignIdea()
+                    .stream().map(idea -> modelMapper.map(idea, DesignIdeaListItemRes.class))
+                    .toList();
 
-        List<DesignIdeaResponse> ideas = designIdeaService.getAllDesignIdea()
-                .stream().map(idea -> modelMapper.map(idea, DesignIdeaResponse.class))
-                .toList();
-
-        if (ideass == null)
-            return CoreApiResponse.error("No data found");
-
-        return CoreApiResponse.success(ideass);
+            return CoreApiResponse.success(ideas);
+        } catch (Exception e) {
+            return CoreApiResponse.error("Không tìm thấy dữ liệu");
+        }
     }
 
     @SecurityRequirement(name = "Bear Authentication")
     @PostMapping("/addDesignIdea")
     public CoreApiResponse addDesignIdea(@RequestBody WoodworkProductDto woodworkProductDto)
     {
-        DesignIdea idea = designIdeaService.addDesignIdea(woodworkProductDto);
+        try {
+            DesignIdea idea = designIdeaService.addDesignIdea(woodworkProductDto);
 
-        if (idea == null)
-            return CoreApiResponse.error("Error");
-        return CoreApiResponse.success(idea);
+            if (idea == null)
+                return CoreApiResponse.error("Lỗi thất bại");
+
+            return CoreApiResponse.success(idea);
+        } catch (Exception e) {
+            return CoreApiResponse.error("Lỗi thất bại");
+        }
     }
 
 
     @GetMapping("/getDesignIdeaVariantByDesignId/{designId}")
     public CoreApiResponse getDesignIdeaVariantByDesignId(@PathVariable Long designId)
     {
-        List<DesignIdeaVariantDto> ideass = designIdeaService.getDesignIdeaVariantByDesignId(designId);
+        try {
+            List<DesignIdeaVariantDto> ideass = designIdeaService.getDesignIdeaVariantByDesignId(designId);
 
-        if (ideass == null)
-            return CoreApiResponse.error("No data found");
+            if (ideass == null)
+                return CoreApiResponse.error("Không tìm thấy dữ liệu");
 
-        return CoreApiResponse.success(ideass);
+            return CoreApiResponse.success(ideass);
+        } catch (Exception e) {
+            return CoreApiResponse.error("Không tìm thấy dữ liệu");
+        }
     }
 }

@@ -10,7 +10,7 @@ import lombok.NoArgsConstructor;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class DesignIdeaResponse {
+public class DesignIdeaDetailRes {
     private Long designIdeaId;
 
     private String name;
@@ -23,5 +23,7 @@ public class DesignIdeaResponse {
 
     private Short totalReviews;
 
-    private WoodworkerProfile woodworkerProfile;
+    private WoodworkerProfileDetailRes woodworkerProfile;
+
+    private CategoryDetailRes category;
 }
