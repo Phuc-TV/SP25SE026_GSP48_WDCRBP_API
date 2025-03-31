@@ -12,7 +12,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/api/wallet")
+@RequestMapping("/api/v1/wallet")
 @CrossOrigin(origins = "*")
 public class WalletController {
 
@@ -27,6 +27,9 @@ public class WalletController {
     public CoreApiResponse<WalletRes> getWalletByUserId(@PathVariable Long userId) {
         try {
             WalletRes wallet = walletService.getWalletByUserId(userId);
+            if (wallet == null) {
+                return CoreApiResponse.success(null, "Không có dữ liệu");
+            }
             return CoreApiResponse.success(wallet, "Lấy thông tin ví thành công");
         } catch (Exception e) {
             return CoreApiResponse.error(HttpStatus.BAD_REQUEST, "Lấy thông tin ví thất bại: " + e.getMessage());
