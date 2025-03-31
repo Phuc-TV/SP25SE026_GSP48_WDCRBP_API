@@ -16,10 +16,6 @@ public class PaymentServicePackRequest {
     @NotEmpty(message = "Service Pack ID cannot be empty")
     private String servicePackId;
 
-    @Min(value = 1, message = "Amount must be greater than 0")
-    @Max(value = 1_000_000_000, message = "Amount cannot exceed 1,000,000,000")
-    private long amount;
-
     @NotEmpty(message = "Email cannot be empty")
     @Email(regexp = ".+@.+\\..+", message = "Email format is invalid")
     private String email;

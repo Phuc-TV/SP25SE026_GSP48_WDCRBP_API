@@ -2,6 +2,7 @@ package SP25SE026_GSP48_WDCRBP_api.service.impl;
 
 import SP25SE026_GSP48_WDCRBP_api.config.VnPayConfig;
 import SP25SE026_GSP48_WDCRBP_api.model.entity.PaymentMethod;
+import SP25SE026_GSP48_WDCRBP_api.model.entity.ServicePack;
 import SP25SE026_GSP48_WDCRBP_api.model.entity.Transaction;
 import SP25SE026_GSP48_WDCRBP_api.model.entity.User;
 import SP25SE026_GSP48_WDCRBP_api.model.exception.WDCRBPApiException;
@@ -147,14 +148,19 @@ public class VNPayServiceImp implements VNPayService {
 
     @Override
     public PaymentRest processServicePackPayment(PaymentServicePackRequest request) {
-        long amount = request.getAmount();
+        Long servicePackId = Long.parseLong(request.getServicePackId());
+
+        // Fetch the ServicePack (assuming the ServicePack is an entity already in your database)
+        ServicePack servicePack = servicePackRepository.findById(servicePackId)
+                .orElseThrow(() -> new WDCRBPApiException(HttpStatus.NOT_FOUND, "Không tìm thấy gói dịch vụ."));
+
+        long amount = (long)servicePack.getPrice().floatValue();
         String email = request.getEmail();
         String userId = request.getUserId();
-        String servicePackId = request.getServicePackId();
 
         try {
             Long parsedUserId = Long.parseLong(userId);
-            Long parsedServicePackId = Long.parseLong(servicePackId);
+            Long parsedServicePackId = Long.parseLong(request.getServicePackId());
 
             User dbUser = userRepository.findById(parsedUserId)
                     .orElseThrow(() -> new WDCRBPApiException(HttpStatus.NOT_FOUND, "không tìm thấy mã người dùng: " + userId));
@@ -162,9 +168,6 @@ public class VNPayServiceImp implements VNPayService {
             if (!"Woodworker".equalsIgnoreCase(dbUser.getRole())) {
                 throw new WDCRBPApiException(HttpStatus.FORBIDDEN, "Chỉ có thợ mộc mới được phép mua gói dịch vụ.");
             }
-
-            var servicePack = servicePackRepository.findById(parsedServicePackId)
-                    .orElseThrow(() -> new WDCRBPApiException(HttpStatus.NOT_FOUND, "không tìm thấy mã gói dịch vụ: " + servicePackId));
 
             PaymentMethod paymentMethod = paymentMethodRepository.findByUserAndProviderName(dbUser, "VNPay")
                     .orElseGet(() -> paymentMethodRepository.save(

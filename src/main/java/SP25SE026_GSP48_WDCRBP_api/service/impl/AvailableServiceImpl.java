@@ -4,6 +4,8 @@ import SP25SE026_GSP48_WDCRBP_api.constant.ServiceNameConstant;
 import SP25SE026_GSP48_WDCRBP_api.constant.ServicePackConstant;
 import SP25SE026_GSP48_WDCRBP_api.model.entity.AvailableService;
 import SP25SE026_GSP48_WDCRBP_api.model.entity.WoodworkerProfile;
+import SP25SE026_GSP48_WDCRBP_api.model.requestModel.AvailableServiceUpdateReq;
+import SP25SE026_GSP48_WDCRBP_api.model.responseModel.AvailableServiceListItemRes;
 import SP25SE026_GSP48_WDCRBP_api.repository.AvailableServiceRepository;
 import SP25SE026_GSP48_WDCRBP_api.repository.ServiceRepository;
 import SP25SE026_GSP48_WDCRBP_api.repository.WoodworkerProfileRepository;
@@ -24,11 +26,6 @@ public class AvailableServiceImpl implements AvailableServiceService {
 
     @Autowired
     private WoodworkerProfileRepository woodworkerProfileRepository;
-
-    public AvailableServiceImpl(AvailableServiceRepository availableServiceRepository)
-    {
-        this.availableServiceRepository = availableServiceRepository;
-    }
 
     @Override
     public void activateAvailableServicesByServicePack(WoodworkerProfile ww, String servicePackName)
@@ -82,6 +79,23 @@ public class AvailableServiceImpl implements AvailableServiceService {
         availableService.setWoodworkerProfile(ww);
 
         availableServiceRepository.save(availableService);
+    }
+
+    @Override
+    public AvailableService updateAvailableService(AvailableServiceUpdateReq updateReq) {
+        AvailableService availableService = availableServiceRepository.findFirstByAvailableServiceId((updateReq.getAvailableServiceId()));
+
+        if (availableService == null) {
+            return null;
+        }
+
+        availableService.setDescription(updateReq.getDescription());
+        availableService.setOperatingStatus(updateReq.getOperatingStatus());
+        availableService.setUpdatedAt(LocalDateTime.now());
+
+        availableServiceRepository.save(availableService);
+
+        return availableService;
     }
 
     @Override

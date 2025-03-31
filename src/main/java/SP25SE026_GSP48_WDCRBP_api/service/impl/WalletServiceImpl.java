@@ -25,6 +25,9 @@ public class WalletServiceImpl implements WalletService {
     private WalletRepository walletRepository;
 
     @Autowired
+    private WoodworkerProfileServiceImpl woodworkerProfileService;
+
+    @Autowired
     private UserRepository userRepository;
 
     @Autowired
@@ -150,8 +153,11 @@ public class WalletServiceImpl implements WalletService {
     public ListTransactionRest createWalletServicePackPayment(PaymentServicePackRequest request) {
         Long userId = Long.parseLong(request.getUserId());
         Long servicePackId = Long.parseLong(request.getServicePackId());
-        Long amount = request.getAmount();
         String email = request.getEmail();
+        // Fetch the ServicePack (assuming the ServicePack is an entity already in your database)
+        ServicePack servicePack = servicePackRepository.findById(servicePackId)
+                .orElseThrow(() -> new WDCRBPApiException(HttpStatus.NOT_FOUND, "Không tìm thấy gói dịch vụ."));
+        Float amount = servicePack.getPrice();
 
         // Step 1: Find the user and verify it's a Woodworker
         User dbUser = userRepository.findById(userId)
@@ -194,21 +200,14 @@ public class WalletServiceImpl implements WalletService {
         WoodworkerProfile woodworkerProfile = woodworkerProfileRepository.findByUser_UserId(userId)
                 .orElseThrow(() -> new WDCRBPApiException(HttpStatus.NOT_FOUND, "Không tìm thấy hồ sơ thợ mộc cho người dùng ID: " + userId));
 
-        // Fetch the ServicePack (assuming the ServicePack is an entity already in your database)
-        ServicePack servicePack = servicePackRepository.findById(servicePackId)
-                .orElseThrow(() -> new WDCRBPApiException(HttpStatus.NOT_FOUND, "Không tìm thấy gói dịch vụ."));
-
         // Update WoodworkerProfile with ServicePack details
-        woodworkerProfile.setServicePack(servicePack);
-        woodworkerProfile.setServicePackStartDate(LocalDateTime.now()); // Set start date to now
-        woodworkerProfile.setServicePackEndDate(LocalDateTime.now().plusYears(1)); // Set end date (example 1 year later)
+        woodworkerProfileService.addServicePack(servicePack.getServicePackId(), woodworkerProfile.getWoodworkerId());
 
         // Save the updated WoodworkerProfile
         woodworkerProfileRepository.save(woodworkerProfile);
 
         // Step 7: Send success email to user
-        String successMessage = "Bạn đã thanh toán thành công cho gói dịch vụ!";
-        mailServiceImpl.sendEmail(email, "Thanh toán thành công", "payment", successMessage);
+        mailServiceImpl.sendEmail(email, "[WDCRBP] Kích hoạt gói dịch vụ thành công", "buy-pack-success", servicePack.getDescription());
 
         // Step 8: Build and return the response DTO
         ListTransactionRest.Data transactionData = new ListTransactionRest.Data();

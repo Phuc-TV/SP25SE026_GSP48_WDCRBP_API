@@ -9,4 +9,6 @@ import java.util.List;
 
 public interface AvailableServiceRepository extends JpaRepository<AvailableService, Long> {
     List<AvailableService> findAvailableServicesByWoodworkerProfile(WoodworkerProfile woodworkerProfile);
+
+    AvailableService findFirstByAvailableServiceId(Long availableServiceId);
 }
