@@ -43,7 +43,7 @@ public class WoodworkerProfileDetailRes {
 
     private LocalDateTime servicePackEndDate;
 
-    private User user;
+    private UserDetailRes user;
 
     private ServicePack servicePack;
 }

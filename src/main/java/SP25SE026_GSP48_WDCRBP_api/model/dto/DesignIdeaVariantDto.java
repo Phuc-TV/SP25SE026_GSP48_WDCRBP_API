@@ -20,7 +20,5 @@ public class DesignIdeaVariantDto {
 
     private Float price;
 
-    private DesignIdea designIdea;
-
-    private List<DesignIdeaVariantConfig> designIdeaVariantConfig;
+    private List<DesignIdeaVariantConfigDto> designIdeaVariantConfig;
 }

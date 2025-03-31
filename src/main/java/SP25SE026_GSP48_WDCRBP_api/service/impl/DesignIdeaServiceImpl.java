@@ -1,8 +1,8 @@
 package SP25SE026_GSP48_WDCRBP_api.service.impl;
 
+import SP25SE026_GSP48_WDCRBP_api.mapper.DesignIdeaVariantMapper;
 import SP25SE026_GSP48_WDCRBP_api.model.dto.*;
 import SP25SE026_GSP48_WDCRBP_api.model.entity.*;
-import SP25SE026_GSP48_WDCRBP_api.model.responseModel.DesignIdeaResponse;
 import SP25SE026_GSP48_WDCRBP_api.repository.*;
 import SP25SE026_GSP48_WDCRBP_api.service.DesignIdeaService;
 import SP25SE026_GSP48_WDCRBP_api.service.WoodworkerProfileService;
@@ -11,8 +11,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class DesignIdeaServiceImpl implements DesignIdeaService {
@@ -103,11 +105,18 @@ public class DesignIdeaServiceImpl implements DesignIdeaService {
         HashMap<Integer, DesignIdeaConfigValue> configValueHashMap = new HashMap<Integer,DesignIdeaConfigValue>();
         Category category = categoryRepository.findCategoriesByCategoryId(woodworkProductDto.getCategoryId());
 
+        // Find WoodworkerProfile
+        WoodworkerProfile woodworkerProfile = woodworkerProfileService.getWoodworkerById(woodworkProductDto.getWoodworkerId());
+        if (woodworkerProfile == null)
+            return null;
+
         // Save DesignIdea
         DesignIdea idea = new DesignIdea();
         idea.setCategory(category);
         idea.setName(woodworkProductDto.getName());
         idea.setImg_urls(woodworkProductDto.getImg());
+        idea.setDescription(woodworkProductDto.getDescription());
+        idea.setWoodworkerProfile(woodworkerProfile);
         ideaRepository.save(idea);
 
         //Save DesignIdeaConfig and DesignIdeaConfigValue
@@ -121,15 +130,12 @@ public class DesignIdeaServiceImpl implements DesignIdeaService {
 
             designIdeaConfigRepository.save(designIdeaConfig);
 
-            DesignIdeaConfig designIdeaConfig1 =
-                    designIdeaConfigRepository.findDesignIdeaConfigBySpecifications(configurationDto.getName());
-
             List<ConfigValueDto> configValueDtos = configurationDto.getValues();
             for (ConfigValueDto configValueDto : configValueDtos)
             {
                 DesignIdeaConfigValue designIdeaConfigValue = new DesignIdeaConfigValue();
                 designIdeaConfigValue.setValue(configValueDto.getName());
-                designIdeaConfigValue.setDesignIdeaConfig(designIdeaConfig1);
+                designIdeaConfigValue.setDesignIdeaConfig(designIdeaConfig);
 
                 designIdeaConfigValueRepository.save(designIdeaConfigValue);
 
@@ -162,32 +168,19 @@ public class DesignIdeaServiceImpl implements DesignIdeaService {
     }
 
     @Override
-    public List<DesignIdeaVariantDto> getDesignIdeaVariantByDesignId(Long designId)
-    {
+    public List<DesignIdeaVariantDto> getDesignIdeaVariantByDesignId(Long designId) {
         DesignIdea designIdea = designIdeaRepository.findDesignIdeaByDesignIdeaId(designId);
+        if (designIdea == null) return Collections.emptyList();
 
-        List<DesignIdeaVariant> designIdeaVariants =
-                designIdeaVariantRepository.findDesignIdeaVariantByDesignIdea(designIdea);
+        List<DesignIdeaVariant> variants = designIdeaVariantRepository.findDesignIdeaVariantByDesignIdea(designIdea);
+        if (variants == null || variants.isEmpty()) return Collections.emptyList();
 
-        List<DesignIdeaVariantDto> designIdeaVariantDtos = new ArrayList<>();
-
-        if (designIdeaVariants == null)
-            return null;
-
-        for (DesignIdeaVariant designIdeaVariantDtoss : designIdeaVariants)
-        {
-            List<DesignIdeaVariantConfig> designIdeaVariantConfigs =
-                    designIdeaVariantConfigRepository.
-                            findDesignIdeaVariantConfigByDesignIdeaVariant(designIdeaVariantDtoss);
-
-            DesignIdeaVariantDto designIdeaVariantDto =
-                    modelMapper.map(designIdeaVariantDtoss, DesignIdeaVariantDto.class);
-
-            designIdeaVariantDto.setDesignIdeaVariantConfig(designIdeaVariantConfigs);
-
-            designIdeaVariantDtos.add(designIdeaVariantDto);
-        }
-
-        return designIdeaVariantDtos;
+        return variants.stream()
+                .map(variant -> {
+                    List<DesignIdeaVariantConfig> configs =
+                            designIdeaVariantConfigRepository.findDesignIdeaVariantConfigByDesignIdeaVariant(variant);
+                    return DesignIdeaVariantMapper.toDto(variant, configs);
+                })
+                .collect(Collectors.toList());
     }
 }
