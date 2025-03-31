@@ -31,7 +31,6 @@ public class VNPayServiceImp implements VNPayService {
     private static final String AES_KEY = "YourSecretKey123";
     private final UserRepository userRepository;
     private final OrderDepositRepository orderDepositRepository;
-    private final PaymentMethodRepository paymentMethodRepository;
     private final TransactionRepository transactionRepository;
     private final ServicePackRepository servicePackRepository;
     private final WalletRepository walletRepository;

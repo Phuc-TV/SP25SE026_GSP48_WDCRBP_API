@@ -145,7 +145,6 @@ public class WalletServiceImpl implements WalletService {
         transactionData.setStatus(txn.isStatus());
         transactionData.setUserId(txn.getUser().getUserId());
         transactionData.setOrderDepositId(txn.getOrderDeposit() != null ? txn.getOrderDeposit().getOrderDepositId() : null);
-        transactionData.setPaymentId(txn.getPaymentMethod() != null ? txn.getPaymentMethod().getPaymentId() : null);
         transactionData.setWalletId(txn.getWallet().getWalletId());
         ListTransactionRest response = new ListTransactionRest();
         response.setData(Collections.singletonList(transactionData));
@@ -223,7 +222,6 @@ public class WalletServiceImpl implements WalletService {
         transactionData.setStatus(txn.isStatus());
         transactionData.setUserId(txn.getUser().getUserId());
         transactionData.setOrderDepositId(txn.getOrderDeposit() != null ? txn.getOrderDeposit().getOrderDepositId() : null);
-        transactionData.setPaymentId(txn.getPaymentMethod() != null ? txn.getPaymentMethod().getPaymentId() : null);
         transactionData.setWalletId(txn.getWallet().getWalletId());
 
         ListTransactionRest response = new ListTransactionRest();
