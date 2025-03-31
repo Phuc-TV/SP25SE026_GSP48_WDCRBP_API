@@ -6,7 +6,9 @@ import SP25SE026_GSP48_WDCRBP_api.model.entity.WoodworkerProfile;
 import java.util.List;
 
 public interface AvailableServiceService {
-    void addAvailableService(WoodworkerProfile ww);
+    void activateAvailableServicesByServicePack(WoodworkerProfile ww, String servicePackName);
+
+    void addAvailableServiceByServiceName(WoodworkerProfile ww, String serviceName);
 
     List<AvailableService> getAvailableServiceByWwId(Long wwId);
 }

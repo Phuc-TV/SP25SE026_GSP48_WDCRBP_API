@@ -1,5 +1,7 @@
 package SP25SE026_GSP48_WDCRBP_api.service.impl;
 
+import SP25SE026_GSP48_WDCRBP_api.constant.ServiceNameConstant;
+import SP25SE026_GSP48_WDCRBP_api.constant.ServicePackConstant;
 import SP25SE026_GSP48_WDCRBP_api.model.entity.User;
 import SP25SE026_GSP48_WDCRBP_api.model.entity.Wallet;
 import SP25SE026_GSP48_WDCRBP_api.model.entity.ServicePack;
@@ -221,6 +223,12 @@ public class WoodworkerProfileServiceImpl implements WoodworkerProfileService {
             walletRepository.save(wallet);
         }
 
+        // Set available services for the woodworker for false for all service
+        availableServiceService.addAvailableServiceByServiceName(woodworkerProfile, ServiceNameConstant.CUSTOMIZATION);
+        availableServiceService.addAvailableServiceByServiceName(woodworkerProfile, ServiceNameConstant.GUARANTEE);
+        availableServiceService.addAvailableServiceByServiceName(woodworkerProfile, ServiceNameConstant.SALE);
+        availableServiceService.addAvailableServiceByServiceName(woodworkerProfile, ServiceNameConstant.PERSONALIZATION);
+
         WoodworkerUpdateStatusRest response = new WoodworkerUpdateStatusRest();
         response.setUpdatedAt(woodworkerProfile.getUpdatedAt());
         return response;
@@ -248,7 +256,7 @@ public class WoodworkerProfileServiceImpl implements WoodworkerProfileService {
 
         wwRepository.save(obj);
 
-        availableServiceService.addAvailableService(obj);
+        availableServiceService.activateAvailableServicesByServicePack(obj,servicePack.getName());
 
         return obj;
 

@@ -1,11 +1,7 @@
-package SP25SE026_GSP48_WDCRBP_api.model.dto;
+package SP25SE026_GSP48_WDCRBP_api.model.responseModel;
 
 import SP25SE026_GSP48_WDCRBP_api.model.entity.ServicePack;
 import SP25SE026_GSP48_WDCRBP_api.model.entity.User;
-import jakarta.persistence.Column;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
-import jakarta.persistence.OneToOne;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -18,7 +14,7 @@ import java.time.LocalDateTime;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class WoodworkerProfileDetailResponseDto {
+public class WoodworkerProfileDetailRes {
     private Long woodworkerId;
 
     private String brandName;
