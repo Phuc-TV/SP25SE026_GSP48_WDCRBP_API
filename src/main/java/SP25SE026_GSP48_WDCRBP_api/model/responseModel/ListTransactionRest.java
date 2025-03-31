@@ -1,10 +1,5 @@
 package SP25SE026_GSP48_WDCRBP_api.model.responseModel;
 
-import SP25SE026_GSP48_WDCRBP_api.model.entity.OrderDeposit;
-import SP25SE026_GSP48_WDCRBP_api.model.entity.PaymentMethod;
-import SP25SE026_GSP48_WDCRBP_api.model.entity.User;
-import SP25SE026_GSP48_WDCRBP_api.model.entity.Wallet;
-import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 

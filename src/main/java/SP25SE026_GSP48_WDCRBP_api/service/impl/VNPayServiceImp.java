@@ -1,8 +1,11 @@
 package SP25SE026_GSP48_WDCRBP_api.service.impl;
 
 import SP25SE026_GSP48_WDCRBP_api.config.VnPayConfig;
+<<<<<<< Updated upstream
 import SP25SE026_GSP48_WDCRBP_api.constant.TransactionTypeConstant;
 import SP25SE026_GSP48_WDCRBP_api.model.entity.PaymentMethod;
+=======
+>>>>>>> Stashed changes
 import SP25SE026_GSP48_WDCRBP_api.model.entity.ServicePack;
 import SP25SE026_GSP48_WDCRBP_api.model.entity.Transaction;
 import SP25SE026_GSP48_WDCRBP_api.model.entity.User;
@@ -63,17 +66,6 @@ public class VNPayServiceImp implements VNPayService {
             var orderDeposit = orderDepositRepository.findById(parsedOrderDepositId)
                     .orElseThrow(() -> new WDCRBPApiException(HttpStatus.NOT_FOUND, "không tìm thấy mã cọc đơn hàng: " + orderDepositId));
 
-            PaymentMethod paymentMethod = paymentMethodRepository.findByUserAndProviderName(dbUser, "VNPay")
-                    .orElseGet(() -> paymentMethodRepository.save(
-                            PaymentMethod.builder()
-                                    .user(dbUser)
-                                    .providerName("VNPay")
-                                    .methodType("online")
-                                    .accountNumber("VNPay")
-                                    .isDefault(false)
-                                    .createdAt(LocalDateTime.now())
-                                    .build()
-                    ));
 
             Transaction txn = Transaction.builder()
                     .transactionType(transactionType)
@@ -82,7 +74,6 @@ public class VNPayServiceImp implements VNPayService {
                     .status(false)
                     .createdAt(LocalDateTime.now())
                     .user(dbUser)
-                    .paymentMethod(paymentMethod)
                     .orderDeposit(orderDeposit)
                     .build();
             transactionRepository.save(txn);
@@ -171,18 +162,6 @@ public class VNPayServiceImp implements VNPayService {
                 throw new WDCRBPApiException(HttpStatus.FORBIDDEN, "Chỉ có thợ mộc mới được phép mua gói dịch vụ.");
             }
 
-            PaymentMethod paymentMethod = paymentMethodRepository.findByUserAndProviderName(dbUser, "VNPay")
-                    .orElseGet(() -> paymentMethodRepository.save(
-                            PaymentMethod.builder()
-                                    .user(dbUser)
-                                    .providerName("VNPay")
-                                    .methodType("online")
-                                    .accountNumber("VNPay")
-                                    .isDefault(false)
-                                    .createdAt(LocalDateTime.now())
-                                    .build()
-                    ));
-
             Transaction txn = Transaction.builder()
                     .transactionType(TransactionTypeConstant.THANH_TOAN_QUA_CONG)
                     .amount(amount)
@@ -190,7 +169,6 @@ public class VNPayServiceImp implements VNPayService {
                     .status(false)
                     .createdAt(LocalDateTime.now())
                     .user(dbUser)
-                    .paymentMethod(paymentMethod)
                     .build();
             transactionRepository.save(txn);
 
@@ -294,17 +272,6 @@ public class VNPayServiceImp implements VNPayService {
             var wallet = walletRepository.findById(parsedWalletId)
                     .orElseThrow(() -> new WDCRBPApiException(HttpStatus.NOT_FOUND, "Wallet not found for ID: " + walletId));
 
-            PaymentMethod paymentMethod = paymentMethodRepository.findByUserAndProviderName(dbUser, "VNPay")
-                    .orElseGet(() -> paymentMethodRepository.save(
-                            PaymentMethod.builder()
-                                    .user(dbUser)
-                                    .providerName("VNPay")
-                                    .methodType("online")
-                                    .accountNumber("VNPay")
-                                    .isDefault(false)
-                                    .createdAt(LocalDateTime.now())
-                                    .build()
-                    ));
 
             Transaction txn = Transaction.builder()
                     .transactionType(transactionType)
@@ -313,7 +280,6 @@ public class VNPayServiceImp implements VNPayService {
                     .status(false)
                     .createdAt(LocalDateTime.now())
                     .user(dbUser)
-                    .paymentMethod(paymentMethod)
                     .wallet(wallet)
                     .build();
             transactionRepository.save(txn);
