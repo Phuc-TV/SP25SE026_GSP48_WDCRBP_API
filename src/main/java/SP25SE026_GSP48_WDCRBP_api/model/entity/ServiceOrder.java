@@ -62,4 +62,8 @@ public class ServiceOrder {
     @OneToOne
     @JoinColumn(name = "appointmentId" ,nullable = true)
     private ConsultantAppointment consultantAppointment;
+
+    @OneToOne
+    @JoinColumn(name = "reviewId" ,nullable = true)
+    private Review review;
 }
