@@ -4,8 +4,8 @@ import SP25SE026_GSP48_WDCRBP_api.components.CoreApiResponse;
 import SP25SE026_GSP48_WDCRBP_api.model.requestModel.PaymentOrderRequest;
 import SP25SE026_GSP48_WDCRBP_api.model.requestModel.PaymentServicePackRequest;
 import SP25SE026_GSP48_WDCRBP_api.model.requestModel.WalletRequest;
-import SP25SE026_GSP48_WDCRBP_api.model.responseModel.ListTransactionRest;
-import SP25SE026_GSP48_WDCRBP_api.model.responseModel.WalletRest;
+import SP25SE026_GSP48_WDCRBP_api.model.responseModel.ListTransactionRes;
+import SP25SE026_GSP48_WDCRBP_api.model.responseModel.WalletRes;
 import SP25SE026_GSP48_WDCRBP_api.service.WalletService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -24,9 +24,9 @@ public class WalletController {
     }
 
     @GetMapping("/user/{userId}")
-    public CoreApiResponse<WalletRest> getWalletByUserId(@PathVariable Long userId) {
+    public CoreApiResponse<WalletRes> getWalletByUserId(@PathVariable Long userId) {
         try {
-            WalletRest wallet = walletService.getWalletByUserId(userId);
+            WalletRes wallet = walletService.getWalletByUserId(userId);
             return CoreApiResponse.success(wallet, "Lấy thông tin ví thành công");
         } catch (Exception e) {
             return CoreApiResponse.error(HttpStatus.BAD_REQUEST, "Lấy thông tin ví thất bại: " + e.getMessage());
@@ -34,9 +34,9 @@ public class WalletController {
     }
 
     @PutMapping("/update")
-    public CoreApiResponse<WalletRest> updateBalanceWallet(@RequestBody WalletRequest walletRequest) {
+    public CoreApiResponse<WalletRes> updateBalanceWallet(@RequestBody WalletRequest walletRequest) {
         try {
-            WalletRest updatedWallet = walletService.updateBalanceWallet(walletRequest);
+            WalletRes updatedWallet = walletService.updateBalanceWallet(walletRequest);
             return CoreApiResponse.success(updatedWallet, "Cập nhật số dư ví thành công");
         } catch (Exception e) {
             return CoreApiResponse.error(HttpStatus.BAD_REQUEST, "Cập nhật số dư ví thất bại: " + e.getMessage());
@@ -44,9 +44,9 @@ public class WalletController {
     }
 
     @PostMapping("/order/payment")
-    public CoreApiResponse<ListTransactionRest> createWalletOrderPayment(@RequestBody PaymentOrderRequest request) {
+    public CoreApiResponse<ListTransactionRes> createWalletOrderPayment(@RequestBody PaymentOrderRequest request) {
         try {
-            ListTransactionRest response = walletService.createWalletOrderPayment(request);
+            ListTransactionRes response = walletService.createWalletOrderPayment(request);
             return CoreApiResponse.success(response, "Order payment created successfully.");
         } catch (Exception e) {
             return CoreApiResponse.error(HttpStatus.BAD_REQUEST, "Failed to create order payment: " + e.getMessage());
@@ -54,9 +54,9 @@ public class WalletController {
     }
 
     @PostMapping("/service/pack/payment")
-    public CoreApiResponse<ListTransactionRest> createWalletServicePackPayment(@RequestBody PaymentServicePackRequest request) {
+    public CoreApiResponse<ListTransactionRes> createWalletServicePackPayment(@RequestBody PaymentServicePackRequest request) {
         try {
-            ListTransactionRest response = walletService.createWalletServicePackPayment(request);
+            ListTransactionRes response = walletService.createWalletServicePackPayment(request);
             return CoreApiResponse.success(response, "Service pack payment created successfully.");
         } catch (Exception e) {
             return CoreApiResponse.error(HttpStatus.BAD_REQUEST, "Failed to create service pack payment: " + e.getMessage());

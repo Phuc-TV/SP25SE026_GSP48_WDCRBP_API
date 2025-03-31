@@ -11,8 +11,6 @@ import SP25SE026_GSP48_WDCRBP_api.service.WoodworkerProfileService;
 import jakarta.validation.Valid;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import org.modelmapper.ModelMapper;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
@@ -72,7 +70,7 @@ public class WoodworkerProfileController {
     @PostMapping("/ww-register")
     public CoreApiResponse registerWoodworker(@RequestBody @Valid WoodworkerRequest request) {
         try {
-            WoodworkerProfileRest response = woodworkerProfileService.registerWoodworker(request);
+            WoodworkerProfileRes response = woodworkerProfileService.registerWoodworker(request);
             return CoreApiResponse.success(response, "Đăng ký thành công");
         } catch (Exception e) {
             return CoreApiResponse.error(HttpStatus.BAD_REQUEST, "form đăng ký có sai sót: " + e.getMessage());
@@ -82,7 +80,7 @@ public class WoodworkerProfileController {
     @PutMapping("/ww-update-status")
     public CoreApiResponse updateWoodworkerStatus(@RequestBody WoodworkerUpdateStatusRequest request) {
         try {
-            WoodworkerUpdateStatusRest response = woodworkerProfileService.updateWoodworkerStatus(request);
+            WoodworkerUpdateStatusRes response = woodworkerProfileService.updateWoodworkerStatus(request);
             return CoreApiResponse.success(response, "Cập nhật trạng thái thành công");
         } catch (Exception e) {
             return CoreApiResponse.error(HttpStatus.BAD_REQUEST, "Không thể cập nhật trạng thái: " + e.getMessage());
@@ -91,7 +89,7 @@ public class WoodworkerProfileController {
 
     @GetMapping("/inactive")
     public CoreApiResponse getInactiveWoodworkers() {
-        List<ListRegisterRest.Data> result = woodworkerProfileService.getAllInactiveWoodworkers();
+        List<ListRegisterRes.Data> result = woodworkerProfileService.getAllInactiveWoodworkers();
        try{
             return CoreApiResponse.success(result, "Danh sách thợ mộc chưa kích hoạt tài khoản");
         } catch (Exception e) {

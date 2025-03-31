@@ -9,7 +9,7 @@ import java.io.Serializable;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class PaymentRest implements Serializable {
+public class PaymentRes implements Serializable {
     private String status;
     private String message;
     private String URL;

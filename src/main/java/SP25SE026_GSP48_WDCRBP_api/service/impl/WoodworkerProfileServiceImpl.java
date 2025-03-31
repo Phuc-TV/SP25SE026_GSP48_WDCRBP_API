@@ -1,7 +1,6 @@
 package SP25SE026_GSP48_WDCRBP_api.service.impl;
 
 import SP25SE026_GSP48_WDCRBP_api.constant.ServiceNameConstant;
-import SP25SE026_GSP48_WDCRBP_api.constant.ServicePackConstant;
 import SP25SE026_GSP48_WDCRBP_api.model.entity.User;
 import SP25SE026_GSP48_WDCRBP_api.model.entity.Wallet;
 import SP25SE026_GSP48_WDCRBP_api.model.entity.ServicePack;
@@ -9,10 +8,10 @@ import SP25SE026_GSP48_WDCRBP_api.model.entity.WoodworkerProfile;
 import SP25SE026_GSP48_WDCRBP_api.model.requestModel.UpdateWoodworkerServicePackRequest;
 import SP25SE026_GSP48_WDCRBP_api.model.requestModel.WoodworkerRequest;
 import SP25SE026_GSP48_WDCRBP_api.model.requestModel.WoodworkerUpdateStatusRequest;
-import SP25SE026_GSP48_WDCRBP_api.model.responseModel.ListRegisterRest;
+import SP25SE026_GSP48_WDCRBP_api.model.responseModel.ListRegisterRes;
 import SP25SE026_GSP48_WDCRBP_api.model.responseModel.UpdateWoodworkerServicePackRest;
-import SP25SE026_GSP48_WDCRBP_api.model.responseModel.WoodworkerProfileRest;
-import SP25SE026_GSP48_WDCRBP_api.model.responseModel.WoodworkerUpdateStatusRest;
+import SP25SE026_GSP48_WDCRBP_api.model.responseModel.WoodworkerProfileRes;
+import SP25SE026_GSP48_WDCRBP_api.model.responseModel.WoodworkerUpdateStatusRes;
 import SP25SE026_GSP48_WDCRBP_api.repository.UserRepository;
 import SP25SE026_GSP48_WDCRBP_api.repository.ServicePackRepository;
 import SP25SE026_GSP48_WDCRBP_api.repository.WalletRepository;
@@ -117,7 +116,7 @@ public class WoodworkerProfileServiceImpl implements WoodworkerProfileService {
 
 
     @Override
-    public WoodworkerProfileRest registerWoodworker(WoodworkerRequest request) {
+    public WoodworkerProfileRes registerWoodworker(WoodworkerRequest request) {
         try {
             Optional<User> existingUser = userRepository.findUserByEmailOrPhone(request.getEmail(), request.getPhone());
             if (existingUser.isPresent()) {
@@ -139,8 +138,8 @@ public class WoodworkerProfileServiceImpl implements WoodworkerProfileService {
             User user = createNewUser(request);
             savedProfile.setUser(user);
             WoodworkerProfile finalProfile = wwRepository.save(savedProfile);
-            WoodworkerProfileRest response = new WoodworkerProfileRest();
-            WoodworkerProfileRest.Data data = modelMapper.map(finalProfile, WoodworkerProfileRest.Data.class);
+            WoodworkerProfileRes response = new WoodworkerProfileRes();
+            WoodworkerProfileRes.Data data = modelMapper.map(finalProfile, WoodworkerProfileRes.Data.class);
             response.setData(data);
 
             return response;
@@ -173,7 +172,7 @@ public class WoodworkerProfileServiceImpl implements WoodworkerProfileService {
     }
 
     @Override
-    public WoodworkerUpdateStatusRest updateWoodworkerStatus(WoodworkerUpdateStatusRequest request) {
+    public WoodworkerUpdateStatusRes updateWoodworkerStatus(WoodworkerUpdateStatusRequest request) {
         Long woodworkerId = Long.parseLong(request.getWoodworkerId());
         Optional<WoodworkerProfile> woodworkerProfileOptional = wwRepository.findById(woodworkerId);
 
@@ -199,7 +198,7 @@ public class WoodworkerProfileServiceImpl implements WoodworkerProfileService {
 
             wwRepository.delete(woodworkerProfile);
             userRepository.delete(user);
-            WoodworkerUpdateStatusRest response = new WoodworkerUpdateStatusRest();
+            WoodworkerUpdateStatusRes response = new WoodworkerUpdateStatusRes();
             response.setUpdatedAt(LocalDateTime.now());
             return response;
         }
@@ -229,7 +228,7 @@ public class WoodworkerProfileServiceImpl implements WoodworkerProfileService {
         availableServiceService.addAvailableServiceByServiceName(woodworkerProfile, ServiceNameConstant.SALE);
         availableServiceService.addAvailableServiceByServiceName(woodworkerProfile, ServiceNameConstant.PERSONALIZATION);
 
-        WoodworkerUpdateStatusRest response = new WoodworkerUpdateStatusRest();
+        WoodworkerUpdateStatusRes response = new WoodworkerUpdateStatusRes();
         response.setUpdatedAt(woodworkerProfile.getUpdatedAt());
         return response;
     }
@@ -263,11 +262,11 @@ public class WoodworkerProfileServiceImpl implements WoodworkerProfileService {
     }
 
     @Override
-    public List<ListRegisterRest.Data> getAllInactiveWoodworkers() {
+    public List<ListRegisterRes.Data> getAllInactiveWoodworkers() {
         List<WoodworkerProfile> inactiveProfiles = wwRepository.findByStatusFalse();
 
         return inactiveProfiles.stream().map(profile -> {
-            ListRegisterRest.Data dto = new ListRegisterRest.Data();
+            ListRegisterRes.Data dto = new ListRegisterRes.Data();
             dto.setWoodworkerId(profile.getWoodworkerId());
             dto.setUserId(profile.getUser() != null ? profile.getUser().getUserId() : null);
             dto.setFullName(profile.getUser() != null ? profile.getUser().getUsername() : null);

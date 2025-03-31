@@ -8,6 +8,6 @@ import java.time.LocalDateTime;
 @Getter
 @Setter
 
-public class WoodworkerUpdateStatusRest {
+public class WoodworkerUpdateStatusRes {
     private LocalDateTime UpdatedAt;
 }

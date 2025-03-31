@@ -7,7 +7,7 @@ import java.time.LocalDateTime;
 
 @Getter
 @Setter
-public class WalletRest {
+public class WalletRes {
     private Long walletId;
     private Float balance;
     private LocalDateTime createdAt;

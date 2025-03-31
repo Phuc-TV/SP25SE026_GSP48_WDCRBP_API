@@ -8,7 +8,7 @@ import java.util.List;
 
 @Getter
 @Setter
-public class ListRegisterRest {
+public class ListRegisterRes {
     private List<Data> data;
 
     @Getter

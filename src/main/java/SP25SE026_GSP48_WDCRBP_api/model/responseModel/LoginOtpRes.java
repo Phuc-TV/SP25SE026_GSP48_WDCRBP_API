@@ -7,7 +7,7 @@ import lombok.Data;
 @Data
 @Builder
 @AllArgsConstructor
-public class LoginOtpRest {
+public class LoginOtpRes {
     private String accessToken;
     private String refreshToken;
 }

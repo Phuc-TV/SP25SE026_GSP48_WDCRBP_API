@@ -2,8 +2,8 @@ package SP25SE026_GSP48_WDCRBP_api.controller;
 
 import SP25SE026_GSP48_WDCRBP_api.components.CoreApiResponse;
 import SP25SE026_GSP48_WDCRBP_api.model.requestModel.CreateServicePackRequest;
-import SP25SE026_GSP48_WDCRBP_api.model.responseModel.CreateServicePackRest;
-import SP25SE026_GSP48_WDCRBP_api.model.responseModel.ListServicePackRest;
+import SP25SE026_GSP48_WDCRBP_api.model.responseModel.CreateServicePackRes;
+import SP25SE026_GSP48_WDCRBP_api.model.responseModel.ListServicePackRes;
 import SP25SE026_GSP48_WDCRBP_api.service.ServicePackService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,7 +21,7 @@ public class ServicePackController {
     private ServicePackService servicePackService;
 
     @PostMapping("/create")
-    public CoreApiResponse<CreateServicePackRest> createServicePack(
+    public CoreApiResponse<CreateServicePackRes> createServicePack(
             @Valid @RequestBody CreateServicePackRequest request) {
         try{
             return CoreApiResponse.success(servicePackService.createServicePack(request), "Tạo Service Pack thành công");
@@ -31,7 +31,7 @@ public class ServicePackController {
     }
 
     @PutMapping("/update")
-    public CoreApiResponse<CreateServicePackRest> updateServicePack(
+    public CoreApiResponse<CreateServicePackRes> updateServicePack(
             @RequestParam Long servicePackId,
             @Valid @RequestBody CreateServicePackRequest request
     ) {
@@ -53,8 +53,8 @@ public class ServicePackController {
     }
 
     @GetMapping("/list")
-    public CoreApiResponse<List<ListServicePackRest.Data>> getAllServicePacks() {
-        List<ListServicePackRest.Data> result = servicePackService.getAllServicePacks();
+    public CoreApiResponse<List<ListServicePackRes.Data>> getAllServicePacks() {
+        List<ListServicePackRes.Data> result = servicePackService.getAllServicePacks();
         if (result.isEmpty()) {
             return CoreApiResponse.error(HttpStatus.NOT_FOUND, "Danh sách Service Pack trống");
         }
@@ -62,9 +62,9 @@ public class ServicePackController {
     }
 
     @GetMapping("/detail")
-    public CoreApiResponse<ListServicePackRest> getServicePackById(@RequestParam Long servicePackId) {
+    public CoreApiResponse<ListServicePackRes> getServicePackById(@RequestParam Long servicePackId) {
         try {
-            ListServicePackRest response = servicePackService.getServicePackById(servicePackId);
+            ListServicePackRes response = servicePackService.getServicePackById(servicePackId);
 
             if (response == null || response.getData() == null || response.getData().isEmpty()) {
                 throw new RuntimeException("Service Pack not found with ID: " + servicePackId);

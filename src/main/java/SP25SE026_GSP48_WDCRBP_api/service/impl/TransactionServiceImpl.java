@@ -3,7 +3,7 @@ package SP25SE026_GSP48_WDCRBP_api.service.impl;
 import SP25SE026_GSP48_WDCRBP_api.model.entity.Transaction;
 import SP25SE026_GSP48_WDCRBP_api.model.exception.WDCRBPApiException;
 import SP25SE026_GSP48_WDCRBP_api.model.requestModel.TransactionUpdateRequest;
-import SP25SE026_GSP48_WDCRBP_api.model.responseModel.ListTransactionRest;
+import SP25SE026_GSP48_WDCRBP_api.model.responseModel.ListTransactionRes;
 import SP25SE026_GSP48_WDCRBP_api.repository.TransactionRepository;
 import SP25SE026_GSP48_WDCRBP_api.service.TransactionService;
 import lombok.RequiredArgsConstructor;
@@ -33,14 +33,14 @@ public class TransactionServiceImpl implements TransactionService {
     }
 
     @Override
-    public List<ListTransactionRest.Data> getAllTransactions() {
+    public List<ListTransactionRes.Data> getAllTransactions() {
         return transactionRepository.findAll().stream()
                 .map(this::mapToDto)
                 .collect(Collectors.toList());
     }
 
     @Override
-    public List<ListTransactionRest.Data> getTransactionsByStatus(boolean status) {
+    public List<ListTransactionRes.Data> getTransactionsByStatus(boolean status) {
         return transactionRepository.findAll().stream()
                 .filter(tx -> tx.isStatus() == status)
                 .map(this::mapToDto)
@@ -48,7 +48,7 @@ public class TransactionServiceImpl implements TransactionService {
     }
 
     @Override
-    public List<ListTransactionRest.Data> getTransactionById(Long transactionId) {
+    public List<ListTransactionRes.Data> getTransactionById(Long transactionId) {
         Transaction tx = transactionRepository.findById(transactionId)
                 .orElseThrow(() -> new WDCRBPApiException(HttpStatus.NOT_FOUND, "Transaction not found with ID: " + transactionId));
 
@@ -57,15 +57,15 @@ public class TransactionServiceImpl implements TransactionService {
 
 
     @Override
-    public List<ListTransactionRest.Data> getTransactionsByUserId(Long userId) {
+    public List<ListTransactionRes.Data> getTransactionsByUserId(Long userId) {
         return transactionRepository.findAll().stream()
                 .filter(tx -> tx.getUser() != null && tx.getUser().getUserId().equals(userId))
                 .map(this::mapToDto)
                 .collect(Collectors.toList());
     }
 
-    private ListTransactionRest.Data mapToDto(Transaction tx) {
-        ListTransactionRest.Data dto = new ListTransactionRest.Data();
+    private ListTransactionRes.Data mapToDto(Transaction tx) {
+        ListTransactionRes.Data dto = new ListTransactionRes.Data();
         dto.setTransactionId(tx.getTransactionId());
         dto.setTransactionType(tx.getTransactionType());
         dto.setDescription(tx.getDescription());

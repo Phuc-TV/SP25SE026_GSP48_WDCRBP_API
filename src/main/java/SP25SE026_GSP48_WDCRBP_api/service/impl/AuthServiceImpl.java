@@ -7,14 +7,13 @@ import SP25SE026_GSP48_WDCRBP_api.model.entity.Wallet;
 import SP25SE026_GSP48_WDCRBP_api.model.exception.WDCRBPApiException;
 import SP25SE026_GSP48_WDCRBP_api.model.requestModel.*;
 import SP25SE026_GSP48_WDCRBP_api.model.responseModel.AuthenticationResponse;
-import SP25SE026_GSP48_WDCRBP_api.model.responseModel.LoginOtpRest;
+import SP25SE026_GSP48_WDCRBP_api.model.responseModel.LoginOtpRes;
 import SP25SE026_GSP48_WDCRBP_api.repository.AccessTokenRepository;
 import SP25SE026_GSP48_WDCRBP_api.repository.RefreshTokenRepository;
 import SP25SE026_GSP48_WDCRBP_api.repository.UserRepository;
 import SP25SE026_GSP48_WDCRBP_api.repository.WalletRepository;
 import SP25SE026_GSP48_WDCRBP_api.security.JwtTokenProvider;
 import SP25SE026_GSP48_WDCRBP_api.service.AuthService;
-import SP25SE026_GSP48_WDCRBP_api.util.AESUtil;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.apache.commons.lang3.RandomStringUtils;
@@ -221,7 +220,7 @@ public class AuthServiceImpl implements AuthService {
     }
 
     @Override
-    public LoginOtpRest loginWithOtp(LoginOtpRequest request) {
+    public LoginOtpRes loginWithOtp(LoginOtpRequest request) {
         Optional<User> userOptional = userRepository.findUserByEmailOrPhone(request.getEmail(), request.getEmail());
         if (userOptional.isEmpty()) {
             throw new RuntimeException("Người dùng không tồn tại");
@@ -241,7 +240,7 @@ public class AuthServiceImpl implements AuthService {
         RefreshToken savedRefreshToken = saveUserRefreshToken(refreshToken);
         revokeAllUserAccessTokens(user);
         saveUserAccessToken(user, accessToken, savedRefreshToken);
-        return new LoginOtpRest(accessToken, refreshToken);
+        return new LoginOtpRes(accessToken, refreshToken);
     }
 
     @Override

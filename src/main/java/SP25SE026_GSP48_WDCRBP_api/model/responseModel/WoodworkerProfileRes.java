@@ -7,7 +7,7 @@ import java.time.LocalDateTime;
 
 @Getter
 @Setter
-public class WoodworkerProfileRest {
+public class WoodworkerProfileRes {
 
     private Data data;
 
