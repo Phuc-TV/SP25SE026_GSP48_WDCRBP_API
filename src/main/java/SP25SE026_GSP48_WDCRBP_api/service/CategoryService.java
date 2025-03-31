@@ -9,7 +9,8 @@ import SP25SE026_GSP48_WDCRBP_api.model.responseModel.CategoryRes;
 import java.util.List;
 
 public interface CategoryService {
-    List<CategoryDto> listAllCategory();
+    List<CategoryDto> listAllCategoryWithChildren();
+    List<Category> listAllCategory();
     CategoryRes createCategory(CategoryRequest categoryRequest);
     CategoryRes getCategoryById(Long categoryId);
     CategoryRes updateCategory(Long categoryId, CategoryRequest categoryRequest);
