@@ -7,7 +7,7 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 
 @RestController
-@RequestMapping("/api/meet")
+@RequestMapping("/api/v1/meet")
 public class MeetController {
 
     private final GoogleCalendarService calendarService;
