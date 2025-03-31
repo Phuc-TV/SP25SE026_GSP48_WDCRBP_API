@@ -5,6 +5,7 @@ import SP25SE026_GSP48_WDCRBP_api.model.entity.ServiceOrder;
 import SP25SE026_GSP48_WDCRBP_api.model.requestModel.CreateServiceOrderPersonalizeRequest;
 import SP25SE026_GSP48_WDCRBP_api.model.requestModel.CreateServiceOrderRequest;
 import SP25SE026_GSP48_WDCRBP_api.service.ServiceOrderService;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.web.bind.annotation.*;
@@ -32,6 +33,7 @@ public class ServiceOrderController {
     }
 
     // 2. Tạo đơn dịch vụ tuỳ chỉnh
+    @SecurityRequirement(name = "Bear Authentication")
     @PostMapping("/createCustomizeOrder")
     public CoreApiResponse createCustomizeOrder(@RequestBody CreateServiceOrderRequest request) {
         ServiceOrder serviceOrder = serviceOrderService.addServiceOrderCustomize(request);
@@ -39,6 +41,7 @@ public class ServiceOrderController {
     }
 
     // 3. Thợ mộc hoặc khách hàng chấp nhận đơn và thiết lập lịch hẹn
+    @SecurityRequirement(name = "Bear Authentication")
     @PostMapping("/accept")
     public CoreApiResponse acceptServiceOrder(
             @RequestParam Long serviceOrderId,
@@ -50,6 +53,7 @@ public class ServiceOrderController {
     }
 
     // 4. Khách hàng gửi phản hồi
+    @SecurityRequirement(name = "Bear Authentication")
     @PostMapping("/feedback")
     public CoreApiResponse customerFeedback(
             @RequestParam Long serviceOrderId,
