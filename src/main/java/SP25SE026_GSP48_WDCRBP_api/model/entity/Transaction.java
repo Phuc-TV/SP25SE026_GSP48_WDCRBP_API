@@ -25,6 +25,9 @@ public class Transaction {
     private float amount;
 
     @Column(nullable = true)
+    private String description;
+
+    @Column(nullable = true)
     private LocalDateTime createdAt;
 
     @Column(nullable = true)

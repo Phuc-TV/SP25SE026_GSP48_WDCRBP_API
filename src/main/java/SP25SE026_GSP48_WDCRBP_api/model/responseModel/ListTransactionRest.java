@@ -21,6 +21,7 @@ public class ListTransactionRest {
         private Long transactionId;
         private String transactionType;
         private float amount;
+        private String description;
         private LocalDateTime createdAt;
         private LocalDateTime canceledAt;
         private boolean status;

@@ -1,5 +1,6 @@
 package SP25SE026_GSP48_WDCRBP_api.service.impl;
 
+import SP25SE026_GSP48_WDCRBP_api.constant.TransactionTypeConstant;
 import SP25SE026_GSP48_WDCRBP_api.model.entity.*;
 import SP25SE026_GSP48_WDCRBP_api.model.exception.WDCRBPApiException;
 import SP25SE026_GSP48_WDCRBP_api.model.requestModel.PaymentOrderRequest;
@@ -124,8 +125,9 @@ public class WalletServiceImpl implements WalletService {
         wallet.setUpdatedAt(LocalDateTime.now());
         walletRepository.save(wallet);
         Transaction txn = new Transaction();
-        txn.setTransactionType("Order Payment");
+        txn.setTransactionType(TransactionTypeConstant.THANH_TOAN_BANG_VI);
         txn.setAmount(amount);
+        txn.setDescription("Thanh toán đặt cọc đơn hàng");
         txn.setCreatedAt(LocalDateTime.now());
         txn.setStatus(true);
         txn.setUser(dbUser);
@@ -138,6 +140,7 @@ public class WalletServiceImpl implements WalletService {
         transactionData.setTransactionId(txn.getTransactionId());
         transactionData.setTransactionType(txn.getTransactionType());
         transactionData.setAmount(txn.getAmount());
+        transactionData.setDescription(txn.getDescription());
         transactionData.setCreatedAt(txn.getCreatedAt());
         transactionData.setStatus(txn.isStatus());
         transactionData.setUserId(txn.getUser().getUserId());
@@ -188,8 +191,9 @@ public class WalletServiceImpl implements WalletService {
 
         // Step 5: Create a new transaction
         Transaction txn = new Transaction();
-        txn.setTransactionType(servicePackRepository.findById(servicePackId).get().getName());
+        txn.setTransactionType(TransactionTypeConstant.THANH_TOAN_BANG_VI);
         txn.setAmount(amount);
+        txn.setDescription("Thanh toán gói dịch vụ " + servicePack.getName());
         txn.setCreatedAt(LocalDateTime.now());
         txn.setStatus(true);
         txn.setUser(dbUser);
@@ -214,6 +218,7 @@ public class WalletServiceImpl implements WalletService {
         transactionData.setTransactionId(txn.getTransactionId());
         transactionData.setTransactionType(txn.getTransactionType());
         transactionData.setAmount(txn.getAmount());
+        transactionData.setDescription(txn.getDescription());
         transactionData.setCreatedAt(txn.getCreatedAt());
         transactionData.setStatus(txn.isStatus());
         transactionData.setUserId(txn.getUser().getUserId());
