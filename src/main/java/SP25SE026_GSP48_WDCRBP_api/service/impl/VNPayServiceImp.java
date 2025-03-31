@@ -1,6 +1,7 @@
 package SP25SE026_GSP48_WDCRBP_api.service.impl;
 
 import SP25SE026_GSP48_WDCRBP_api.config.VnPayConfig;
+import SP25SE026_GSP48_WDCRBP_api.constant.TransactionTypeConstant;
 import SP25SE026_GSP48_WDCRBP_api.model.entity.PaymentMethod;
 import SP25SE026_GSP48_WDCRBP_api.model.entity.ServicePack;
 import SP25SE026_GSP48_WDCRBP_api.model.entity.Transaction;
@@ -77,6 +78,7 @@ public class VNPayServiceImp implements VNPayService {
             Transaction txn = Transaction.builder()
                     .transactionType(transactionType)
                     .amount(amount)
+                    .description("Thanh toán cọc đơn hàng")
                     .status(false)
                     .createdAt(LocalDateTime.now())
                     .user(dbUser)
@@ -182,8 +184,9 @@ public class VNPayServiceImp implements VNPayService {
                     ));
 
             Transaction txn = Transaction.builder()
-                    .transactionType(servicePack.getName())
+                    .transactionType(TransactionTypeConstant.THANH_TOAN_QUA_CONG)
                     .amount(amount)
+                    .description("Thanh toán gói dịch vụ: " + servicePack.getName())
                     .status(false)
                     .createdAt(LocalDateTime.now())
                     .user(dbUser)
@@ -306,6 +309,7 @@ public class VNPayServiceImp implements VNPayService {
             Transaction txn = Transaction.builder()
                     .transactionType(transactionType)
                     .amount(amount)
+                    .description("Nạp tiền vào ví")
                     .status(false)
                     .createdAt(LocalDateTime.now())
                     .user(dbUser)

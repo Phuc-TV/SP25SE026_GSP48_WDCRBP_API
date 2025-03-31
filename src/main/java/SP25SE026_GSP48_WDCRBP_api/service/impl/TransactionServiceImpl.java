@@ -68,6 +68,7 @@ public class TransactionServiceImpl implements TransactionService {
         ListTransactionRest.Data dto = new ListTransactionRest.Data();
         dto.setTransactionId(tx.getTransactionId());
         dto.setTransactionType(tx.getTransactionType());
+        dto.setDescription(tx.getDescription());
         dto.setAmount(tx.getAmount());
         dto.setCreatedAt(tx.getCreatedAt());
         dto.setCanceledAt(tx.getCanceledAt());
