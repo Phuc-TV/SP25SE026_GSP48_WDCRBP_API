@@ -18,6 +18,11 @@ public class TechSpecController {
     @Autowired
     private TechSpecService techSpecService;
 
+    public TechSpecController(TechSpecService techSpecService)
+    {
+        this.techSpecService = techSpecService;
+    }
+
     @GetMapping("/listAllTechSpec")
     public CoreApiResponse getAllTechSpecService()
     {
