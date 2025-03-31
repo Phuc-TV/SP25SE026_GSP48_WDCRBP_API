@@ -3,6 +3,7 @@ package SP25SE026_GSP48_WDCRBP_api.service.impl;
 import SP25SE026_GSP48_WDCRBP_api.components.CoreApiResponse;
 import SP25SE026_GSP48_WDCRBP_api.model.entity.User;
 import SP25SE026_GSP48_WDCRBP_api.model.requestModel.ChangePasswordRequest;
+import SP25SE026_GSP48_WDCRBP_api.model.requestModel.UpdateUserProfileRequest;
 import SP25SE026_GSP48_WDCRBP_api.model.responseModel.UserInfoResponse;
 import SP25SE026_GSP48_WDCRBP_api.repository.UserRepository;
 import SP25SE026_GSP48_WDCRBP_api.service.UserService;
@@ -62,4 +63,22 @@ public class UserServiceImpl implements UserService {
         user.setPassword(hashedNewPassword);
         userRepository.save(user);
     }
+
+    @Override
+    public CoreApiResponse<?> updateUserProfile(UpdateUserProfileRequest request) {
+        User user = userRepository.findById(request.getUserId())
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy người dùng với ID: " + request.getUserId()));
+
+        user.setUsername(request.getFullName());
+        user.setEmail(request.getEmail());
+        user.setPhone(request.getPhone());
+
+        if (request.getPassword() != null && !request.getPassword().isBlank()) {
+            user.setPassword(passwordEncoder.encode(request.getPassword()));
+        }
+
+        userRepository.save(user);
+        return CoreApiResponse.success("Cập nhật thông tin người dùng thành công");
+    }
+
 }
