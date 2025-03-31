@@ -45,10 +45,6 @@ public class Transaction {
     private OrderDeposit orderDeposit;
 
     @ManyToOne
-    @JoinColumn(name = "paymentId", nullable = true)
-    private PaymentMethod paymentMethod;
-
-    @ManyToOne
     @JoinColumn(name = "walletId", nullable = true)
     private Wallet wallet;
 }
