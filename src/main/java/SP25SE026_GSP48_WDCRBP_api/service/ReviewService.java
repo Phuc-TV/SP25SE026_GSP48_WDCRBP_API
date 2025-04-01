@@ -7,5 +7,5 @@ import java.util.List;
 public interface ReviewService {
     List<ReviewRes> getReviewsByWoodworkerId(Long woodworkerId);
     List<ReviewRes> getReviewsByProductId(Long productId);
-    List<ReviewRes> getReviewsByDesignVariantId(Long designVariantId);
+    List<ReviewRes> getReviewsByDesignIdeaId(Long designId);
 }

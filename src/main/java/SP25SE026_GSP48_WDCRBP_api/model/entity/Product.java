@@ -18,7 +18,7 @@ public class Product {
     @Column(nullable = true)
     private String productName;
 
-    @Column(nullable = true)
+    @Column(nullable = true,length = 1000)
     private String description;
 
     @Column(nullable = true)
@@ -39,7 +39,7 @@ public class Product {
     @Column(nullable = true)
     private short height;
 
-    @Column(nullable = true)
+    @Column(nullable = true,length = 1000)
     private String mediaUrls;
 
     @Column(nullable = true)

@@ -29,7 +29,7 @@ public class WoodworkerProfileController {
 
     // Lấy danh sách tất cả các Woodworker với service pack "Gold", "Silver", "Bronze"
     @GetMapping
-    public CoreApiResponse getAllWoodWorker() {
+    public CoreApiResponse<List<WoodworkerProfileListItemRes>> getAllWoodWorker() {
         List<WoodworkerProfileListItemRes> wwList = woodworkerProfileService.getAllWoodWorker()
                 .stream().map(idea -> modelMapper.map(idea, WoodworkerProfileListItemRes.class))
                 .toList();
@@ -39,14 +39,14 @@ public class WoodworkerProfileController {
 
     // Lấy thông tin của một Woodworker theo ID
     @GetMapping("/{wwId}")
-    public CoreApiResponse getWoodworkerById(@PathVariable Long wwId) {
+    public CoreApiResponse<WoodworkerProfileDetailRes> getWoodworkerById(@PathVariable Long wwId) {
         return CoreApiResponse.success(modelMapper.map(
                 woodworkerProfileService.getWoodworkerById(wwId), WoodworkerProfileDetailRes.class
         ));
     }
 
     @GetMapping("/user/{userId}")
-    public CoreApiResponse getWoodworkerProfileByUserId(@PathVariable Long userId) {
+    public CoreApiResponse<WoodworkerProfileDetailRes> getWoodworkerProfileByUserId(@PathVariable Long userId) {
         return CoreApiResponse.success(modelMapper.map(
                 woodworkerProfileService.getWoodworkerByUserId(userId), WoodworkerProfileDetailRes.class
         ));
@@ -55,7 +55,7 @@ public class WoodworkerProfileController {
     // Thêm một Service Pack cho Woodworker
     @SecurityRequirement(name = "Bear Authentication")
     @PutMapping("/addServicePack")
-    public CoreApiResponse addServicePack(@Valid @RequestBody UpdateWoodworkerServicePackRequest request) {
+    public CoreApiResponse<WoodworkerProfileListItemRes> addServicePack(@Valid @RequestBody UpdateWoodworkerServicePackRequest request) {
         try {
             WoodworkerProfileListItemRes woodworkerProfileListItemResponseDto = modelMapper.map(
                     woodworkerProfileService.addServicePack(request.getServicePackId(), request.getWoodworkerId()), WoodworkerProfileListItemRes.class
@@ -68,7 +68,7 @@ public class WoodworkerProfileController {
     }
 
     @PostMapping("/ww-register")
-    public CoreApiResponse registerWoodworker(@RequestBody @Valid WoodworkerRequest request) {
+    public CoreApiResponse<WoodworkerProfileRes> registerWoodworker(@RequestBody @Valid WoodworkerRequest request) {
         try {
             WoodworkerProfileRes response = woodworkerProfileService.registerWoodworker(request);
             return CoreApiResponse.success(response, "Đăng ký thành công");
@@ -78,7 +78,7 @@ public class WoodworkerProfileController {
     }
 
     @PutMapping("/ww-update-status")
-    public CoreApiResponse updateWoodworkerStatus(@RequestBody WoodworkerUpdateStatusRequest request) {
+    public CoreApiResponse<WoodworkerUpdateStatusRes> updateWoodworkerStatus(@RequestBody WoodworkerUpdateStatusRequest request) {
         try {
             WoodworkerUpdateStatusRes response = woodworkerProfileService.updateWoodworkerStatus(request);
             return CoreApiResponse.success(response, "Cập nhật trạng thái thành công");
@@ -88,7 +88,7 @@ public class WoodworkerProfileController {
     }
 
     @GetMapping("/inactive")
-    public CoreApiResponse getInactiveWoodworkers() {
+    public CoreApiResponse<List<ListRegisterRes.Data>> getInactiveWoodworkers() {
         List<ListRegisterRes.Data> result = woodworkerProfileService.getAllInactiveWoodworkers();
        try{
             return CoreApiResponse.success(result, "Danh sách thợ mộc chưa kích hoạt tài khoản");
@@ -96,15 +96,4 @@ public class WoodworkerProfileController {
             return CoreApiResponse.error(HttpStatus.BAD_REQUEST, "Không thể lấy danh sách thợ mộc chưa kích hoạt tài khoản: " + e.getMessage());
         }
     }
-
-//    @PutMapping("/addServicePack")
-//    public CoreApiResponse<UpdateWoodworkerServicePackRest> addServicePackToWoodworker(
-//            @Valid @RequestBody UpdateWoodworkerServicePackRequest request) {
-//        try {
-//            UpdateWoodworkerServicePackRest result = woodworkerProfileService.updateServicePackForWoodworker(request);
-//            return CoreApiResponse.success(result, "Cập nhật gói dịch vụ cho thợ mộc thành công");
-//        } catch (RuntimeException e) {
-//            return CoreApiResponse.error(HttpStatus.BAD_REQUEST, "Thất bại khi cập nhật gói dịch vụ: " + e.getMessage());
-//        }
-//    }
 }
