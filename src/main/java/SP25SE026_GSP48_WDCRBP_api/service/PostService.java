@@ -10,4 +10,5 @@ public interface PostService {
     List<PostRes> getAllPosts();
     PostRes updatePost(Long postId, PostRequest postRequest);
     void deletePost(Long postId);
+    List<PostRes> getPostsByWoodworkerId(Long woodworkerId);
 }

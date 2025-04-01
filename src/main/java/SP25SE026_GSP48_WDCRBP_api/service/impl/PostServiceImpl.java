@@ -91,4 +91,13 @@ public class PostServiceImpl implements PostService {
                 .woodworkerName(post.getWoodworkerProfile().getBrandName())
                 .build();
     }
+
+    @Override
+    public List<PostRes> getPostsByWoodworkerId(Long woodworkerId) {
+        List<Post> posts = postRepository.findByWoodworkerProfile_WoodworkerId(woodworkerId);
+        return posts.stream()
+                .map(this::convertToPostRes)
+                .collect(Collectors.toList());
+    }
+
 }

@@ -31,6 +31,19 @@ public class ProductController {
         }
     }
 
+    @GetMapping("/woodworker/{woodworkerId}")
+    public CoreApiResponse<List<ProductRes>> getProductsByWoodworkerId(@PathVariable Long woodworkerId) {
+        try {
+            List<ProductRes> response = productService.getProductsByWoodworkerId(woodworkerId);
+            if (response.isEmpty()) {
+                return CoreApiResponse.success(null, "Không tìm thấy sản phẩm");
+            }
+            return CoreApiResponse.success(response, "Lấy sản phẩm theo thợ gỗ thành công");
+        } catch (Exception e) {
+            return CoreApiResponse.error(HttpStatus.BAD_REQUEST, "Lỗi khi lấy sản phẩm: " + e.getMessage());
+        }
+    }
+
     @GetMapping("/{id}")
     public CoreApiResponse<ProductRes> getProductById(@PathVariable Long id) {
         try{

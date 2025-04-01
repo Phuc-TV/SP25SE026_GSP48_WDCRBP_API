@@ -10,4 +10,5 @@ public interface ProductService {
     List<ProductRes> getAllProducts();
     ProductRes updateProduct(Long productId, ProductRequest productRequest);
     void deleteProduct(Long productId);
+    List<ProductRes> getProductsByWoodworkerId(Long woodworkerId);
 }
