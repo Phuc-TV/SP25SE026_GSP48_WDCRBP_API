@@ -1,12 +1,16 @@
 package SP25SE026_GSP48_WDCRBP_api.service.impl;
 
 import SP25SE026_GSP48_WDCRBP_api.model.entity.*;
+import SP25SE026_GSP48_WDCRBP_api.model.requestModel.ReviewRequest;
+import SP25SE026_GSP48_WDCRBP_api.model.requestModel.UpdateReviewStatusRequest;
+import SP25SE026_GSP48_WDCRBP_api.model.requestModel.UpdateWoodworkerResponseStatusRequest;
 import SP25SE026_GSP48_WDCRBP_api.model.responseModel.ReviewRes;
 import SP25SE026_GSP48_WDCRBP_api.repository.*;
 import SP25SE026_GSP48_WDCRBP_api.service.ReviewService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -21,6 +25,8 @@ public class ReviewServiceImpl implements ReviewService {
     private final ServiceOrderRepository serviceOrderRepository;
     private final ProductRepository productRepository;
     private final DesignIdeaRepository designIdeaRepository;
+    private final ReviewRepository reviewRepository;
+    private final UserRepository userRepository;
 
     @Override
     public List<ReviewRes> getReviewsByWoodworkerId(Long woodworkerId) {
@@ -93,7 +99,7 @@ public class ReviewServiceImpl implements ReviewService {
         return ReviewRes.builder()
                 .reviewId(review.getReviewId())
                 .userId(review.getUser().getUserId())
-                .username(review.getUser().getUsername()) // or getUsername(), depends on your entity
+                .username(review.getUser().getUsername())
                 .description(review.getDescription())
                 .rating(review.getRating())
                 .comment(review.getComment())
@@ -105,4 +111,45 @@ public class ReviewServiceImpl implements ReviewService {
                 .serviceName(serviceName)
                 .build();
     }
+
+    @Override
+    public ReviewRes createReview(ReviewRequest request) {
+        User user = userRepository.findById(request.getUserId())
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        Review review = Review.builder()
+                .user(user)
+                .description(request.getDescription())
+                .rating(request.getRating())
+                .comment(request.getComment())
+                .createdAt(LocalDateTime.now())
+                .updatedAt(LocalDateTime.now())
+                .woodworkerResponse(request.getWoodworkerResponse())
+                .status(true)
+                .woodworkerResponseStatus(false)
+                .responseAt(LocalDateTime.now())
+                .build();
+
+        Review saved = reviewRepository.save(review);
+        return toReviewRes(saved, "");
+    }
+
+    @Override
+    public ReviewRes updateReviewStatus(Long reviewId, UpdateReviewStatusRequest dto) {
+        Review review = reviewRepository.findById(reviewId)
+                .orElseThrow(() -> new RuntimeException("Review not found"));
+        review.setStatus(dto.getStatus());
+        review.setUpdatedAt(LocalDateTime.now());
+        return toReviewRes(reviewRepository.save(review), "");
+    }
+
+    @Override
+    public ReviewRes updateWoodworkerResponseStatus(Long reviewId, UpdateWoodworkerResponseStatusRequest dto) {
+        Review review = reviewRepository.findById(reviewId)
+                .orElseThrow(() -> new RuntimeException("Review not found"));
+        review.setWoodworkerResponseStatus(dto.getWoodworkerResponseStatus());
+        review.setResponseAt(LocalDateTime.now());
+        return toReviewRes(reviewRepository.save(review), "");
+    }
+
 }

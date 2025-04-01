@@ -146,4 +146,12 @@ public class ProductServiceImpl implements ProductService {
                 .build();
     }
 
+    @Override
+    public List<ProductRes> getProductsByWoodworkerId(Long woodworkerId) {
+        List<Product> products = productRepository.findByWoodworkerProfile_WoodworkerId(woodworkerId);
+        return products.stream()
+                .map(this::convertToProductRes)
+                .collect(Collectors.toList());
+    }
+
 }

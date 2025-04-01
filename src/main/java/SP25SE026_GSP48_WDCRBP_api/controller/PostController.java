@@ -5,7 +5,6 @@ import SP25SE026_GSP48_WDCRBP_api.model.requestModel.PostRequest;
 import SP25SE026_GSP48_WDCRBP_api.model.responseModel.PostRes;
 import SP25SE026_GSP48_WDCRBP_api.service.PostService;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import jakarta.validation.Valid;
 import java.util.List;
@@ -61,17 +60,13 @@ public class PostController {
 
     @GetMapping("/woodworker/{woodworkerId}")
     public CoreApiResponse<List<PostRes>> getAllPostsByWwId(@PathVariable Long woodworkerId) {
-        try{
-            List<PostRes> response = postService.getAllPosts().stream()
-                    .filter(post -> post.getWoodworkerId().equals(woodworkerId))
-                    .toList();
-
+        try {
+            List<PostRes> response = postService.getPostsByWoodworkerId(woodworkerId);
             if (response.isEmpty()) {
                 return CoreApiResponse.success(null, "Không tìm thấy bài viết");
             }
-
             return CoreApiResponse.success(response, "Lấy tất cả bài viết thành công");
-        }catch (Exception e){
+        } catch (Exception e) {
             return CoreApiResponse.error(HttpStatus.BAD_REQUEST, "Lấy bài viết thất bại" + e.getMessage());
         }
     }

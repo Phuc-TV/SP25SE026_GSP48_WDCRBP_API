@@ -20,6 +20,7 @@ public class ReviewRes {
     private LocalDateTime updatedAt;
     private String woodworkerResponse;
     private boolean woodworkerResponseStatus;
+    private boolean status;
     private LocalDateTime responseAt;
     private String serviceName;
 }
