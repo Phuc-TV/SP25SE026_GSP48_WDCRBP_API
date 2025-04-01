@@ -4,6 +4,7 @@ import SP25SE026_GSP48_WDCRBP_api.components.CoreApiResponse;
 import SP25SE026_GSP48_WDCRBP_api.model.entity.User;
 import SP25SE026_GSP48_WDCRBP_api.model.requestModel.ChangePasswordRequest;
 import SP25SE026_GSP48_WDCRBP_api.model.requestModel.UpdateUserProfileRequest;
+import SP25SE026_GSP48_WDCRBP_api.model.responseModel.UserDetailRes;
 import SP25SE026_GSP48_WDCRBP_api.model.responseModel.UserInfoResponse;
 import SP25SE026_GSP48_WDCRBP_api.repository.UserRepository;
 import SP25SE026_GSP48_WDCRBP_api.service.UserService;
@@ -39,9 +40,9 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public CoreApiResponse getUserInformationById(Long id)
+    public UserDetailRes getUserInformationById(Long id)
     {
-        return CoreApiResponse.success(modelMapper.map(userRepository.findById(id), UserInfoResponse.class), "successfully");
+        return modelMapper.map(userRepository.findById(id), UserDetailRes.class);
     }
 
     @Override
