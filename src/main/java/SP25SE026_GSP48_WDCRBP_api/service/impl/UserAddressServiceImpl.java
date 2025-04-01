@@ -5,12 +5,13 @@ import SP25SE026_GSP48_WDCRBP_api.model.exception.WDCRBPApiException;
 import SP25SE026_GSP48_WDCRBP_api.model.requestModel.UserAddressRequest;
 import SP25SE026_GSP48_WDCRBP_api.model.responseModel.UserAddressRes;
 import SP25SE026_GSP48_WDCRBP_api.repository.UserAddressRepository;
+import SP25SE026_GSP48_WDCRBP_api.repository.UserRepository;
 import SP25SE026_GSP48_WDCRBP_api.service.UserAddressService;
-import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -18,16 +19,16 @@ import java.util.stream.Collectors;
 public class UserAddressServiceImpl implements UserAddressService {
 
     @Autowired
-    private UserAddressRepository userAddressRepository;
+    private UserRepository userRepository;
 
     @Autowired
-    private ModelMapper modelMapper;
+    private UserAddressRepository userAddressRepository;
 
     @Override
     public List<UserAddressRes> getAllUserAddresses() {
         List<UserAddress> addresses = userAddressRepository.findAll();
         return addresses.stream()
-                .map(address -> modelMapper.map(address, UserAddressRes.class))
+                .map(this::convertToUserAddressRes)
                 .collect(Collectors.toList());
     }
 
@@ -35,24 +36,56 @@ public class UserAddressServiceImpl implements UserAddressService {
     public UserAddressRes getUserAddressById(Long id) {
         UserAddress userAddress = userAddressRepository.findById(id)
                 .orElseThrow(() -> new WDCRBPApiException(HttpStatus.NOT_FOUND, "UserAddress not found for this id :: " + id));
-        return modelMapper.map(userAddress, UserAddressRes.class);
+        return convertToUserAddressRes(userAddress);
     }
 
     @Override
     public UserAddressRes createUserAddress(UserAddressRequest userAddressRequest) {
-        UserAddress userAddress = modelMapper.map(userAddressRequest, UserAddress.class);
-        UserAddress savedUserAddress = userAddressRepository.save(userAddress);
-        return modelMapper.map(savedUserAddress, UserAddressRes.class);
+        var user = userRepository.findById(userAddressRequest.getUserId())
+                .orElseThrow(() -> new WDCRBPApiException(HttpStatus.NOT_FOUND, "User not found"));
+
+        UserAddress userAddress = UserAddress.builder()
+                .isDefault(userAddressRequest.getIsDefault())
+                .address(userAddressRequest.getAddress())
+                .wardCode(userAddressRequest.getWardCode())
+                .districtId(userAddressRequest.getDistrictId())
+                .cityId(userAddressRequest.getCityId())
+                .createdAt(LocalDateTime.now())
+                .user(user)
+                .build();
+
+        UserAddress saved = userAddressRepository.save(userAddress);
+        return convertToUserAddressRes(saved);
     }
 
     @Override
     public UserAddressRes updateUserAddress(Long id, UserAddressRequest userAddressRequest) {
-        UserAddress existingUserAddress = userAddressRepository.findById(id)
+        UserAddress existing = userAddressRepository.findById(id)
                 .orElseThrow(() -> new WDCRBPApiException(HttpStatus.NOT_FOUND, "UserAddress not found for this id :: " + id));
 
-        modelMapper.map(userAddressRequest, existingUserAddress);
-        UserAddress updatedUserAddress = userAddressRepository.save(existingUserAddress);
-        return modelMapper.map(updatedUserAddress, UserAddressRes.class);
+        var user = userRepository.findById(userAddressRequest.getUserId())
+                .orElseThrow(() -> new WDCRBPApiException(HttpStatus.NOT_FOUND, "User not found"));
+
+        // If updating to default, unset others first
+        if (Boolean.TRUE.equals(userAddressRequest.getIsDefault())) {
+            List<UserAddress> userAddresses = userAddressRepository.findByUser_UserId(user.getUserId());
+            for (UserAddress address : userAddresses) {
+                if (!address.getUserAddressId().equals(existing.getUserAddressId())) {
+                    address.setIsDefault(false);
+                    userAddressRepository.save(address);
+                }
+            }
+        }
+
+        existing.setIsDefault(userAddressRequest.getIsDefault());
+        existing.setAddress(userAddressRequest.getAddress());
+        existing.setWardCode(userAddressRequest.getWardCode());
+        existing.setDistrictId(userAddressRequest.getDistrictId());
+        existing.setCityId(userAddressRequest.getCityId());
+        existing.setUser(user);
+
+        UserAddress updated = userAddressRepository.save(existing);
+        return convertToUserAddressRes(updated);
     }
 
     @Override
@@ -60,5 +93,18 @@ public class UserAddressServiceImpl implements UserAddressService {
         UserAddress userAddress = userAddressRepository.findById(id)
                 .orElseThrow(() -> new WDCRBPApiException(HttpStatus.NOT_FOUND, "UserAddress not found for this id :: " + id));
         userAddressRepository.delete(userAddress);
+    }
+
+    private UserAddressRes convertToUserAddressRes(UserAddress entity) {
+        return UserAddressRes.builder()
+                .userAddressId(entity.getUserAddressId())
+                .isDefault(entity.getIsDefault())
+                .address(entity.getAddress())
+                .wardCode(entity.getWardCode())
+                .districtId(entity.getDistrictId())
+                .cityId(entity.getCityId())
+                .createdAt(entity.getCreatedAt())
+                .userId(entity.getUser() != null ? entity.getUser().getUserId() : null)
+                .build();
     }
 }

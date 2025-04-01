@@ -1,9 +1,6 @@
 package SP25SE026_GSP48_WDCRBP_api.model.responseModel;
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
 import java.time.LocalDateTime;
 
@@ -11,6 +8,7 @@ import java.time.LocalDateTime;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
+@Builder
 public class UserAddressRes {
     private Long userAddressId;
     private Boolean isDefault;
