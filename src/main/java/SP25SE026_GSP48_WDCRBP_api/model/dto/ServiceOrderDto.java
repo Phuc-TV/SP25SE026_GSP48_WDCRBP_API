@@ -18,4 +18,7 @@ public class ServiceOrderDto {
     private String feedback;
     private Float amountPaid;
     private Float amountRemaining;
+    private String orderProgress;
+    private AvaliableServiceDto service;
+    private String orderProcess;
 }

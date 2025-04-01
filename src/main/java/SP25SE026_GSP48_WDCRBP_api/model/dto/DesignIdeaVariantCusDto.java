@@ -1,4 +1,4 @@
-package SP25SE026_GSP48_WDCRBP_api.model.requestModel;
+package SP25SE026_GSP48_WDCRBP_api.model.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -9,9 +9,7 @@ import lombok.Setter;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class CreateServiceOrderRequest {
-    private Long availableServiceId;
-    private Long userId;
+public class DesignIdeaVariantCusDto {
     private Long designIdeaVariantId;
     private Short quantity;
 }
