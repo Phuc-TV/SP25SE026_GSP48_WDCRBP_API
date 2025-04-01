@@ -44,6 +44,23 @@ public class UserAddressServiceImpl implements UserAddressService {
         var user = userRepository.findById(userAddressRequest.getUserId())
                 .orElseThrow(() -> new WDCRBPApiException(HttpStatus.NOT_FOUND, "User not found"));
 
+        // Check if the user already has 3 addresses
+        List<UserAddress> existingAddresses = userAddressRepository.findAll()
+                .stream()
+                .filter(addr -> addr.getUser().getUserId().equals(user.getUserId()))
+                .collect(Collectors.toList());
+
+        if (existingAddresses.size() >= 3) {
+            throw new WDCRBPApiException(HttpStatus.BAD_REQUEST, "Mỗi người dùng chỉ được phép có tối đa 3 địa chỉ.");
+        }
+
+        // If this new address is set as default, unset others
+        if (userAddressRequest.getIsDefault()) {
+            existingAddresses.forEach(addr -> addr.setIsDefault(false));
+            userAddressRepository.saveAll(existingAddresses);
+        }
+
+        // Create new address
         UserAddress userAddress = UserAddress.builder()
                 .isDefault(userAddressRequest.getIsDefault())
                 .address(userAddressRequest.getAddress())
