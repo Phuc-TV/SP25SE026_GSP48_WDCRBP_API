@@ -27,9 +27,34 @@ public class PostServiceImpl implements PostService {
 
     @Override
     public PostRes createPost(PostRequest postRequest) {
+        // 1. Get woodworker profile
         WoodworkerProfile woodworkerProfile = woodworkerProfileRepository.findById(postRequest.getWoodworkerId())
                 .orElseThrow(() -> new RuntimeException("WoodworkerProfile not found with ID: " + postRequest.getWoodworkerId()));
 
+        // 2. Get post limit from service pack
+        if (woodworkerProfile.getServicePack() == null) {
+            throw new RuntimeException("Woodworker does not have a service pack assigned.");
+        }
+
+        Short postLimitPerMonth = woodworkerProfile.getServicePack().getPostLimitPerMonth();
+        if (postLimitPerMonth == null) {
+            throw new RuntimeException("Service pack does not define a post limit.");
+        }
+
+        // 3. Count how many posts this woodworker created this month
+        LocalDateTime startOfMonth = LocalDateTime.now().withDayOfMonth(1).withHour(0).withMinute(0).withSecond(0).withNano(0);
+        int currentMonthPostCount = postRepository
+                .findByWoodworkerProfile_WoodworkerId(postRequest.getWoodworkerId()).stream()
+                .filter(post -> post.getCreatedAt() != null && post.getCreatedAt().isAfter(startOfMonth))
+                .toList()
+                .size();
+
+        // 4. Check if the limit is exceeded
+        if (currentMonthPostCount >= postLimitPerMonth) {
+            throw new RuntimeException("Đã vượt quá số lượng bài viết cho phép trong tháng này.");
+        }
+
+        // 5. Create post if allowed
         Post post = new Post();
         post.setTitle(postRequest.getTitle());
         post.setDescription(postRequest.getDescription());
@@ -40,6 +65,43 @@ public class PostServiceImpl implements PostService {
         Post savedPost = postRepository.save(post);
         return convertToPostRes(savedPost);
     }
+
+//    @Override
+//    public PostRes createPost(PostRequest postRequest) {
+//        WoodworkerProfile woodworkerProfile = woodworkerProfileRepository.findById(postRequest.getWoodworkerId())
+//                .orElseThrow(() -> new RuntimeException("WoodworkerProfile not found with ID: " + postRequest.getWoodworkerId()));
+//
+//        // Ensure service pack and limits exist
+//        if (woodworkerProfile.getServicePack() == null || woodworkerProfile.getServicePackStartDate() == null) {
+//            throw new RuntimeException("Woodworker does not have a valid service pack or start date.");
+//        }
+//
+//        Short postLimit = woodworkerProfile.getServicePack().getPostLimitPerMonth();
+//        if (postLimit == null) {
+//            throw new RuntimeException("Service pack does not define a post limit.");
+//        }
+//
+//        // Count posts AFTER the servicePackStartDate (ignore previous plan's posts)
+//        LocalDateTime effectiveStart = woodworkerProfile.getServicePackStartDate();
+//        int postsSinceUpgrade = postRepository.findByWoodworkerProfile_WoodworkerId(postRequest.getWoodworkerId()).stream()
+//                .filter(post -> post.getCreatedAt() != null && post.getCreatedAt().isAfter(effectiveStart))
+//                .toList().size();
+//
+//        if (postsSinceUpgrade >= postLimit) {
+//            throw new RuntimeException("Bạn đã đăng hết số lượng bài viết cho phép trong gói dịch vụ hiện tại.");
+//        }
+//
+//        // Allowed to post
+//        Post post = new Post();
+//        post.setTitle(postRequest.getTitle());
+//        post.setDescription(postRequest.getDescription());
+//        post.setImg_Urls(postRequest.getImgUrls());
+//        post.setCreatedAt(LocalDateTime.now());
+//        post.setWoodworkerProfile(woodworkerProfile);
+//
+//        Post savedPost = postRepository.save(post);
+//        return convertToPostRes(savedPost);
+//    }
 
     @Override
     public PostRes getPostById(Long postId) {
