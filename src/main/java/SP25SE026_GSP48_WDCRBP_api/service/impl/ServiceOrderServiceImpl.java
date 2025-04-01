@@ -1,13 +1,14 @@
 package SP25SE026_GSP48_WDCRBP_api.service.impl;
 
+import SP25SE026_GSP48_WDCRBP_api.components.CoreApiResponse;
 import SP25SE026_GSP48_WDCRBP_api.constant.ServiceOrderStatus;
-import SP25SE026_GSP48_WDCRBP_api.model.dto.RequestedProductPersonalizeDto;
-import SP25SE026_GSP48_WDCRBP_api.model.dto.TechSpecPersonalizeDto;
+import SP25SE026_GSP48_WDCRBP_api.model.dto.*;
 import SP25SE026_GSP48_WDCRBP_api.model.entity.*;
 import SP25SE026_GSP48_WDCRBP_api.model.requestModel.CreateServiceOrderPersonalizeRequest;
-import SP25SE026_GSP48_WDCRBP_api.model.requestModel.CreateServiceOrderRequest;
+import SP25SE026_GSP48_WDCRBP_api.model.requestModel.CreateServiceOrderCusRequest;
 import SP25SE026_GSP48_WDCRBP_api.repository.*;
 import SP25SE026_GSP48_WDCRBP_api.service.ServiceOrderService;
+import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -47,6 +48,12 @@ public class ServiceOrderServiceImpl implements ServiceOrderService {
     @Autowired
     private CustomerSelectionRepository customerSelectionRepository;
 
+    @Autowired
+    private ModelMapper modelMapper;
+
+    @Autowired
+    private ShipmentRepository shipmentRepository;
+
     public ServiceOrderServiceImpl(ServiceOrderRepository orderRepository,
                                    UserRepository userRepository,
                                    AvailableServiceRepository availableServiceRepository,
@@ -55,7 +62,9 @@ public class ServiceOrderServiceImpl implements ServiceOrderService {
                                    WoodworkerProfileRepository woodworkerProfileRepository,
                                    ConsultantAppointmentRepository consultantAppointmentRepository,
                                    TechSpecRepository techSpecRepository,
-                                   CustomerSelectionRepository customerSelectionRepository) {
+                                   CustomerSelectionRepository customerSelectionRepository,
+                                   ModelMapper modelMapper,
+                                   ShipmentRepository shipmentRepository) {
         this.orderRepository = orderRepository;
         this.userRepository = userRepository;
         this.availableServiceRepository = availableServiceRepository;
@@ -65,10 +74,12 @@ public class ServiceOrderServiceImpl implements ServiceOrderService {
         this.consultantAppointmentRepository = consultantAppointmentRepository;
         this.techSpecRepository = techSpecRepository;
         this.customerSelectionRepository = customerSelectionRepository;
+        this.modelMapper = modelMapper;
+        this.shipmentRepository = shipmentRepository;
     }
 
     @Override
-    public List<ServiceOrder> listServiceOrderByUserIdOrWwId(Long id, String role) {
+    public List<ServiceOrderDto> listServiceOrderByUserIdOrWwId(Long id, String role) {
         List<ServiceOrder> orders = new ArrayList<>();
         if (role.equals("User")) {
             User user = userRepository.findUserByUserId(id);
@@ -86,21 +97,62 @@ public class ServiceOrderServiceImpl implements ServiceOrderService {
                 return null;
         }
 
-        return orders;
+        List<ServiceOrderDto> serviceOrderDtos = new ArrayList<>();
+
+        for (ServiceOrder serviceOrder : orders)
+        {
+            ServiceOrderDto serviceOrderDto = new ServiceOrderDto();
+
+            serviceOrderDto = modelMapper.map(orders, ServiceOrderDto.class);
+            AvaliableServiceDto avaliableServiceDto = new AvaliableServiceDto();
+
+            avaliableServiceDto.setService(serviceOrder.getAvailableService().getService());
+
+            wwDto wwDto = new wwDto();
+
+            wwDto.setBrandName(serviceOrder.getAvailableService().getWoodworkerProfile().getBrandName());
+            wwDto.setBio(serviceOrder.getAvailableService().getWoodworkerProfile().getBio());
+
+            avaliableServiceDto.setWwDto(wwDto);
+
+            serviceOrderDto.setService(avaliableServiceDto);
+
+            OrderProgress orderProgress = orderProgressRepository.findOrderProgressByServiceOrder(serviceOrder);
+
+            serviceOrderDto.setOrderProcess(orderProgress.getStatus());
+
+            serviceOrderDtos.add(serviceOrderDto);
+        }
+
+        return serviceOrderDtos;
     }
 
     @Override
-    public ServiceOrder addServiceOrderCustomize(CreateServiceOrderRequest createServiceOrderRequest) {
+    public CoreApiResponse addServiceOrderCustomize(CreateServiceOrderCusRequest createServiceOrderCusRequest) {
+
+        List<DesignIdeaVariantCusDto> designIdeaVariantIds = createServiceOrderCusRequest.getDesignIdeaVariantIds();
+
+        short quantity = 0;
+
+        for (DesignIdeaVariantCusDto t: designIdeaVariantIds)
+        {
+            quantity = (short) (quantity + t.getQuantity());
+        }
+
+        if (quantity > 4)
+            return CoreApiResponse.error(ServiceOrderStatus.CHI_DUOC_TOI_DA_4_SAN_PHAM);
+
         //Create ServiceOrder
-        User user = userRepository.findById(createServiceOrderRequest.getUserId()).orElse(null);
+        User user = userRepository.findById(createServiceOrderCusRequest.getUserId()).orElse(null);
 
         AvailableService availableService =
-                availableServiceRepository.findById(createServiceOrderRequest.getAvailableServiceId()).orElse(null);
+                availableServiceRepository.findById(createServiceOrderCusRequest.getAvailableServiceId()).orElse(null);
 
         ServiceOrder serviceOrder = new ServiceOrder();
         serviceOrder.setAvailableService(availableService);
         serviceOrder.setUser(user);
         serviceOrder.setCreatedAt(LocalDateTime.now());
+        serviceOrder.setQuantity(quantity);
         serviceOrder.setRole("Woodworker");
 
         orderRepository.save(serviceOrder);
@@ -109,16 +161,19 @@ public class ServiceOrderServiceImpl implements ServiceOrderService {
         int t = orderRepository.findAll().size();
         ServiceOrder newServiceOrder = orderRepository.findAll().get(t - 1);
 
-        DesignIdeaVariant designIdeaVariant =
-                designIdeaVariantRepository.findDesignIdeaVariantByDesignIdeaVariantId(createServiceOrderRequest.getDesignIdeaVariantId());
+        for (DesignIdeaVariantCusDto i: designIdeaVariantIds)
+        {
+            DesignIdeaVariant designIdeaVariant =
+                    designIdeaVariantRepository.findDesignIdeaVariantByDesignIdeaVariantId(i.getDesignIdeaVariantId());
 
-        RequestedProduct requestedProduct = new RequestedProduct();
-        requestedProduct.setDesignIdeaVariant(designIdeaVariant);
-        requestedProduct.setServiceOrder(newServiceOrder);
-        requestedProduct.setTotalAmount(designIdeaVariant.getPrice() * createServiceOrderRequest.getQuantity());
-        requestedProduct.setCreatedAt(LocalDateTime.now());
+            RequestedProduct requestedProduct = new RequestedProduct();
+            requestedProduct.setDesignIdeaVariant(designIdeaVariant);
+            requestedProduct.setServiceOrder(newServiceOrder);
+            requestedProduct.setTotalAmount(designIdeaVariant.getPrice() * i.getQuantity());
+            requestedProduct.setCreatedAt(LocalDateTime.now());
 
-        requestedProductRepository.save(requestedProduct);
+            requestedProductRepository.save(requestedProduct);
+        }
 
         //Create OrderProgress
         OrderProgress orderProgress = new OrderProgress();
@@ -128,7 +183,13 @@ public class ServiceOrderServiceImpl implements ServiceOrderService {
 
         orderProgressRepository.save(orderProgress);
 
-        return serviceOrder;
+        Shipment shipment = new Shipment();
+        shipment.setServiceOrder(serviceOrder);
+        shipment.setToAddress(createServiceOrderCusRequest.getAddress());
+
+        shipmentRepository.save(shipment);
+
+        return CoreApiResponse.success(newServiceOrder, "successfully");
     }
 
     @Override

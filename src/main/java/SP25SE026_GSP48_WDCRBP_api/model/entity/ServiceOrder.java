@@ -19,7 +19,7 @@ public class ServiceOrder {
     private Long orderId;
 
     @Column(nullable = true)
-    private Byte quantity;
+    private Short quantity;
 
     @Column(nullable = true)
     private Float totalAmount;
