@@ -3,6 +3,7 @@ package SP25SE026_GSP48_WDCRBP_api.controller;
 import SP25SE026_GSP48_WDCRBP_api.components.CoreApiResponse;
 import SP25SE026_GSP48_WDCRBP_api.model.requestModel.ChangePasswordRequest;
 import SP25SE026_GSP48_WDCRBP_api.model.requestModel.UpdateUserProfileRequest;
+import SP25SE026_GSP48_WDCRBP_api.model.responseModel.UserDetailRes;
 import SP25SE026_GSP48_WDCRBP_api.service.UserService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,7 +24,7 @@ public class UserController {
     }
 
     @GetMapping("/getUserInformationById/{id}")
-    public CoreApiResponse<?> getUserInformationById(@PathVariable Long id)
+    public CoreApiResponse<UserDetailRes> getUserInformationById(@PathVariable Long id)
     {
         return CoreApiResponse.success(userService.getUserInformationById(id));
     }
