@@ -9,6 +9,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 @Service
@@ -19,7 +20,7 @@ public class ReviewServiceImpl implements ReviewService {
     private final AvailableServiceRepository availableServiceRepository;
     private final ServiceOrderRepository serviceOrderRepository;
     private final ProductRepository productRepository;
-    private final DesignIdeaVariantRepository designIdeaVariantRepository;
+    private final DesignIdeaRepository designIdeaRepository;
 
     @Override
     public List<ReviewRes> getReviewsByWoodworkerId(Long woodworkerId) {
@@ -38,9 +39,15 @@ public class ReviewServiceImpl implements ReviewService {
 
         // Step 3: Extract and map non-null reviews
         return orders.stream()
-                .map(ServiceOrder::getReview)
-                .filter(review -> review != null)
-                .map(this::toReviewRes)
+                .map(order -> {
+                    Review review = order.getReview();
+                    if (review != null && review.isStatus()) {
+                        String serviceName = order.getAvailableService().getService().getServiceName();
+                        return toReviewRes(review, serviceName);
+                    }
+                    return null;
+                })
+                .filter(Objects::nonNull)
                 .collect(Collectors.toList());
     }
 
@@ -58,17 +65,16 @@ public class ReviewServiceImpl implements ReviewService {
                         product.getWoodworkerProfile().getWoodworkerId()
                 ))
                 .map(ServiceOrder::getReview)
-                .filter(review -> review != null)
-                .map(this::toReviewRes)
+                .filter(review -> review != null && review.isStatus())
+                .map(review -> toReviewRes(review,""))
                 .collect(Collectors.toList());
     }
 
     @Override
-    public List<ReviewRes> getReviewsByDesignVariantId(Long designVariantId) {
-        DesignIdeaVariant variant = designIdeaVariantRepository.findDesignIdeaVariantByDesignIdeaVariantId(designVariantId);
-        if (variant == null || variant.getDesignIdea() == null) return new ArrayList<>();
+    public List<ReviewRes> getReviewsByDesignIdeaId(Long designId) {
+        DesignIdea designIdea = designIdeaRepository.findDesignIdeaByDesignIdeaId(designId);
+        if (designIdea == null) return new ArrayList<>();
 
-        DesignIdea designIdea = variant.getDesignIdea();
         List<ServiceOrder> orders = serviceOrderRepository.findAll();
 
         return orders.stream()
@@ -78,12 +84,12 @@ public class ReviewServiceImpl implements ReviewService {
                         designIdea.getWoodworkerProfile().getWoodworkerId()
                 ))
                 .map(ServiceOrder::getReview)
-                .filter(review -> review != null)
-                .map(this::toReviewRes)
+                .filter(review -> review != null && review.isStatus())
+                .map(review -> toReviewRes(review,""))
                 .collect(Collectors.toList());
     }
 
-    private ReviewRes toReviewRes(Review review) {
+    private ReviewRes toReviewRes(Review review, String serviceName) {
         return ReviewRes.builder()
                 .reviewId(review.getReviewId())
                 .userId(review.getUser().getUserId())
@@ -94,8 +100,9 @@ public class ReviewServiceImpl implements ReviewService {
                 .createdAt(review.getCreatedAt())
                 .updatedAt(review.getUpdatedAt())
                 .woodworkerResponse(review.getWoodworkerResponse())
-                .woodworkerResponseStatus(review.isWookworkerResponseStatus())
+                .woodworkerResponseStatus(review.isWoodworkerResponseStatus())
                 .responseAt(review.getResponseAt())
+                .serviceName(serviceName)
                 .build();
     }
 }

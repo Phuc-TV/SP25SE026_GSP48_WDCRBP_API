@@ -21,4 +21,5 @@ public class ReviewRes {
     private String woodworkerResponse;
     private boolean woodworkerResponseStatus;
     private LocalDateTime responseAt;
+    private String serviceName;
 }

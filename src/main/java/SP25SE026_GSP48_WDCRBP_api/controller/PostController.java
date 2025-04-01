@@ -59,6 +59,23 @@ public class PostController {
         }
     }
 
+    @GetMapping("/woodworker/{woodworkerId}")
+    public CoreApiResponse<List<PostRes>> getAllPostsByWwId(@PathVariable Long woodworkerId) {
+        try{
+            List<PostRes> response = postService.getAllPosts().stream()
+                    .filter(post -> post.getWoodworkerId().equals(woodworkerId))
+                    .toList();
+
+            if (response.isEmpty()) {
+                return CoreApiResponse.success(null, "Không tìm thấy bài viết");
+            }
+
+            return CoreApiResponse.success(response, "Lấy tất cả bài viết thành công");
+        }catch (Exception e){
+            return CoreApiResponse.error(HttpStatus.BAD_REQUEST, "Lấy bài viết thất bại" + e.getMessage());
+        }
+    }
+
     @PutMapping("/{postId}")
     public CoreApiResponse<PostRes> updatePost(
             @PathVariable Long postId,
@@ -72,8 +89,8 @@ public class PostController {
     }
 
     @DeleteMapping("/{postId}")
-    public ResponseEntity<String> deletePost(@PathVariable Long postId) {
+    public CoreApiResponse<String> deletePost(@PathVariable Long postId) {
         postService.deletePost(postId);
-        return ResponseEntity.ok("Xóa bài viết thành công");
+        return CoreApiResponse.success("Xóa bài viết thành công");
     }
 }

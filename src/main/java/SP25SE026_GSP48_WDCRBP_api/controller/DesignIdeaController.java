@@ -10,6 +10,7 @@ import SP25SE026_GSP48_WDCRBP_api.service.DesignIdeaService;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -80,17 +81,17 @@ public class DesignIdeaController {
 
 
     @GetMapping("/getDesignIdeaVariantByDesignId/{designId}")
-    public CoreApiResponse getDesignIdeaVariantByDesignId(@PathVariable Long designId)
+    public CoreApiResponse<List<DesignIdeaVariantDto>> getDesignIdeaVariantByDesignId(@PathVariable Long designId)
     {
         try {
             List<DesignIdeaVariantDto> ideass = designIdeaService.getDesignIdeaVariantByDesignId(designId);
 
             if (ideass == null)
-                return CoreApiResponse.error("Không tìm thấy dữ liệu");
+                return CoreApiResponse.error(HttpStatus.BAD_REQUEST, "Không tìm thấy");
 
             return CoreApiResponse.success(ideass);
         } catch (Exception e) {
-            return CoreApiResponse.error("Không tìm thấy dữ liệu");
+            return CoreApiResponse.error(HttpStatus.BAD_REQUEST, "Không tìm thấy");
         }
     }
 }

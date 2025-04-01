@@ -31,6 +31,23 @@ public class UserAddressController {
         }
     }
 
+    @GetMapping("/user/{userId}")
+    public CoreApiResponse<List<UserAddressRes>> getAllUserAddressesByUserId(@PathVariable Long userId) {
+        try {
+            List<UserAddressRes> response = userAddressService.getAllUserAddresses().stream()
+                    .filter(address -> address.getUserId().equals(userId))
+                    .toList();
+
+            if (response.isEmpty()) {
+                return CoreApiResponse.success(null, "Không có dữ liệu");
+            }
+
+            return CoreApiResponse.success(response, "Lấy danh sách địa chỉ thành công");
+        } catch (Exception e) {
+            return CoreApiResponse.error(HttpStatus.INTERNAL_SERVER_ERROR, "Không thể thực thi: " + e.getMessage());
+        }
+    }
+
     @GetMapping("/{id}")
     public CoreApiResponse<?> getUserAddressById(@PathVariable Long id) {
         try {

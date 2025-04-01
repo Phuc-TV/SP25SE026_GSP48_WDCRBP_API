@@ -23,11 +23,10 @@ public class AvailableServiceController {
     private ModelMapper modelMapper;
 
     @GetMapping("/woodworker/{wwId}")
-    public CoreApiResponse getAvailableServiceByWwId(@PathVariable Long wwId)
+    public CoreApiResponse<List<AvailableServiceListItemRes>> getAvailableServiceByWwId(@PathVariable Long wwId)
     {
         try {
-            List<AvailableServiceListItemRes> availableServiceList = availableServiceService.getAvailableServiceByWwId(wwId).stream()
-                    .map(service -> modelMapper.map(service, AvailableServiceListItemRes.class))
+            List<AvailableServiceListItemRes> availableServiceList = availableServiceService.getAvailableServiceByWwId(wwId).stream().filter(service -> service.getStatus()).map(service -> modelMapper.map(service, AvailableServiceListItemRes.class))
                     .toList();
 
             return CoreApiResponse.success(availableServiceList);
@@ -37,13 +36,13 @@ public class AvailableServiceController {
     }
 
     @PutMapping("/update")
-    public CoreApiResponse updateAvailableService(@RequestBody AvailableServiceUpdateReq updateReq)
+    public CoreApiResponse<AvailableServiceListItemRes> updateAvailableService(@RequestBody AvailableServiceUpdateReq updateReq)
     {
         try {
             AvailableService availableService = availableServiceService.updateAvailableService(updateReq);
 
             if (availableService == null) {
-                return CoreApiResponse.success(updateReq.getAvailableServiceId(), "Không tìm thấy dịch vụ với ID: " + updateReq.getAvailableServiceId());
+                return CoreApiResponse.success(null, "Không tìm thấy dịch vụ với ID: " + updateReq.getAvailableServiceId());
             }
 
             return CoreApiResponse.success(modelMapper.map(availableService, AvailableServiceListItemRes.class));

@@ -43,10 +43,10 @@ public class ReviewController {
         }
     }
 
-    @GetMapping("/design-variant/{designVariantIdeaId}")
-    public CoreApiResponse<List<ReviewRes>> getReviewsByDesignVariantIdeaId(@PathVariable Long designVariantIdeaId) {
+    @GetMapping("/design/{designIdeaId}")
+    public CoreApiResponse<List<ReviewRes>> getReviewsByDesignIdeaId(@PathVariable Long designIdeaId) {
         try {
-            List<ReviewRes> reviews = reviewService.getReviewsByDesignVariantId(designVariantIdeaId);
+            List<ReviewRes> reviews = reviewService.getReviewsByDesignIdeaId(designIdeaId);
             if (reviews.isEmpty()) {
                 return CoreApiResponse.success(null, "Không tìm thấy đánh giá cho ý tưởng thiết kế này.");
             }

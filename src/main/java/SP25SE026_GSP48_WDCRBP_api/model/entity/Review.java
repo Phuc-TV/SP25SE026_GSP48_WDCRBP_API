@@ -41,7 +41,10 @@ public class Review {
     private String woodworkerResponse;
 
     @Column(nullable = true)
-    private boolean WookworkerResponseStatus;
+    private boolean woodworkerResponseStatus;
+
+    @Column(nullable = true)
+    private boolean status;
 
     @Column(nullable = true)
     private LocalDateTime responseAt;

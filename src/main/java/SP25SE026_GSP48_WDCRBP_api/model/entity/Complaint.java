@@ -22,7 +22,7 @@ public class Complaint {
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
-    @Column(nullable = true)
+    @Column(nullable = true,length = 1000)
     private String description;
 
     @Column(nullable = true)
