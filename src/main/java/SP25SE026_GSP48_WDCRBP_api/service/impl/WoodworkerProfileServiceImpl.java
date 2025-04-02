@@ -1,6 +1,7 @@
 package SP25SE026_GSP48_WDCRBP_api.service.impl;
 
 import SP25SE026_GSP48_WDCRBP_api.constant.ServiceNameConstant;
+import SP25SE026_GSP48_WDCRBP_api.constant.ServicePackConstant;
 import SP25SE026_GSP48_WDCRBP_api.model.entity.User;
 import SP25SE026_GSP48_WDCRBP_api.model.entity.Wallet;
 import SP25SE026_GSP48_WDCRBP_api.model.entity.ServicePack;
@@ -77,7 +78,7 @@ public class WoodworkerProfileServiceImpl implements WoodworkerProfileService {
 
         for (WoodworkerProfile profile : list) {
             if (profile != null) {
-                if (profile.getServicePack() != null && profile.getServicePack().getName().equals("Gold")) {
+                if (profile.getServicePack() != null && profile.getServicePack().getName().equals(ServicePackConstant.GOLD)) {
                     woodworkerProfileList.add(profile);
                 }
             }
@@ -85,7 +86,7 @@ public class WoodworkerProfileServiceImpl implements WoodworkerProfileService {
 
         for (WoodworkerProfile profile : list) {
             if (profile != null) {
-                if (profile.getServicePack() != null && profile.getServicePack().getName().equals("Sliver")) {
+                if (profile.getServicePack() != null && profile.getServicePack().getName().equals(ServicePackConstant.SILVER)) {
                     woodworkerProfileList.add(profile);
                 }
             }
@@ -93,7 +94,7 @@ public class WoodworkerProfileServiceImpl implements WoodworkerProfileService {
 
         for (WoodworkerProfile profile : list) {
             if (profile != null) {
-                if (profile.getServicePack() != null && profile.getServicePack().getName().equals("Bronze")) {
+                if (profile.getServicePack() != null && profile.getServicePack().getName().equals(ServicePackConstant.BRONZE)) {
                     woodworkerProfileList.add(profile);
                 }
             }

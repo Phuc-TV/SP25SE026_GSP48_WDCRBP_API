@@ -17,27 +17,27 @@ public class RequestedProduct {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long requestedProductId;
 
-    @Column(nullable = false)
+    @Column(nullable = true)
     private Byte quantity;
 
-    @Column(nullable = false)
+    @Column(nullable = true)
     private LocalDateTime createdAt;
 
-    @Column(nullable = false)
+    @Column(nullable = true)
     private float totalAmount;
 
-    @Column(nullable = false)
+    @Column(nullable = true)
     private Boolean hasDesign;
 
     @ManyToOne
-    @JoinColumn(name = "categoryId", nullable = false)
+    @JoinColumn(name = "categoryId", nullable = true)
     private Category category;
 
     @ManyToOne
-    @JoinColumn(name = "designIdeaVariantId", nullable = false)
+    @JoinColumn(name = "designIdeaVariantId", nullable = true)
     private DesignIdeaVariant designIdeaVariant;
 
     @ManyToOne
-    @JoinColumn(name = "orderId", nullable = false)
+    @JoinColumn(name = "orderId", nullable = true)
     private ServiceOrder serviceOrder;
 }

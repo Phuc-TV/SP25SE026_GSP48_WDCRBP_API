@@ -2,6 +2,7 @@ package SP25SE026_GSP48_WDCRBP_api.service.impl;
 
 import SP25SE026_GSP48_WDCRBP_api.components.CoreApiResponse;
 import SP25SE026_GSP48_WDCRBP_api.constant.ServiceOrderStatus;
+import SP25SE026_GSP48_WDCRBP_api.mapper.ServiceOrderMapper;
 import SP25SE026_GSP48_WDCRBP_api.model.dto.*;
 import SP25SE026_GSP48_WDCRBP_api.model.entity.*;
 import SP25SE026_GSP48_WDCRBP_api.model.requestModel.CreateServiceOrderPersonalizeRequest;
@@ -81,7 +82,7 @@ public class ServiceOrderServiceImpl implements ServiceOrderService {
     @Override
     public List<ServiceOrderDto> listServiceOrderByUserIdOrWwId(Long id, String role) {
         List<ServiceOrder> orders = new ArrayList<>();
-        if (role.equals("User")) {
+        if (role.equals("Customer")) {
             User user = userRepository.findUserByUserId(id);
             orders = orderRepository.findServiceOrderByUser(user);
         } else {
@@ -101,27 +102,16 @@ public class ServiceOrderServiceImpl implements ServiceOrderService {
 
         for (ServiceOrder serviceOrder : orders)
         {
-            ServiceOrderDto serviceOrderDto = new ServiceOrderDto();
-
-            serviceOrderDto = modelMapper.map(orders, ServiceOrderDto.class);
             AvaliableServiceDto avaliableServiceDto = new AvaliableServiceDto();
-
             avaliableServiceDto.setService(serviceOrder.getAvailableService().getService());
-
             wwDto wwDto = new wwDto();
-
             wwDto.setBrandName(serviceOrder.getAvailableService().getWoodworkerProfile().getBrandName());
+            wwDto.setWoodworkerId(serviceOrder.getAvailableService().getWoodworkerProfile().getWoodworkerId());
+            wwDto.setAddress(serviceOrder.getAvailableService().getWoodworkerProfile().getAddress());
             wwDto.setBio(serviceOrder.getAvailableService().getWoodworkerProfile().getBio());
-
             avaliableServiceDto.setWwDto(wwDto);
 
-            serviceOrderDto.setService(avaliableServiceDto);
-
-            OrderProgress orderProgress = orderProgressRepository.findOrderProgressByServiceOrder(serviceOrder);
-
-            serviceOrderDto.setOrderProcess(orderProgress.getStatus());
-
-            serviceOrderDtos.add(serviceOrderDto);
+            serviceOrderDtos.add(ServiceOrderMapper.toDto(serviceOrder, avaliableServiceDto));
         }
 
         return serviceOrderDtos;
@@ -129,9 +119,8 @@ public class ServiceOrderServiceImpl implements ServiceOrderService {
 
     @Override
     public CoreApiResponse addServiceOrderCustomize(CreateServiceOrderCusRequest createServiceOrderCusRequest) {
-
+        Float totalAmount = 0f;
         List<DesignIdeaVariantCusDto> designIdeaVariantIds = createServiceOrderCusRequest.getDesignIdeaVariantIds();
-
         short quantity = 0;
 
         for (DesignIdeaVariantCusDto t: designIdeaVariantIds)
@@ -151,15 +140,12 @@ public class ServiceOrderServiceImpl implements ServiceOrderService {
         ServiceOrder serviceOrder = new ServiceOrder();
         serviceOrder.setAvailableService(availableService);
         serviceOrder.setUser(user);
+        serviceOrder.setStatus(ServiceOrderStatus.DANG_CHO_THO_MOC_DUYET);
         serviceOrder.setCreatedAt(LocalDateTime.now());
         serviceOrder.setQuantity(quantity);
         serviceOrder.setRole("Woodworker");
 
         orderRepository.save(serviceOrder);
-
-        //Create RequestedProduct
-        int t = orderRepository.findAll().size();
-        ServiceOrder newServiceOrder = orderRepository.findAll().get(t - 1);
 
         for (DesignIdeaVariantCusDto i: designIdeaVariantIds)
         {
@@ -168,16 +154,21 @@ public class ServiceOrderServiceImpl implements ServiceOrderService {
 
             RequestedProduct requestedProduct = new RequestedProduct();
             requestedProduct.setDesignIdeaVariant(designIdeaVariant);
-            requestedProduct.setServiceOrder(newServiceOrder);
+            requestedProduct.setServiceOrder(serviceOrder);
             requestedProduct.setTotalAmount(designIdeaVariant.getPrice() * i.getQuantity());
+            totalAmount = totalAmount + requestedProduct.getTotalAmount();
             requestedProduct.setCreatedAt(LocalDateTime.now());
 
             requestedProductRepository.save(requestedProduct);
         }
 
+        serviceOrder.setTotalAmount(totalAmount);
+        orderRepository.save(serviceOrder);
+
         //Create OrderProgress
         OrderProgress orderProgress = new OrderProgress();
         orderProgress.setServiceOrder(serviceOrder);
+        orderProgress.setCreatedTime(LocalDateTime.now());
 
         orderProgress.setStatus(ServiceOrderStatus.DANG_CHO_THO_MOC_DUYET);
 
@@ -189,7 +180,7 @@ public class ServiceOrderServiceImpl implements ServiceOrderService {
 
         shipmentRepository.save(shipment);
 
-        return CoreApiResponse.success(newServiceOrder, "successfully");
+        return CoreApiResponse.success(serviceOrder, "successfully");
     }
 
     @Override

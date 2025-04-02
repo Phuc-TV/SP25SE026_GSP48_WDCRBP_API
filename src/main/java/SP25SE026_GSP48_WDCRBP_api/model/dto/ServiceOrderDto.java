@@ -15,10 +15,9 @@ public class ServiceOrderDto {
     private Float totalAmount;
     private boolean isInstall;
     private String description;
+    private String status;
     private String feedback;
     private Float amountPaid;
     private Float amountRemaining;
-    private String orderProgress;
     private AvaliableServiceDto service;
-    private String orderProcess;
 }
