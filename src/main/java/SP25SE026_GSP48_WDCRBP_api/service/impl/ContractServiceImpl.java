@@ -128,7 +128,8 @@ public class ContractServiceImpl implements ContractService {
             orderDepositRepository.save(orderDeposit);
         }
 
-        OrderProgress orderProgress = orderProgressRepository.findOrderProgressByServiceOrder(serviceOrder).getLast();
+        OrderProgress orderProgress = orderProgressRepository.findOrderProgressByServiceOrder(serviceOrder).
+                get(orderProgressRepository.findAll().size()-1);
         String s = "Đang chờ thanh toán";
         orderProgress.setStatus(s);
         orderProgressRepository.save(orderProgress);
