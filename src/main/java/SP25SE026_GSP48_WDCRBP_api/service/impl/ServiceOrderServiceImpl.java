@@ -1,12 +1,14 @@
 package SP25SE026_GSP48_WDCRBP_api.service.impl;
 
 import SP25SE026_GSP48_WDCRBP_api.components.CoreApiResponse;
+import SP25SE026_GSP48_WDCRBP_api.constant.ServiceNameConstant;
 import SP25SE026_GSP48_WDCRBP_api.constant.ServiceOrderStatus;
 import SP25SE026_GSP48_WDCRBP_api.mapper.ServiceOrderMapper;
 import SP25SE026_GSP48_WDCRBP_api.model.dto.*;
 import SP25SE026_GSP48_WDCRBP_api.model.entity.*;
 import SP25SE026_GSP48_WDCRBP_api.model.requestModel.CreateServiceOrderPersonalizeRequest;
 import SP25SE026_GSP48_WDCRBP_api.model.requestModel.CreateServiceOrderCusRequest;
+import SP25SE026_GSP48_WDCRBP_api.model.responseModel.UserDetailRes;
 import SP25SE026_GSP48_WDCRBP_api.repository.*;
 import SP25SE026_GSP48_WDCRBP_api.service.ServiceOrderService;
 import org.modelmapper.ModelMapper;
@@ -55,30 +57,6 @@ public class ServiceOrderServiceImpl implements ServiceOrderService {
     @Autowired
     private ShipmentRepository shipmentRepository;
 
-    public ServiceOrderServiceImpl(ServiceOrderRepository orderRepository,
-                                   UserRepository userRepository,
-                                   AvailableServiceRepository availableServiceRepository,
-                                   RequestedProductRepository requestedProductRepository,
-                                   OrderProgressRepository orderProgressRepository,
-                                   WoodworkerProfileRepository woodworkerProfileRepository,
-                                   ConsultantAppointmentRepository consultantAppointmentRepository,
-                                   TechSpecRepository techSpecRepository,
-                                   CustomerSelectionRepository customerSelectionRepository,
-                                   ModelMapper modelMapper,
-                                   ShipmentRepository shipmentRepository) {
-        this.orderRepository = orderRepository;
-        this.userRepository = userRepository;
-        this.availableServiceRepository = availableServiceRepository;
-        this.requestedProductRepository = requestedProductRepository;
-        this.orderProgressRepository = orderProgressRepository;
-        this.woodworkerProfileRepository = woodworkerProfileRepository;
-        this.consultantAppointmentRepository = consultantAppointmentRepository;
-        this.techSpecRepository = techSpecRepository;
-        this.customerSelectionRepository = customerSelectionRepository;
-        this.modelMapper = modelMapper;
-        this.shipmentRepository = shipmentRepository;
-    }
-
     @Override
     public List<ServiceOrderDto> listServiceOrderByUserIdOrWwId(Long id, String role) {
         List<ServiceOrder> orders = new ArrayList<>();
@@ -104,6 +82,7 @@ public class ServiceOrderServiceImpl implements ServiceOrderService {
         {
             AvaliableServiceDto avaliableServiceDto = new AvaliableServiceDto();
             avaliableServiceDto.setService(serviceOrder.getAvailableService().getService());
+
             wwDto wwDto = new wwDto();
             wwDto.setBrandName(serviceOrder.getAvailableService().getWoodworkerProfile().getBrandName());
             wwDto.setWoodworkerId(serviceOrder.getAvailableService().getWoodworkerProfile().getWoodworkerId());
@@ -111,7 +90,9 @@ public class ServiceOrderServiceImpl implements ServiceOrderService {
             wwDto.setBio(serviceOrder.getAvailableService().getWoodworkerProfile().getBio());
             avaliableServiceDto.setWwDto(wwDto);
 
-            serviceOrderDtos.add(ServiceOrderMapper.toDto(serviceOrder, avaliableServiceDto));
+            UserDetailRes userDetailRes = modelMapper.map(serviceOrder.getUser(), UserDetailRes.class);
+
+            serviceOrderDtos.add(ServiceOrderMapper.toDto(serviceOrder, avaliableServiceDto,userDetailRes));
         }
 
         return serviceOrderDtos;
@@ -140,7 +121,7 @@ public class ServiceOrderServiceImpl implements ServiceOrderService {
         ServiceOrder serviceOrder = new ServiceOrder();
         serviceOrder.setAvailableService(availableService);
         serviceOrder.setUser(user);
-        serviceOrder.setStatus(ServiceOrderStatus.DANG_CHO_THO_MOC_DUYET);
+        serviceOrder.setStatus(ServiceOrderStatus.DANG_CHO_THO_MOC_XAC_NHAN);
         serviceOrder.setCreatedAt(LocalDateTime.now());
         serviceOrder.setQuantity(quantity);
         serviceOrder.setRole("Woodworker");
@@ -170,7 +151,7 @@ public class ServiceOrderServiceImpl implements ServiceOrderService {
         orderProgress.setServiceOrder(serviceOrder);
         orderProgress.setCreatedTime(LocalDateTime.now());
 
-        orderProgress.setStatus(ServiceOrderStatus.DANG_CHO_THO_MOC_DUYET);
+        orderProgress.setStatus(ServiceOrderStatus.DANG_CHO_THO_MOC_XAC_NHAN);
 
         orderProgressRepository.save(orderProgress);
 
@@ -187,37 +168,70 @@ public class ServiceOrderServiceImpl implements ServiceOrderService {
     public ServiceOrder acceptServiceOrder(Long serviceOrderId, LocalDateTime timeMeeting, String linkMeeting) {
         ServiceOrder serviceOrder = orderRepository.findById(serviceOrderId).orElse(null);
 
-        if (serviceOrder.getRole().equals("Woodworker")) {
-            ConsultantAppointment consultantAppointment = new ConsultantAppointment();
-
-            if (consultantAppointmentRepository.findConsultantAppointmentByServiceOrder(serviceOrder) != null) {
-                consultantAppointment =
-                        consultantAppointmentRepository.findConsultantAppointmentByServiceOrder(serviceOrder);
-            }
-
-            consultantAppointment.setServiceOrder(serviceOrder);
-            consultantAppointment.setCreatedAt(LocalDateTime.now());
-            consultantAppointment.setDateTime(timeMeeting);
-            consultantAppointment.setMeetAddress(linkMeeting);
-
-            consultantAppointmentRepository.save(consultantAppointment);
-
-            serviceOrder.setConsultantAppointment(consultantAppointment);
-            serviceOrder.setRole("Customer");
-
-            orderRepository.save(serviceOrder);
-
-            OrderProgress orderProgress = orderProgressRepository.findOrderProgressByServiceOrder(serviceOrder);
-            orderProgress.setStatus(ServiceOrderStatus.DANG_CHO_KHACH_DUYET_LICH_HEN);
-            orderProgressRepository.save(orderProgress);
-        } else if (serviceOrder.getRole().equals("Customer")) {
-            serviceOrder.setRole("Customer");
-            orderRepository.save(serviceOrder);
-
-            OrderProgress orderProgress = orderProgressRepository.findOrderProgressByServiceOrder(serviceOrder);
-            orderProgress.setStatus(ServiceOrderStatus.DANG_LAM_HOP_DONG);
-            orderProgressRepository.save(orderProgress);
+        if (serviceOrder == null) {
+            return null;
         }
+
+        String currentStatus = serviceOrder.getStatus();
+
+        // Create new progress record with next status based on current status and role
+        OrderProgress newOrderProgress = new OrderProgress();
+        OrderProgress continueOrderProgress = new OrderProgress();
+        newOrderProgress.setServiceOrder(serviceOrder);
+        newOrderProgress.setCreatedTime(LocalDateTime.now());
+
+        switch (serviceOrder.getRole()) {
+            case "Woodworker":
+                if (currentStatus == null || currentStatus.equals(ServiceOrderStatus.DANG_CHO_THO_MOC_XAC_NHAN)) {
+                    // Woodworker accepting initial order, setting appointment
+                    ConsultantAppointment consultantAppointment = new ConsultantAppointment();
+                    if (consultantAppointmentRepository.findConsultantAppointmentByServiceOrder(serviceOrder) != null) {
+                        consultantAppointment = consultantAppointmentRepository.findConsultantAppointmentByServiceOrder(serviceOrder);
+                    }
+
+                    consultantAppointment.setServiceOrder(serviceOrder);
+                    consultantAppointment.setCreatedAt(LocalDateTime.now());
+                    consultantAppointment.setDateTime(timeMeeting);
+                    consultantAppointment.setMeetAddress(linkMeeting);
+                    consultantAppointmentRepository.save(consultantAppointment);
+
+                    serviceOrder.setConsultantAppointment(consultantAppointment);
+                    newOrderProgress.setStatus(ServiceOrderStatus.DANG_CHO_KHACH_DUYET_LICH_HEN);
+                }
+
+                break;
+            case "Customer":
+                if (currentStatus.equals(ServiceOrderStatus.DANG_CHO_KHACH_DUYET_LICH_HEN)) {
+                    // Customer approving appointment
+                    newOrderProgress.setStatus(ServiceOrderStatus.DA_DUYET_LICH_HEN);
+                } else if (currentStatus.equals(ServiceOrderStatus.DANG_CHO_KHACH_DUYET_HOP_DONG)) {
+                    // Customer approving contract
+                    newOrderProgress.setStatus(ServiceOrderStatus.DA_DUYET_HOP_DONG);
+
+                    if (serviceOrder.getAvailableService().getService().getServiceName().equals(ServiceNameConstant.CUSTOMIZATION)) {
+                        continueOrderProgress.setServiceOrder(serviceOrder);
+                        continueOrderProgress.setCreatedTime(LocalDateTime.now());
+                        continueOrderProgress.setStatus(ServiceOrderStatus.DANG_GIA_CONG);
+                    }
+                } else if (currentStatus.equals(ServiceOrderStatus.DANG_CHO_KHACH_DUYET_THIET_KE)) {
+                    newOrderProgress.setStatus(ServiceOrderStatus.DANG_GIA_CONG);
+                }
+                break;
+        }
+
+        // Toggle the role between Woodworker and Customer
+        serviceOrder.setRole(serviceOrder.getRole().equals("Woodworker") ? "Customer" : "Woodworker");
+
+        // Clear feedback when moving to next stage
+        serviceOrder.setFeedback(null);
+
+        // Save changes
+        orderRepository.save(serviceOrder);
+        orderProgressRepository.save(newOrderProgress);
+        if (continueOrderProgress.getStatus() != null) {
+            orderProgressRepository.save(continueOrderProgress);
+        }
+
         return serviceOrder;
     }
 
@@ -231,6 +245,7 @@ public class ServiceOrderServiceImpl implements ServiceOrderService {
             orderRepository.save(serviceOrder);
             return serviceOrder;
         }
+
         return null;
     }
 
