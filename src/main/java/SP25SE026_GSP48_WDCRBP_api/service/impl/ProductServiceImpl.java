@@ -143,6 +143,11 @@ public class ProductServiceImpl implements ProductService {
                 .categoryId(product.getCategory().getCategoryId())
                 .woodworkerName(product.getWoodworkerProfile().getBrandName())
                 .categoryName(product.getCategory().getCategoryName())
+                .address(product.getWoodworkerProfile().getAddress())
+                .cityId(product.getWoodworkerProfile().getCityId())
+                .packType(product.getWoodworkerProfile().getServicePack().getName())
+                .woodworkerImgUrl(product.getWoodworkerProfile().getImgUrl())
+                .servicePackEndDate(product.getWoodworkerProfile().getServicePackEndDate())
                 .build();
     }
 

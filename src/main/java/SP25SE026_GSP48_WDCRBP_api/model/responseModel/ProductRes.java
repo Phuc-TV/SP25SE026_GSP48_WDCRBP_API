@@ -2,6 +2,8 @@ package SP25SE026_GSP48_WDCRBP_api.model.responseModel;
 
 import lombok.*;
 
+import java.time.LocalDateTime;
+
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
@@ -30,4 +32,9 @@ public class ProductRes {
     private Long categoryId;
     private String woodworkerName;
     private String categoryName;
+    private String address;
+    private String cityId;
+    private String packType;
+    private String woodworkerImgUrl;
+    private LocalDateTime servicePackEndDate;
 }

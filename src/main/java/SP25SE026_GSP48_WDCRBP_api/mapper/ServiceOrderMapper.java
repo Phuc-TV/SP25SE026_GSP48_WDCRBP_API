@@ -3,11 +3,12 @@ package SP25SE026_GSP48_WDCRBP_api.mapper;
 import SP25SE026_GSP48_WDCRBP_api.model.dto.AvaliableServiceDto;
 import SP25SE026_GSP48_WDCRBP_api.model.dto.ServiceOrderDto;
 import SP25SE026_GSP48_WDCRBP_api.model.entity.ServiceOrder;
+import SP25SE026_GSP48_WDCRBP_api.model.responseModel.UserDetailRes;
 
 public class ServiceOrderMapper {
 
     // Map từ Entity -> DTO
-    public static ServiceOrderDto toDto(ServiceOrder entity, AvaliableServiceDto avaliableServiceDto ) {
+    public static ServiceOrderDto toDto(ServiceOrder entity, AvaliableServiceDto avaliableServiceDto, UserDetailRes userDetailRes) {
         if (entity == null) {
             return null;
         }
@@ -23,6 +24,7 @@ public class ServiceOrderMapper {
         dto.setAmountRemaining(entity.getAmountRemaining());
         dto.setStatus(entity.getStatus());
         dto.setService(avaliableServiceDto);
+        dto.setUser(userDetailRes);
 
         return dto;
     }
