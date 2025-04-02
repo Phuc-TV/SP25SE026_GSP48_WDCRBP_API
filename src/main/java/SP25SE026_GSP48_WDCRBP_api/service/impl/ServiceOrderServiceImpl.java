@@ -266,10 +266,6 @@ public class ServiceOrderServiceImpl implements ServiceOrderService {
 
         orderRepository.save(serviceOrder);
 
-        //Create RequestedProduct
-        int t = orderRepository.findAll().size();
-        ServiceOrder newServiceOrder = orderRepository.findAll().get(t - 1);
-
         List<RequestedProductPersonalizeDto> requestedProducts =
                 createServiceOrderPersonalizeRequest.getRequestedProducts();
 
@@ -277,7 +273,7 @@ public class ServiceOrderServiceImpl implements ServiceOrderService {
         {
             RequestedProduct requestedProduct = new RequestedProduct();
             requestedProduct.setQuantity(requestedProductPersonalizeDto.getQuantity());
-            requestedProduct.setServiceOrder(newServiceOrder);
+            requestedProduct.setServiceOrder(serviceOrder);
             requestedProduct.setCreatedAt(LocalDateTime.now());
 
             requestedProductRepository.save(requestedProduct);
@@ -296,6 +292,6 @@ public class ServiceOrderServiceImpl implements ServiceOrderService {
             }
         }
 
-        return newServiceOrder;
+        return serviceOrder;
     }
 }
