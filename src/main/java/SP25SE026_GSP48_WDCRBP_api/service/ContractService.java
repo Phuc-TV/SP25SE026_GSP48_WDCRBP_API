@@ -7,4 +7,6 @@ public interface ContractService {
     Contract createContractCustomize(WwCreateContractCustomizeRequest wwCreateContractCustomizeRequest);
 
     Contract customerSignContract(Long serviceOrderId, String customerSign, Long cusId);
+
+    Contract getContractByserviceorderId(Long serviceOrderId);
 }

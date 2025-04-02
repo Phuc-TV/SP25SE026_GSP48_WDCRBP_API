@@ -15,5 +15,6 @@ import java.util.List;
 public class CreateServiceOrderPersonalizeRequest {
     private Long availableServiceId;
     private Long userId;
-    List<RequestedProductPersonalizeDto> requestedProducts;
+    private String address;
+    private List<RequestedProductPersonalizeDto> requestedProducts;
 }

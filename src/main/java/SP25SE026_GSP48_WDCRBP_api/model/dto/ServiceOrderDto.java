@@ -1,5 +1,7 @@
 package SP25SE026_GSP48_WDCRBP_api.model.dto;
 
+import SP25SE026_GSP48_WDCRBP_api.model.entity.ConsultantAppointment;
+import SP25SE026_GSP48_WDCRBP_api.model.entity.RequestedProduct;
 import SP25SE026_GSP48_WDCRBP_api.model.responseModel.UserDetailRes;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -21,5 +23,7 @@ public class ServiceOrderDto {
     private Float amountPaid;
     private Float amountRemaining;
     private AvaliableServiceDto service;
+    private RequestedProduct requestedProduct;
+    private ConsultantAppointment consultantAppointment;
     private UserDetailRes user;
 }

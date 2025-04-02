@@ -144,6 +144,8 @@ public class ServiceOrderServiceImpl implements ServiceOrderService {
         }
 
         serviceOrder.setTotalAmount(totalAmount);
+        serviceOrder.setAmountRemaining(totalAmount);
+        serviceOrder.setAmountPaid(0.f);
         orderRepository.save(serviceOrder);
 
         //Create OrderProgress
@@ -222,6 +224,16 @@ public class ServiceOrderServiceImpl implements ServiceOrderService {
         // Toggle the role between Woodworker and Customer
         serviceOrder.setRole(serviceOrder.getRole().equals("Woodworker") ? "Customer" : "Woodworker");
 
+            OrderProgress orderProgress = orderProgressRepository.findOrderProgressByServiceOrder(serviceOrder).getLast();
+            orderProgress.setStatus(ServiceOrderStatus.DANG_CHO_KHACH_DUYET_LICH_HEN);
+            orderProgressRepository.save(orderProgress);
+        } else if (serviceOrder.getRole().equals("Customer")) {
+            serviceOrder.setRole("Customer");
+            orderRepository.save(serviceOrder);
+
+            OrderProgress orderProgress = orderProgressRepository.findOrderProgressByServiceOrder(serviceOrder).getLast();
+            orderProgress.setStatus(ServiceOrderStatus.DANG_LAM_HOP_DONG);
+            orderProgressRepository.save(orderProgress);
         // Clear feedback when moving to next stage
         serviceOrder.setFeedback(null);
 
@@ -291,6 +303,19 @@ public class ServiceOrderServiceImpl implements ServiceOrderService {
                 customerSelectionRepository.save(customerSelection);
             }
         }
+
+        //Create OrderProgress
+        OrderProgress orderProgress = new OrderProgress();
+        orderProgress.setServiceOrder(serviceOrder);
+        orderProgress.setCreatedTime(LocalDateTime.now());
+
+        orderProgress.setStatus(ServiceOrderStatus.DANG_CHO_THO_MOC_DUYET);
+
+        Shipment shipment = new Shipment();
+        shipment.setServiceOrder(serviceOrder);
+        shipment.setToAddress(createServiceOrderPersonalizeRequest.getAddress());
+
+        shipmentRepository.save(shipment);
 
         return serviceOrder;
     }
