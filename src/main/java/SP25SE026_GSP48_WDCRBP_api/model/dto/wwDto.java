@@ -10,6 +10,8 @@ import lombok.Setter;
 @NoArgsConstructor
 @AllArgsConstructor
 public class wwDto {
+    private Long woodworkerId;
+    private String address;
     private String brandName;
     private String bio;
 }

@@ -40,7 +40,7 @@ public class ServiceOrder {
     private LocalDateTime updatedAt;
 
     @Column(nullable = true)
-    private boolean status;
+    private String status;
 
     @Column(nullable = true)
     private Float amountPaid;
