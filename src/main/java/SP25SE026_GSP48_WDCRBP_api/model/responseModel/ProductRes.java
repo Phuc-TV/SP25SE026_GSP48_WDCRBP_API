@@ -30,4 +30,8 @@ public class ProductRes {
     private Long categoryId;
     private String woodworkerName;
     private String categoryName;
+    private String address;
+    private String cityId;
+    private String packType;
+    private String woodworkerImgUrl;
 }
