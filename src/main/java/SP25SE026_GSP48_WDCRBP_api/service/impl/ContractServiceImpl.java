@@ -1,5 +1,6 @@
 package SP25SE026_GSP48_WDCRBP_api.service.impl;
 
+import SP25SE026_GSP48_WDCRBP_api.constant.ServiceOrderStatus;
 import SP25SE026_GSP48_WDCRBP_api.model.entity.*;
 import SP25SE026_GSP48_WDCRBP_api.model.requestModel.WwCreateContractCustomizeRequest;
 import SP25SE026_GSP48_WDCRBP_api.repository.*;
@@ -53,6 +54,13 @@ public class ContractServiceImpl implements ContractService {
     {
         ServiceOrder serviceOrder =
                 serviceRepository.findServiceOrderByOrderId(wwCreateContractCustomizeRequest.getServiceOrderId());
+
+        if (serviceOrder.getStatus().equals(ServiceOrderStatus.DA_DUYET_LICH_HEN)) {
+            OrderProgress newOrderProgress = new OrderProgress();
+            newOrderProgress.setServiceOrder(serviceOrder);
+            newOrderProgress.setStatus(ServiceOrderStatus.DANG_CHO_KHACH_DUYET_HOP_DONG);
+        }
+
         Contract contract1 = contractRepository.findContractByServiceOrder(serviceOrder);
 
         if (contract1 == null)
@@ -61,6 +69,7 @@ public class ContractServiceImpl implements ContractService {
             contract.setWarrantyPeriod(wwCreateContractCustomizeRequest.getWarrantyPeriod());
             contract.setWarrantyPolicy(wwCreateContractCustomizeRequest.getWarrantyPolicy());
             contract.setCompleteDate(wwCreateContractCustomizeRequest.getCompleteDate());
+            contract.setWoodworkerSignature(wwCreateContractCustomizeRequest.getWoodworkerSignature());
             contract.setSignDate(LocalDateTime.now());
 
             List<RequestedProduct> requestedProduct =
@@ -72,8 +81,10 @@ public class ContractServiceImpl implements ContractService {
                 i = i+ rp.getTotalAmount();
             }
 
+            serviceOrder.setFeedback("");
             serviceOrder.setTotalAmount(i);
             serviceOrder.setRole("Customer");
+            serviceOrder.setStatus(ServiceOrderStatus.DANG_CHO_KHACH_DUYET_HOP_DONG);
             serviceRepository.save(serviceOrder);
 
             contract.setContractTotalAmount(i);
