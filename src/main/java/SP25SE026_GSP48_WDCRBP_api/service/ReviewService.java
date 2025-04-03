@@ -11,6 +11,7 @@ public interface ReviewService {
     List<ReviewRes> getReviewsByWoodworkerId(Long woodworkerId);
     List<ReviewRes> getReviewsByProductId(Long productId);
     List<ReviewRes> getReviewsByDesignIdeaId(Long designId);
+    ReviewRes getReviewById(Long reviewId);
     ReviewRes createReview(ReviewRequest request);
     ReviewRes updateReviewStatus(Long reviewId, UpdateReviewStatusRequest updateReviewStatusRequest);
     ReviewRes updateWoodworkerResponseStatus(Long reviewId, UpdateWoodworkerResponseStatusRequest updateWoodworkerResponseStatusRequest);

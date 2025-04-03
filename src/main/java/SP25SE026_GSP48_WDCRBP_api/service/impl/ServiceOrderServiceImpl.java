@@ -3,12 +3,13 @@ package SP25SE026_GSP48_WDCRBP_api.service.impl;
 import SP25SE026_GSP48_WDCRBP_api.components.CoreApiResponse;
 import SP25SE026_GSP48_WDCRBP_api.constant.ServiceNameConstant;
 import SP25SE026_GSP48_WDCRBP_api.constant.ServiceOrderStatus;
+import SP25SE026_GSP48_WDCRBP_api.mapper.DesignIdeaVariantMapper;
 import SP25SE026_GSP48_WDCRBP_api.mapper.ServiceOrderMapper;
 import SP25SE026_GSP48_WDCRBP_api.model.dto.*;
 import SP25SE026_GSP48_WDCRBP_api.model.entity.*;
 import SP25SE026_GSP48_WDCRBP_api.model.requestModel.CreateServiceOrderPersonalizeRequest;
 import SP25SE026_GSP48_WDCRBP_api.model.requestModel.CreateServiceOrderCusRequest;
-import SP25SE026_GSP48_WDCRBP_api.model.responseModel.UserDetailRes;
+import SP25SE026_GSP48_WDCRBP_api.model.responseModel.*;
 import SP25SE026_GSP48_WDCRBP_api.repository.*;
 import SP25SE026_GSP48_WDCRBP_api.service.ServiceOrderService;
 import org.modelmapper.ModelMapper;
@@ -29,6 +30,9 @@ public class ServiceOrderServiceImpl implements ServiceOrderService {
 
     @Autowired
     private WoodworkerProfileRepository woodworkerProfileRepository;
+
+    @Autowired
+    private DesignIdeaVariantConfigRepository designIdeaVariantConfigRepository;
 
     @Autowired
     private RequestedProductRepository requestedProductRepository;
@@ -92,10 +96,74 @@ public class ServiceOrderServiceImpl implements ServiceOrderService {
 
             UserDetailRes userDetailRes = modelMapper.map(serviceOrder.getUser(), UserDetailRes.class);
 
-            serviceOrderDtos.add(ServiceOrderMapper.toDto(serviceOrder, avaliableServiceDto,userDetailRes));
+            serviceOrderDtos.add(ServiceOrderMapper.toServiceOrderDto(serviceOrder, avaliableServiceDto,userDetailRes));
         }
 
         return serviceOrderDtos;
+    }
+
+    @Override
+    public ServiceOrderDetailRes getServiceDetailById(Long id) {
+        ServiceOrder order = orderRepository.findServiceOrderByOrderId(id);
+
+        if (order == null) {
+            return null;
+        }
+
+        // Build service order dto
+        AvaliableServiceDto avaliableServiceDto = new AvaliableServiceDto();
+        avaliableServiceDto.setService(order.getAvailableService().getService());
+
+        wwDto wwDto = new wwDto();
+        wwDto.setBrandName(order.getAvailableService().getWoodworkerProfile().getBrandName());
+        wwDto.setWoodworkerId(order.getAvailableService().getWoodworkerProfile().getWoodworkerId());
+        wwDto.setAddress(order.getAvailableService().getWoodworkerProfile().getAddress());
+        wwDto.setBio(order.getAvailableService().getWoodworkerProfile().getBio());
+        avaliableServiceDto.setWwDto(wwDto);
+
+        UserDetailRes userDetailRes = modelMapper.map(order.getUser(), UserDetailRes.class);
+
+        ServiceOrderDto serviceOrderDto = ServiceOrderMapper.toServiceOrderDto(order, avaliableServiceDto,userDetailRes);
+
+        // Build ConsultantAppointmentDetailRes
+        ConsultantAppointmentDetailRes consultantAppointmentDetailRes = order.getConsultantAppointment() != null ? modelMapper.map(order.getConsultantAppointment(), ConsultantAppointmentDetailRes.class) : null;
+
+        // Build ReviewRes
+        ReviewRes reviewRes = order.getReview() != null ? modelMapper.map(order.getReview(), ReviewRes.class) : null;
+
+        // Build RequestedProductDetailRes
+        List<RequestedProduct> requestedProducts = requestedProductRepository.findByServiceOrder(order);
+        List<RequestedProductDetailRes> requestedProductDetailResList = new ArrayList<>();
+
+        for (RequestedProduct requestedProduct : requestedProducts) {
+            // Customization
+            if (requestedProduct.getDesignIdeaVariant()!=null) {
+                // Design idea
+                DesignIdea idea = requestedProduct.getDesignIdeaVariant().getDesignIdea();
+                // Design idea variant
+                DesignIdeaVariant variant = designIdeaVariantRepository.findDesignIdeaVariantByDesignIdeaVariantId(requestedProduct.getDesignIdeaVariant().getDesignIdeaVariantId());
+                // Design idea variant config
+                List<DesignIdeaVariantConfig> configs =
+                        designIdeaVariantConfigRepository.findDesignIdeaVariantConfigByDesignIdeaVariant(variant);
+                // Design idea detail res
+                DesignVariantDetailRes designIdeaDetailRes = DesignIdeaVariantMapper.toDto(variant, configs, idea);
+                // RequestedProduct for Customize detail
+                RequestedProductDetailRes requestedProductDetailRes = new RequestedProductDetailRes();
+
+                requestedProductDetailRes.setRequestedProductId(requestedProduct.getRequestedProductId());
+                requestedProductDetailRes.setQuantity(requestedProduct.getQuantity());
+                requestedProductDetailRes.setTotalAmount(requestedProduct.getTotalAmount());
+                requestedProductDetailRes.setCreatedAt(requestedProduct.getCreatedAt());
+                requestedProductDetailRes.setHasDesign(requestedProduct.getDesignIdeaVariant() != null);
+                requestedProductDetailRes.setDesignIdeaVariantDetail(designIdeaDetailRes);
+
+                requestedProductDetailResList.add(requestedProductDetailRes);
+            } else {
+                // Personalization
+            }
+        }
+
+        return ServiceOrderMapper.toServiceOrderDetailRes(serviceOrderDto, requestedProductDetailResList, consultantAppointmentDetailRes, reviewRes);
     }
 
     @Override
@@ -135,6 +203,7 @@ public class ServiceOrderServiceImpl implements ServiceOrderService {
 
             RequestedProduct requestedProduct = new RequestedProduct();
             requestedProduct.setDesignIdeaVariant(designIdeaVariant);
+            requestedProduct.setQuantity(Byte.parseByte(quantity + ""));
             requestedProduct.setServiceOrder(serviceOrder);
             requestedProduct.setTotalAmount(designIdeaVariant.getPrice() * i.getQuantity());
             totalAmount = totalAmount + requestedProduct.getTotalAmount();
