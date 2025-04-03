@@ -2,11 +2,14 @@ package SP25SE026_GSP48_WDCRBP_api.mapper;
 
 import SP25SE026_GSP48_WDCRBP_api.model.dto.DesignIdeaVariantConfigDto;
 import SP25SE026_GSP48_WDCRBP_api.model.dto.DesignIdeaVariantDto;
+import SP25SE026_GSP48_WDCRBP_api.model.entity.Category;
 import SP25SE026_GSP48_WDCRBP_api.model.entity.DesignIdea;
 import SP25SE026_GSP48_WDCRBP_api.model.entity.DesignIdeaVariant;
 import SP25SE026_GSP48_WDCRBP_api.model.entity.DesignIdeaVariantConfig;
+import SP25SE026_GSP48_WDCRBP_api.model.responseModel.CategoryDetailRes;
 import SP25SE026_GSP48_WDCRBP_api.model.responseModel.DesignIdeaDetailRes;
 import SP25SE026_GSP48_WDCRBP_api.model.responseModel.DesignVariantDetailRes;
+import SP25SE026_GSP48_WDCRBP_api.model.responseModel.WoodworkerProfileDetailRes;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -45,8 +48,15 @@ public class DesignIdeaVariantMapper {
         dto.setDescription(designIdea.getDescription());
         dto.setTotalStar(designIdea.getTotalStar());
         dto.setTotalReviews(designIdea.getTotalReviews());
-        dto.setWoodworkerProfile(dto.getWoodworkerProfile());
-        dto.setCategory(dto.getCategory());
+
+        Category category = designIdea.getCategory();
+        CategoryDetailRes categoryDetailRes = new CategoryDetailRes();
+        categoryDetailRes.setCategoryId(category.getCategoryId());
+        categoryDetailRes.setCategoryName(category.getCategoryName());
+        categoryDetailRes.setCategoryLevel(String.valueOf(category.getCategoryLevel()));
+
+        WoodworkerProfileDetailRes wwDetailRes = WoodworkerProfileMapper.toDetailRes(designIdea.getWoodworkerProfile());
+        dto.setCategory(categoryDetailRes);
         return dto;
     }
 }

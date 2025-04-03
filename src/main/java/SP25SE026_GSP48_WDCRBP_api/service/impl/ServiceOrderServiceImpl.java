@@ -82,8 +82,7 @@ public class ServiceOrderServiceImpl implements ServiceOrderService {
 
         List<ServiceOrderDto> serviceOrderDtos = new ArrayList<>();
 
-        for (ServiceOrder serviceOrder : orders)
-        {
+        for (ServiceOrder serviceOrder : orders) {
             AvaliableServiceDto avaliableServiceDto = new AvaliableServiceDto();
             avaliableServiceDto.setService(serviceOrder.getAvailableService().getService());
 
@@ -96,7 +95,7 @@ public class ServiceOrderServiceImpl implements ServiceOrderService {
 
             UserDetailRes userDetailRes = modelMapper.map(serviceOrder.getUser(), UserDetailRes.class);
 
-            serviceOrderDtos.add(ServiceOrderMapper.toServiceOrderDto(serviceOrder, avaliableServiceDto,userDetailRes));
+            serviceOrderDtos.add(ServiceOrderMapper.toServiceOrderDto(serviceOrder, avaliableServiceDto, userDetailRes));
         }
 
         return serviceOrderDtos;
@@ -123,7 +122,7 @@ public class ServiceOrderServiceImpl implements ServiceOrderService {
 
         UserDetailRes userDetailRes = modelMapper.map(order.getUser(), UserDetailRes.class);
 
-        ServiceOrderDto serviceOrderDto = ServiceOrderMapper.toServiceOrderDto(order, avaliableServiceDto,userDetailRes);
+        ServiceOrderDto serviceOrderDto = ServiceOrderMapper.toServiceOrderDto(order, avaliableServiceDto, userDetailRes);
 
         // Build ConsultantAppointmentDetailRes
         ConsultantAppointmentDetailRes consultantAppointmentDetailRes = order.getConsultantAppointment() != null ? modelMapper.map(order.getConsultantAppointment(), ConsultantAppointmentDetailRes.class) : null;
@@ -137,7 +136,7 @@ public class ServiceOrderServiceImpl implements ServiceOrderService {
 
         for (RequestedProduct requestedProduct : requestedProducts) {
             // Customization
-            if (requestedProduct.getDesignIdeaVariant()!=null) {
+            if (requestedProduct.getDesignIdeaVariant() != null) {
                 // Design idea
                 DesignIdea idea = requestedProduct.getDesignIdeaVariant().getDesignIdea();
                 // Design idea variant
@@ -172,8 +171,7 @@ public class ServiceOrderServiceImpl implements ServiceOrderService {
         List<DesignIdeaVariantCusDto> designIdeaVariantIds = createServiceOrderCusRequest.getDesignIdeaVariantIds();
         short quantity = 0;
 
-        for (DesignIdeaVariantCusDto t: designIdeaVariantIds)
-        {
+        for (DesignIdeaVariantCusDto t : designIdeaVariantIds) {
             quantity = (short) (quantity + t.getQuantity());
         }
 
@@ -187,6 +185,7 @@ public class ServiceOrderServiceImpl implements ServiceOrderService {
                 availableServiceRepository.findById(createServiceOrderCusRequest.getAvailableServiceId()).orElse(null);
 
         ServiceOrder serviceOrder = new ServiceOrder();
+        serviceOrder.setDescription(createServiceOrderCusRequest.getDescription());
         serviceOrder.setAvailableService(availableService);
         serviceOrder.setUser(user);
         serviceOrder.setStatus(ServiceOrderStatus.DANG_CHO_THO_MOC_XAC_NHAN);
@@ -196,14 +195,13 @@ public class ServiceOrderServiceImpl implements ServiceOrderService {
 
         orderRepository.save(serviceOrder);
 
-        for (DesignIdeaVariantCusDto i: designIdeaVariantIds)
-        {
+        for (DesignIdeaVariantCusDto i : designIdeaVariantIds) {
             DesignIdeaVariant designIdeaVariant =
                     designIdeaVariantRepository.findDesignIdeaVariantByDesignIdeaVariantId(i.getDesignIdeaVariantId());
 
             RequestedProduct requestedProduct = new RequestedProduct();
             requestedProduct.setDesignIdeaVariant(designIdeaVariant);
-            requestedProduct.setQuantity(Byte.parseByte(quantity + ""));
+            requestedProduct.setQuantity(Byte.parseByte(i.getQuantity() + ""));
             requestedProduct.setServiceOrder(serviceOrder);
             requestedProduct.setTotalAmount(designIdeaVariant.getPrice() * i.getQuantity());
             totalAmount = totalAmount + requestedProduct.getTotalAmount();
@@ -321,8 +319,7 @@ public class ServiceOrderServiceImpl implements ServiceOrderService {
     }
 
     @Override
-    public ServiceOrder createServiceOrderPersonalize(CreateServiceOrderPersonalizeRequest createServiceOrderPersonalizeRequest)
-    {
+    public ServiceOrder createServiceOrderPersonalize(CreateServiceOrderPersonalizeRequest createServiceOrderPersonalizeRequest) {
         //Create ServiceOrder
         User user = userRepository.findById(createServiceOrderPersonalizeRequest.getUserId()).orElse(null);
 
@@ -340,8 +337,7 @@ public class ServiceOrderServiceImpl implements ServiceOrderService {
         List<RequestedProductPersonalizeDto> requestedProducts =
                 createServiceOrderPersonalizeRequest.getRequestedProducts();
 
-        for (RequestedProductPersonalizeDto requestedProductPersonalizeDto : requestedProducts)
-        {
+        for (RequestedProductPersonalizeDto requestedProductPersonalizeDto : requestedProducts) {
             RequestedProduct requestedProduct = new RequestedProduct();
             requestedProduct.setQuantity(requestedProductPersonalizeDto.getQuantity());
             requestedProduct.setServiceOrder(serviceOrder);
@@ -351,8 +347,7 @@ public class ServiceOrderServiceImpl implements ServiceOrderService {
 
             List<TechSpecPersonalizeDto> techSpecs = requestedProductPersonalizeDto.getTechSpecs();
 
-            for (TechSpecPersonalizeDto techSpecDto : techSpecs)
-            {
+            for (TechSpecPersonalizeDto techSpecDto : techSpecs) {
                 CustomerSelection customerSelection = new CustomerSelection();
                 customerSelection.setTechSpec(techSpecRepository.findById(techSpecDto.getTechSpecId()).orElse(null));
                 customerSelection.setValue(techSpecDto.getValues());
