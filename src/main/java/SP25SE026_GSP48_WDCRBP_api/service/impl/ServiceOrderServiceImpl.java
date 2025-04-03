@@ -392,8 +392,15 @@ public class ServiceOrderServiceImpl implements ServiceOrderService {
     }
 
     @Override
-    public List<ProductImages> addProductImage(List<ProductImagesDto> productImagesDtos)
+    public List<ProductImages> addProductImage(List<ProductImagesDto> productImagesDtos, Long serviceId)
     {
+        ServiceOrder serviceOrder = orderRepository.findById(serviceId).orElse(null);
+
+        serviceOrder.setRole("Woodworker");
+        serviceOrder.setFeedback(null);
+
+        orderRepository.save(serviceOrder);
+
         List<ProductImages> productImages = new ArrayList<>();
         for (ProductImagesDto productImagesDto : productImagesDtos)
         {
