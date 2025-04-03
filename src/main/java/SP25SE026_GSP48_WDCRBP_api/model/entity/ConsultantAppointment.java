@@ -26,10 +26,10 @@ public class ConsultantAppointment {
     @Column(nullable = true)
     private String form;
 
-    @Column(nullable = true,length = 1000)
+    @Column(nullable = true,length = 2000)
     private String meetAddress;
 
-    @Column(nullable = true,length = 1000)
+    @Column(nullable = true,length = 2000)
     private String content;
 
     @Column(nullable = true)

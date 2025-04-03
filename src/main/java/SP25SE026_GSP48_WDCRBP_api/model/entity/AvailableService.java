@@ -18,7 +18,7 @@ public class AvailableService {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long availableServiceId;
 
-    @Column(nullable = true,length = 1000)
+    @Column(nullable = true,length = 2000)
     private String description;
 
     @Column(nullable = true)

@@ -20,7 +20,7 @@ public class WoodworkerProfile {
     @Column(nullable = true)
     private String brandName;
 
-    @Column(nullable = true,length = 1000)
+    @Column(nullable = true,length = 2000)
     private String bio;
 
     @Column(nullable = true)
@@ -41,7 +41,7 @@ public class WoodworkerProfile {
     @Column(nullable = true)
     private boolean status;
 
-    @Column(nullable = true,length = 1000)
+    @Column(nullable = true,length = 2000)
     private String imgUrl;
 
     @Column(nullable = true)

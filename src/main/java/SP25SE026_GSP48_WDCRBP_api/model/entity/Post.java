@@ -21,10 +21,10 @@ public class Post {
     @Column(nullable = true)
     private String title;
 
-    @Column(nullable = true,length = 1000)
+    @Column(nullable = true,length = 2000)
     private String description;
 
-    @Column(nullable = true,length = 1000)
+    @Column(nullable = true,length = 2000)
     private String img_Urls;
 
     @Column(nullable = true)

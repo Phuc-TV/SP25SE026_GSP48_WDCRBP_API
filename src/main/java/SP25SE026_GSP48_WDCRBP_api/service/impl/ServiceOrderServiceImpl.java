@@ -224,12 +224,16 @@ public class ServiceOrderServiceImpl implements ServiceOrderService {
         // Toggle the role between Woodworker and Customer
         serviceOrder.setRole(serviceOrder.getRole().equals("Woodworker") ? "Customer" : "Woodworker");
 
+        // Clear feedback when moving to next stage
+        serviceOrder.setFeedback(null);
+
         // Save changes
         orderRepository.save(serviceOrder);
         orderProgressRepository.save(newOrderProgress);
         if (continueOrderProgress.getStatus() != null) {
             orderProgressRepository.save(continueOrderProgress);
         }
+
         return serviceOrder;
     }
 
