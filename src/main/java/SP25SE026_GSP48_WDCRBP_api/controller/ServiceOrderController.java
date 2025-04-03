@@ -63,11 +63,11 @@ public class ServiceOrderController {
     @SecurityRequirement(name = "Bear Authentication")
     @PostMapping("/accept")
     public CoreApiResponse acceptServiceOrder(
-            @RequestParam Long serviceOrderId,
-            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime timeMeeting,
-            @RequestParam String linkMeeting,
-            @RequestParam String form,
-            @RequestParam String desc
+            @RequestParam(required = false) Long serviceOrderId,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime timeMeeting,
+            @RequestParam(required = false) String linkMeeting,
+            @RequestParam(required = false) String form,
+            @RequestParam(required = false) String desc
     ) {
         ServiceOrder serviceOrder = serviceOrderService.acceptServiceOrder(serviceOrderId, timeMeeting, linkMeeting, form, desc);
 

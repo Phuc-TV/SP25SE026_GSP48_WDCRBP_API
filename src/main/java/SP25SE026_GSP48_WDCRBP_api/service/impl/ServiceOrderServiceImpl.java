@@ -239,12 +239,11 @@ public class ServiceOrderServiceImpl implements ServiceOrderService {
     @Override
     public ServiceOrder acceptServiceOrder(Long serviceOrderId, LocalDateTime timeMeeting, String linkMeeting, String form, String desc) {
         ServiceOrder serviceOrder = orderRepository.findById(serviceOrderId).orElse(null);
+        String currentStatus = serviceOrder.getStatus();
 
         if (serviceOrder == null) {
             return null;
         }
-
-        String currentStatus = serviceOrder.getStatus();
 
         // Create new progress record with next status based on current status and role
         OrderProgress newOrderProgress = new OrderProgress();
@@ -254,7 +253,7 @@ public class ServiceOrderServiceImpl implements ServiceOrderService {
 
         switch (serviceOrder.getRole()) {
             case "Woodworker":
-                if (currentStatus == null || currentStatus.equals(ServiceOrderStatus.DANG_CHO_THO_MOC_XAC_NHAN)) {
+                if (currentStatus == null || currentStatus.equals(ServiceOrderStatus.DANG_CHO_THO_MOC_XAC_NHAN) || currentStatus.equals(ServiceOrderStatus.DANG_CHO_KHACH_DUYET_LICH_HEN)) {
                     // Woodworker accepting initial order, setting appointment
                     ConsultantAppointment consultantAppointment = new ConsultantAppointment();
                     if (consultantAppointmentRepository.findConsultantAppointmentByServiceOrder(serviceOrder) != null) {
@@ -300,6 +299,16 @@ public class ServiceOrderServiceImpl implements ServiceOrderService {
                 break;
         }
 
+        if (currentStatus.equals(ServiceOrderStatus.DANG_CHO_KHACH_DUYET_LICH_HEN) && serviceOrder.getRole().equals("Woodworker")) {
+            // Empty
+        } else {
+            orderProgressRepository.save(newOrderProgress);
+        }
+
+        if (continueOrderProgress.getStatus() != null) {
+            orderProgressRepository.save(continueOrderProgress);
+        }
+
         // Toggle the role between Woodworker and Customer
         serviceOrder.setRole(serviceOrder.getRole().equals("Woodworker") ? "Customer" : "Woodworker");
 
@@ -308,11 +317,6 @@ public class ServiceOrderServiceImpl implements ServiceOrderService {
 
         // Save changes
         orderRepository.save(serviceOrder);
-        orderProgressRepository.save(newOrderProgress);
-
-        if (continueOrderProgress.getStatus() != null) {
-            orderProgressRepository.save(continueOrderProgress);
-        }
 
         return serviceOrder;
     }
