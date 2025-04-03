@@ -61,6 +61,9 @@ public class ServiceOrderServiceImpl implements ServiceOrderService {
     @Autowired
     private ShipmentRepository shipmentRepository;
 
+    @Autowired
+    private ProductImagesRepository productImagesRepository;
+
     @Override
     public List<ServiceOrderDto> listServiceOrderByUserIdOrWwId(Long id, String role) {
         List<ServiceOrder> orders = new ArrayList<>();
@@ -373,10 +376,30 @@ public class ServiceOrderServiceImpl implements ServiceOrderService {
 
         return serviceOrder;
     }
+
+    @Override
+    public List<ProductImages> addProductImage(List<ProductImagesDto> productImagesDtos)
+    {
+        List<ProductImages> productImages = new ArrayList<>();
+        for (ProductImagesDto productImagesDto : productImagesDtos)
+        {
+            RequestedProduct requestedProduct =
+                    requestedProductRepository.findRequestedProductByRequestedProductId(productImagesDto.getProductId());
+            ProductImages productImage = new ProductImages();
+            productImage.setRequestedProduct(requestedProduct);
+            productImage.setMediaUrls(productImagesDto.getMediaUrls());
+            productImagesRepository.save(productImage);
+
+            productImages.add(productImage);
+        }
+        return productImages;
+    }
+}
+=======
 //
 //    @Override
 //    public ProductImages addProductImage(ProductImagesDto productImagesDto)
 //    {
 //
 //    }
-}
+
