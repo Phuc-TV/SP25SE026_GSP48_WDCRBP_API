@@ -8,6 +8,7 @@ import SP25SE026_GSP48_WDCRBP_api.model.entity.ProductImages;
 import SP25SE026_GSP48_WDCRBP_api.model.entity.ServiceOrder;
 import SP25SE026_GSP48_WDCRBP_api.model.requestModel.CreateServiceOrderPersonalizeRequest;
 import SP25SE026_GSP48_WDCRBP_api.model.requestModel.CreateServiceOrderCusRequest;
+import SP25SE026_GSP48_WDCRBP_api.model.responseModel.ServiceOrderDetailRes;
 import SP25SE026_GSP48_WDCRBP_api.service.ServiceOrderService;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import org.modelmapper.ModelMapper;
@@ -38,6 +39,17 @@ public class ServiceOrderController {
         List<ServiceOrderDto> serviceOrders = serviceOrderService.listServiceOrderByUserIdOrWwId(id, role);
 
         return CoreApiResponse.success(serviceOrders);
+    }
+
+    @GetMapping("/{id}")
+    public CoreApiResponse getServiceOrderById(
+            @PathVariable Long id) {
+        try {
+            ServiceOrderDetailRes serviceOrder = serviceOrderService.getServiceDetailById(id);
+            return CoreApiResponse.success(serviceOrder);
+        } catch (Exception e) {
+            return CoreApiResponse.error(e.getMessage());
+        }
     }
 
     // 2. Tạo đơn dịch vụ tuỳ chỉnh

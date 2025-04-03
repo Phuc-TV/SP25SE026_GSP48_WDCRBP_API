@@ -17,10 +17,10 @@ public class Contract {
     @Id
     private String contractId;
 
-    @Column(nullable = true,length = 1000)
+    @Column(nullable = true,length = 2000)
     private String customerSignature;
 
-    @Column(nullable = true,length = 1000)
+    @Column(nullable = true,length = 2000)
     private String woodworkerSignature;
 
     @Column(nullable = true)

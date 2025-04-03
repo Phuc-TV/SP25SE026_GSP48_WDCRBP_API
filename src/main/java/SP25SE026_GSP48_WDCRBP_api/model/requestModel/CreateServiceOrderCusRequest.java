@@ -17,4 +17,5 @@ public class CreateServiceOrderCusRequest {
     private Long userId;
     private List<DesignIdeaVariantCusDto> designIdeaVariantIds;
     private String address;
+    private String description;
 }
