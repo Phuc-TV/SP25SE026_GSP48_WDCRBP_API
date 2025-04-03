@@ -65,10 +65,13 @@ public class ServiceOrderController {
     public CoreApiResponse acceptServiceOrder(
             @RequestParam Long serviceOrderId,
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime timeMeeting,
-            @RequestParam String linkMeeting) {
-        ServiceOrder serviceOrder = serviceOrderService.acceptServiceOrder(serviceOrderId, timeMeeting, linkMeeting);
+            @RequestParam String linkMeeting,
+            @RequestParam String form,
+            @RequestParam String desc
+    ) {
+        ServiceOrder serviceOrder = serviceOrderService.acceptServiceOrder(serviceOrderId, timeMeeting, linkMeeting, form, desc);
 
-        return CoreApiResponse.success(serviceOrder);
+        return CoreApiResponse.success("Success");
     }
 
     // 4. Khách hàng gửi phản hồi
@@ -79,7 +82,7 @@ public class ServiceOrderController {
             @RequestParam String feedback) {
         ServiceOrder serviceOrder = serviceOrderService.customerFeedback(serviceOrderId, feedback);
 
-        return CoreApiResponse.success(serviceOrder);
+        return CoreApiResponse.success("Success");
     }
 
     @SecurityRequirement(name = "Bear Authentication")
@@ -88,7 +91,7 @@ public class ServiceOrderController {
     {
         ServiceOrder serviceOrder = serviceOrderService.createServiceOrderPersonalize(request);
 
-        return CoreApiResponse.success(serviceOrder);
+        return CoreApiResponse.success("Success");
     }
 
     @SecurityRequirement(name = "Bear Authentication")

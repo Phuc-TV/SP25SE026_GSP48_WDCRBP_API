@@ -10,7 +10,5 @@ public interface RequestedProductRepository extends JpaRepository<RequestedProdu
     List<RequestedProduct> findRequestedProductByServiceOrder(ServiceOrder serviceOrder);
 
     RequestedProduct findRequestedProductByRequestedProductId(Long requestedProductId);
-    RequestedProduct findRequestedProductByServiceOrder(ServiceOrder serviceOrder);
-
     List<RequestedProduct> findByServiceOrder(ServiceOrder serviceOrder);
 }

@@ -19,7 +19,7 @@ public interface ServiceOrderService {
 
     CoreApiResponse addServiceOrderCustomize(CreateServiceOrderCusRequest createServiceOrderCusRequest);
 
-    ServiceOrder acceptServiceOrder(Long serviceOrderId, LocalDateTime timeMeeting, String linkMeeting);
+    ServiceOrder acceptServiceOrder(Long serviceOrderId, LocalDateTime timeMeeting, String linkMeeting, String form, String desc);
 
     ServiceOrder customerFeedback(Long serviceOrderId, String feedback);
 

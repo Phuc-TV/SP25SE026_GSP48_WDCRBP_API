@@ -237,7 +237,7 @@ public class ServiceOrderServiceImpl implements ServiceOrderService {
     }
 
     @Override
-    public ServiceOrder acceptServiceOrder(Long serviceOrderId, LocalDateTime timeMeeting, String linkMeeting) {
+    public ServiceOrder acceptServiceOrder(Long serviceOrderId, LocalDateTime timeMeeting, String linkMeeting, String form, String desc) {
         ServiceOrder serviceOrder = orderRepository.findById(serviceOrderId).orElse(null);
 
         if (serviceOrder == null) {
@@ -265,9 +265,12 @@ public class ServiceOrderServiceImpl implements ServiceOrderService {
                     consultantAppointment.setCreatedAt(LocalDateTime.now());
                     consultantAppointment.setDateTime(timeMeeting);
                     consultantAppointment.setMeetAddress(linkMeeting);
+                    consultantAppointment.setContent(desc);
+                    consultantAppointment.setForm(form);
                     consultantAppointmentRepository.save(consultantAppointment);
 
                     serviceOrder.setConsultantAppointment(consultantAppointment);
+                    serviceOrder.setStatus(ServiceOrderStatus.DANG_CHO_KHACH_DUYET_LICH_HEN);
                     newOrderProgress.setStatus(ServiceOrderStatus.DANG_CHO_KHACH_DUYET_LICH_HEN);
                 }
 
@@ -276,18 +279,24 @@ public class ServiceOrderServiceImpl implements ServiceOrderService {
                 if (currentStatus.equals(ServiceOrderStatus.DANG_CHO_KHACH_DUYET_LICH_HEN)) {
                     // Customer approving appointment
                     newOrderProgress.setStatus(ServiceOrderStatus.DA_DUYET_LICH_HEN);
+                    serviceOrder.setStatus(ServiceOrderStatus.DA_DUYET_LICH_HEN);
                 } else if (currentStatus.equals(ServiceOrderStatus.DANG_CHO_KHACH_DUYET_HOP_DONG)) {
                     // Customer approving contract
                     newOrderProgress.setStatus(ServiceOrderStatus.DA_DUYET_HOP_DONG);
+                    serviceOrder.setStatus(ServiceOrderStatus.DA_DUYET_HOP_DONG);
 
                     if (serviceOrder.getAvailableService().getService().getServiceName().equals(ServiceNameConstant.CUSTOMIZATION)) {
                         continueOrderProgress.setServiceOrder(serviceOrder);
                         continueOrderProgress.setCreatedTime(LocalDateTime.now());
                         continueOrderProgress.setStatus(ServiceOrderStatus.DANG_GIA_CONG);
+                        serviceOrder.setStatus(ServiceOrderStatus.DANG_GIA_CONG);
                     }
                 } else if (currentStatus.equals(ServiceOrderStatus.DANG_CHO_KHACH_DUYET_THIET_KE)) {
+                    // Customer apporoving design
                     newOrderProgress.setStatus(ServiceOrderStatus.DANG_GIA_CONG);
+                    serviceOrder.setStatus(ServiceOrderStatus.DANG_GIA_CONG);
                 }
+
                 break;
         }
 
@@ -300,6 +309,7 @@ public class ServiceOrderServiceImpl implements ServiceOrderService {
         // Save changes
         orderRepository.save(serviceOrder);
         orderProgressRepository.save(newOrderProgress);
+
         if (continueOrderProgress.getStatus() != null) {
             orderProgressRepository.save(continueOrderProgress);
         }
@@ -395,11 +405,3 @@ public class ServiceOrderServiceImpl implements ServiceOrderService {
         return productImages;
     }
 }
-=======
-//
-//    @Override
-//    public ProductImages addProductImage(ProductImagesDto productImagesDto)
-//    {
-//
-//    }
-
