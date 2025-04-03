@@ -95,6 +95,14 @@ public class ReviewServiceImpl implements ReviewService {
                 .collect(Collectors.toList());
     }
 
+    @Override
+    public ReviewRes getReviewById(Long reviewId) {
+        Review review = reviewRepository.findById(reviewId)
+                .orElseThrow(() -> new RuntimeException("Review not found"));
+
+        return toReviewRes(review, "");
+    }
+
     private ReviewRes toReviewRes(Review review, String serviceName) {
         return ReviewRes.builder()
                 .reviewId(review.getReviewId())
