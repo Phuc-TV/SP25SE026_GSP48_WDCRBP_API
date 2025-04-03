@@ -42,7 +42,7 @@ public class ContractController {
     }
 
     @GetMapping("/getContractByserviceorderId/{id}")
-    public CoreApiResponse getContractByserviceorderId(@PathVariable Long id)
+    public CoreApiResponse<Contract> getContractByserviceorderId(@PathVariable Long id)
     {
         Contract contract = contractService.getContractByserviceorderId(id);
         return CoreApiResponse.success(contract);

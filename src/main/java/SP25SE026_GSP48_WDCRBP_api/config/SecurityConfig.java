@@ -91,6 +91,9 @@ public class SecurityConfig {
                                 .requestMatchers("/api/v1/reviews/**").permitAll()
                                 .requestMatchers("/api/v1/service-orders/**").permitAll()
                                 .requestMatchers("/api/v1/tech-spec/**").permitAll()
+                                .requestMatchers("/api/v1/Contract/**").permitAll()
+                                .requestMatchers("/api/v1/OrderDeposit/**").permitAll()
+                                .requestMatchers("/api/v1/OderProgress/**").permitAll()
                                 .anyRequest().authenticated()
                 ).exceptionHandling((exception) -> exception
                         .authenticationEntryPoint(this.jwtAuthenticationEntryPoint) // Sử dụng JwtAuthenticationEntryPoint tùy chỉnh

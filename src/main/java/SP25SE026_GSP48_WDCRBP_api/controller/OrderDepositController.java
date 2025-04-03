@@ -29,7 +29,7 @@ public class OrderDepositController {
     }
 
     @GetMapping("/getAllOrderDepositByOrderId/{id}")
-    public CoreApiResponse getAllOrderDepositByOrderId(@PathVariable Long id)
+    public CoreApiResponse<List<ServiceDepositDto>> getAllOrderDepositByOrderId(@PathVariable Long id)
     {
         List<OrderDeposit> orderDeposits = orderDepositService.getAllOrderDepositByOrderId(id);
 
