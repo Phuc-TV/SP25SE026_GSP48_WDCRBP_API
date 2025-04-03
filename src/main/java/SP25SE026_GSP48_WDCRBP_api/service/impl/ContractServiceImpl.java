@@ -63,14 +63,20 @@ public class ContractServiceImpl implements ContractService {
             contract.setCompleteDate(wwCreateContractCustomizeRequest.getCompleteDate());
             contract.setSignDate(LocalDateTime.now());
 
-            RequestedProduct requestedProduct =
+            List<RequestedProduct> requestedProduct =
                     requestedProductRepository.findRequestedProductByServiceOrder(serviceOrder);
 
-            serviceOrder.setTotalAmount(requestedProduct.getTotalAmount());
+            float i =0;
+            for (RequestedProduct rp : requestedProduct)
+            {
+                i = i+ rp.getTotalAmount();
+            }
+
+            serviceOrder.setTotalAmount(i);
             serviceOrder.setRole("Customer");
             serviceRepository.save(serviceOrder);
 
-            contract.setContractTotalAmount(requestedProduct.getTotalAmount());
+            contract.setContractTotalAmount(i);
             contract.setServiceOrder(serviceOrder);
             contractRepository.save(contract);
 

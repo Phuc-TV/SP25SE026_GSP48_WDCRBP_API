@@ -1,12 +1,16 @@
 package SP25SE026_GSP48_WDCRBP_api.controller;
 
 import SP25SE026_GSP48_WDCRBP_api.components.CoreApiResponse;
+import SP25SE026_GSP48_WDCRBP_api.model.dto.ProductImagesDto;
+import SP25SE026_GSP48_WDCRBP_api.model.dto.ServiceDepositDto;
 import SP25SE026_GSP48_WDCRBP_api.model.dto.ServiceOrderDto;
+import SP25SE026_GSP48_WDCRBP_api.model.entity.ProductImages;
 import SP25SE026_GSP48_WDCRBP_api.model.entity.ServiceOrder;
 import SP25SE026_GSP48_WDCRBP_api.model.requestModel.CreateServiceOrderPersonalizeRequest;
 import SP25SE026_GSP48_WDCRBP_api.model.requestModel.CreateServiceOrderCusRequest;
 import SP25SE026_GSP48_WDCRBP_api.service.ServiceOrderService;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.web.bind.annotation.*;
@@ -21,6 +25,9 @@ public class ServiceOrderController {
 
     @Autowired
     private ServiceOrderService serviceOrderService;
+
+    @Autowired
+    private ModelMapper modelMapper;
 
     // 1. Lấy danh sách đơn dịch vụ theo userId hoặc woodworkerId và role
     @GetMapping("/listOrder")
@@ -63,11 +70,23 @@ public class ServiceOrderController {
         return CoreApiResponse.success(serviceOrder);
     }
 
+    @SecurityRequirement(name = "Bear Authentication")
     @PostMapping("/createPersonalOrder")
     public CoreApiResponse createPersonalOrder(@RequestBody CreateServiceOrderPersonalizeRequest request)
     {
         ServiceOrder serviceOrder = serviceOrderService.createServiceOrderPersonalize(request);
 
         return CoreApiResponse.success(serviceOrder);
+    }
+
+    @SecurityRequirement(name = "Bear Authentication")
+    @PostMapping("/addProductImage")
+    public CoreApiResponse addProductImage(@RequestBody List<ProductImagesDto> request)
+    {
+        List<ProductImages> productImages = serviceOrderService.addProductImage(request);
+
+        List<ProductImagesDto> productImagesDtos = productImages.stream()
+                .map(productImage -> modelMapper.map(productImage, ProductImagesDto.class)).toList();
+        return CoreApiResponse.success(productImagesDtos);
     }
 }
