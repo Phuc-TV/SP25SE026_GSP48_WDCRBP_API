@@ -16,7 +16,7 @@ public class ProductImages {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long designFileId;
 
-    @Column(nullable = true,length = 1000)
+    @Column(nullable = true,length = 2000)
     private String mediaUrls;
 
     @Column(nullable = true)

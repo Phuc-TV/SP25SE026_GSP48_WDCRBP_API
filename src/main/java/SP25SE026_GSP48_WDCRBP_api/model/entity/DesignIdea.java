@@ -18,10 +18,10 @@ public class DesignIdea {
     @Column(nullable = true)
     private String name;
 
-    @Column(nullable = true,length = 1000)
+    @Column(nullable = true,length = 2000)
     private String img_urls;
 
-    @Column(nullable = true,length = 1000)
+    @Column(nullable = true,length = 2000)
     private String description;
 
     @Column(nullable = true)
