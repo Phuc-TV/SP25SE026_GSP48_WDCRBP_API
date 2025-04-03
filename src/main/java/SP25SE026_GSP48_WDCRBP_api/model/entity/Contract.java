@@ -14,9 +14,9 @@ import java.time.LocalDateTime;
 @Entity
 @Table(name = "Contract")
 public class Contract {
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Id
-    private String contractId;
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long contractId;
 
     @Column(nullable = true,length = 2000)
     private String customerSignature;
