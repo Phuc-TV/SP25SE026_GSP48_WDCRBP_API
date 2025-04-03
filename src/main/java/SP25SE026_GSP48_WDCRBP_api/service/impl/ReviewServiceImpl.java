@@ -62,17 +62,10 @@ public class ReviewServiceImpl implements ReviewService {
         Product product = productRepository.findById(productId).orElse(null);
         if (product == null) return new ArrayList<>();
 
-        List<ServiceOrder> orders = serviceOrderRepository.findAll();
+        List<ServiceOrder> orders = serviceOrderRepository.findServiceOrdersByProductId(productId);
 
         return orders.stream()
-                .filter(order -> order.getAvailableService() != null)
-                .filter(order -> order.getAvailableService().getWoodworkerProfile() != null)
-                .filter(order -> order.getAvailableService().getWoodworkerProfile().getWoodworkerId().equals(
-                        product.getWoodworkerProfile().getWoodworkerId()
-                ))
-                .map(ServiceOrder::getReview)
-                .filter(review -> review != null && review.isStatus())
-                .map(review -> toReviewRes(review,""))
+                .map(order -> toReviewRes(order.getReview(), product.getProductName()))
                 .collect(Collectors.toList());
     }
 
