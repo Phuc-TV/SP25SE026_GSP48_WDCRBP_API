@@ -6,6 +6,8 @@ import SP25SE026_GSP48_WDCRBP_api.model.responseModel.WoodworkerProfileListItemR
 import SP25SE026_GSP48_WDCRBP_api.model.requestModel.UpdateWoodworkerServicePackRequest;
 import SP25SE026_GSP48_WDCRBP_api.model.requestModel.WoodworkerRequest;
 import SP25SE026_GSP48_WDCRBP_api.model.requestModel.WoodworkerUpdateStatusRequest;
+
+import SP25SE026_GSP48_WDCRBP_api.model.requestModel.*;
 import SP25SE026_GSP48_WDCRBP_api.model.responseModel.*;
 import SP25SE026_GSP48_WDCRBP_api.service.WoodworkerProfileService;
 import jakarta.validation.Valid;
@@ -96,4 +98,15 @@ public class WoodworkerProfileController {
             return CoreApiResponse.error(HttpStatus.BAD_REQUEST, "Không thể lấy danh sách thợ mộc chưa kích hoạt tài khoản: " + e.getMessage());
         }
     }
+
+    @PutMapping("/update-public-status")
+    public CoreApiResponse<UpdateStatusPublicRes> updatePublicStatus(@RequestBody @Valid UpdateStatusPublicRequest request) {
+        try {
+            UpdateStatusPublicRes response = woodworkerProfileService.updatePublicStatus(request);
+            return CoreApiResponse.success(response, "Cập nhật trạng thái công khai thành công");
+        } catch (Exception e) {
+            return CoreApiResponse.error(HttpStatus.BAD_REQUEST, "Không thể cập nhật trạng thái công khai: " + e.getMessage());
+        }
+    }
+
 }

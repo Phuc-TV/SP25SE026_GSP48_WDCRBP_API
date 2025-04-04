@@ -6,13 +6,11 @@ import SP25SE026_GSP48_WDCRBP_api.model.entity.User;
 import SP25SE026_GSP48_WDCRBP_api.model.entity.Wallet;
 import SP25SE026_GSP48_WDCRBP_api.model.entity.ServicePack;
 import SP25SE026_GSP48_WDCRBP_api.model.entity.WoodworkerProfile;
+import SP25SE026_GSP48_WDCRBP_api.model.requestModel.UpdateStatusPublicRequest;
 import SP25SE026_GSP48_WDCRBP_api.model.requestModel.UpdateWoodworkerServicePackRequest;
 import SP25SE026_GSP48_WDCRBP_api.model.requestModel.WoodworkerRequest;
 import SP25SE026_GSP48_WDCRBP_api.model.requestModel.WoodworkerUpdateStatusRequest;
-import SP25SE026_GSP48_WDCRBP_api.model.responseModel.ListRegisterRes;
-import SP25SE026_GSP48_WDCRBP_api.model.responseModel.UpdateWoodworkerServicePackRest;
-import SP25SE026_GSP48_WDCRBP_api.model.responseModel.WoodworkerProfileRes;
-import SP25SE026_GSP48_WDCRBP_api.model.responseModel.WoodworkerUpdateStatusRes;
+import SP25SE026_GSP48_WDCRBP_api.model.responseModel.*;
 import SP25SE026_GSP48_WDCRBP_api.repository.UserRepository;
 import SP25SE026_GSP48_WDCRBP_api.repository.ServicePackRepository;
 import SP25SE026_GSP48_WDCRBP_api.repository.WalletRepository;
@@ -132,7 +130,7 @@ public class WoodworkerProfileServiceImpl implements WoodworkerProfileService {
                 }
             });
             WoodworkerProfile woodworkerProfile = customMapper.map(request, WoodworkerProfile.class);
-            woodworkerProfile.setStatus(false);  // Default status
+            woodworkerProfile.setStatus(false);
             woodworkerProfile.setCreatedAt(LocalDateTime.now());
             woodworkerProfile.setUpdatedAt(LocalDateTime.now());
             WoodworkerProfile savedProfile = wwRepository.save(woodworkerProfile);
@@ -330,5 +328,21 @@ public class WoodworkerProfileServiceImpl implements WoodworkerProfileService {
         return response;
     }
 
+    @Override
+    public UpdateStatusPublicRes updatePublicStatus(UpdateStatusPublicRequest request) {
+        WoodworkerProfile profile = wwRepository.findByUser_UserId(request.getUserId())
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy thợ mộc theo userId: " + request.getUserId()));
+
+        profile.setPublicStatus(request.isPublicStatus());
+        profile.setUpdatedAt(LocalDateTime.now());
+
+        wwRepository.save(profile);
+
+        return UpdateStatusPublicRes.builder()
+                .woodworkerId(profile.getWoodworkerId())
+                .updatedPublicStatus(request.isPublicStatus())
+                .message("Cập nhật trạng thái công khai thành công")
+                .build();
+    }
 }
 

@@ -33,4 +33,8 @@ public class Complaint {
 
     @Column(nullable = true)
     private LocalDateTime updatedAt;
+
+    @ManyToOne
+    @JoinColumn(name = "orderId", nullable = true)
+    private ServiceOrder serviceOrder;
 }
