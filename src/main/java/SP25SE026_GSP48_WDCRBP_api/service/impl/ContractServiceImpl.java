@@ -3,8 +3,11 @@ package SP25SE026_GSP48_WDCRBP_api.service.impl;
 import SP25SE026_GSP48_WDCRBP_api.constant.ServiceOrderStatus;
 import SP25SE026_GSP48_WDCRBP_api.model.entity.*;
 import SP25SE026_GSP48_WDCRBP_api.model.requestModel.WwCreateContractCustomizeRequest;
+import SP25SE026_GSP48_WDCRBP_api.model.responseModel.ContractDetailRes;
+import SP25SE026_GSP48_WDCRBP_api.model.responseModel.UserDetailRes;
 import SP25SE026_GSP48_WDCRBP_api.repository.*;
 import SP25SE026_GSP48_WDCRBP_api.service.ContractService;
+import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -34,6 +37,9 @@ public class ContractServiceImpl implements ContractService {
     @Autowired
     private RequestedProductRepository requestedProductRepository;
 
+    @Autowired
+    private ModelMapper modelMapper;
+
     public ContractServiceImpl(ContractRepository contractRepository,
                                ServiceOrderRepository serviceRepository,
                                UserRepository userRepository,
@@ -59,6 +65,7 @@ public class ContractServiceImpl implements ContractService {
             OrderProgress newOrderProgress = new OrderProgress();
             newOrderProgress.setServiceOrder(serviceOrder);
             newOrderProgress.setStatus(ServiceOrderStatus.DANG_CHO_KHACH_DUYET_HOP_DONG);
+            orderProgressRepository.save(newOrderProgress);
         }
 
         Contract contract1 = contractRepository.findContractByServiceOrder(serviceOrder);
@@ -155,10 +162,16 @@ public class ContractServiceImpl implements ContractService {
     }
 
     @Override
-    public Contract getContractByserviceorderId(Long serviceOrderId)
+    public ContractDetailRes getContractByserviceorderId(Long serviceOrderId)
     {
         ServiceOrder serviceOrder = serviceRepository.findServiceOrderByOrderId(serviceOrderId);
         Contract contract = contractRepository.findContractByServiceOrder(serviceOrder);
-        return contract;
+        User woodworker = userRepository.findUserByUserId(serviceOrder.getAvailableService().getWoodworkerProfile().getUser().getUserId());
+
+        ContractDetailRes contractDetailRes = modelMapper.map(contract, ContractDetailRes.class);
+        contractDetailRes.setCustomer(modelMapper.map(serviceOrder.getUser(), UserDetailRes.class));
+        contractDetailRes.setWoodworker(modelMapper.map(woodworker, UserDetailRes.class));
+
+        return contractDetailRes;
     }
 }
