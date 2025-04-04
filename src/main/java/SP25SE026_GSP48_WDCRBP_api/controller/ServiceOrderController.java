@@ -8,6 +8,8 @@ import SP25SE026_GSP48_WDCRBP_api.model.entity.ProductImages;
 import SP25SE026_GSP48_WDCRBP_api.model.entity.ServiceOrder;
 import SP25SE026_GSP48_WDCRBP_api.model.requestModel.CreateServiceOrderPersonalizeRequest;
 import SP25SE026_GSP48_WDCRBP_api.model.requestModel.CreateServiceOrderCusRequest;
+import SP25SE026_GSP48_WDCRBP_api.model.requestModel.CusFeedbackCreateRequest;
+import SP25SE026_GSP48_WDCRBP_api.model.requestModel.WwAppointmentCreateRequest;
 import SP25SE026_GSP48_WDCRBP_api.model.responseModel.ServiceOrderDetailRes;
 import SP25SE026_GSP48_WDCRBP_api.service.ServiceOrderService;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
@@ -63,24 +65,22 @@ public class ServiceOrderController {
     @SecurityRequirement(name = "Bear Authentication")
     @PostMapping("/accept")
     public CoreApiResponse acceptServiceOrder(
-            @RequestParam(required = false) Long serviceOrderId,
-            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime timeMeeting,
-            @RequestParam(required = false) String linkMeeting,
-            @RequestParam(required = false) String form,
-            @RequestParam(required = false) String desc
-    ) {
-        ServiceOrder serviceOrder = serviceOrderService.acceptServiceOrder(serviceOrderId, timeMeeting, linkMeeting, form, desc);
+            @RequestBody WwAppointmentCreateRequest request) {
+        try {
+            ServiceOrder serviceOrder = serviceOrderService.acceptServiceOrder(request.getServiceOrderId(), request.getTimeMeeting(), request.getMeetAddress(), request.getForm(), request.getDesc());
 
-        return CoreApiResponse.success("Success");
+            return CoreApiResponse.success("Success");
+        } catch (Exception e) {
+            return CoreApiResponse.error("Lỗi hệ thống");
+        }
     }
 
     // 4. Khách hàng gửi phản hồi
     @SecurityRequirement(name = "Bear Authentication")
     @PostMapping("/feedback")
     public CoreApiResponse customerFeedback(
-            @RequestParam Long serviceOrderId,
-            @RequestParam String feedback) {
-        ServiceOrder serviceOrder = serviceOrderService.customerFeedback(serviceOrderId, feedback);
+            @RequestBody CusFeedbackCreateRequest request) {
+        ServiceOrder serviceOrder = serviceOrderService.customerFeedback(request.getServiceOrderId(), request.getFeedback());
 
         return CoreApiResponse.success("Success");
     }
