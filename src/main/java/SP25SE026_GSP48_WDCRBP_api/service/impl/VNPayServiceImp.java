@@ -28,7 +28,6 @@ import java.util.*;
 @RequiredArgsConstructor
 public class VNPayServiceImp implements VNPayService {
 
-    private static final String PAYMENT_URL = "http://localhost:5173/payment-success";
     private static final String AES_KEY = "YourSecretKey123";
     private final UserRepository userRepository;
     private final OrderDepositRepository orderDepositRepository;
@@ -48,6 +47,7 @@ public class VNPayServiceImp implements VNPayService {
         if (transactionType == null || transactionType.isBlank()) {
             transactionType = "pay_online";
         }
+        String returnUrl = request.getReturnUrl();
 
         try {
             Long parsedUserId = Long.parseLong(userId);
@@ -55,6 +55,8 @@ public class VNPayServiceImp implements VNPayService {
 
             User dbUser = userRepository.findById(parsedUserId)
                     .orElseThrow(() -> new WDCRBPApiException(HttpStatus.NOT_FOUND, "không tìm thấy mã người dùng: " + userId));
+
+            verifyEmail(dbUser, email);
 
             if (!"Customer".equalsIgnoreCase(dbUser.getRole())) {
                 throw new WDCRBPApiException(HttpStatus.FORBIDDEN, "chỉ khách hàng mới được sài dịch vụ này..");
@@ -77,7 +79,7 @@ public class VNPayServiceImp implements VNPayService {
             // Create a payment URL
             String encryptedTransactionId = AESUtil.encrypt(String.valueOf(txn.getTransactionId()), AES_KEY);
             Map<String, String> vnp_Params = new HashMap<>();
-            String returnUrl = PAYMENT_URL + "?" + "transactionId=" + URLEncoder.encode(encryptedTransactionId, StandardCharsets.UTF_8);
+            String dynamicReturnUrl = returnUrl + "?transactionId=" + URLEncoder.encode(encryptedTransactionId, StandardCharsets.UTF_8);
             long vnpAmount = amount * 100 ;
             String vnp_TxnRef = UUID.randomUUID().toString().replace("-", "").substring(0, 12);
             String vnp_IpAddr = "127.0.0.1";
@@ -91,7 +93,7 @@ public class VNPayServiceImp implements VNPayService {
             vnp_Params.put("vnp_Locale", "vn");
             vnp_Params.put("vnp_IpAddr", vnp_IpAddr);
             vnp_Params.put("vnp_OrderType", "other");
-            vnp_Params.put("vnp_ReturnUrl", returnUrl);
+            vnp_Params.put("vnp_ReturnUrl", dynamicReturnUrl);
             TimeZone tz = TimeZone.getTimeZone("Asia/Ho_Chi_Minh");
             Calendar cal = Calendar.getInstance(tz);
             SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMddHHmmss");
@@ -155,6 +157,8 @@ public class VNPayServiceImp implements VNPayService {
             User dbUser = userRepository.findById(parsedUserId)
                     .orElseThrow(() -> new WDCRBPApiException(HttpStatus.NOT_FOUND, "không tìm thấy mã người dùng: " + userId));
 
+            verifyEmail(dbUser, email);
+
             if (!"Woodworker".equalsIgnoreCase(dbUser.getRole())) {
                 throw new WDCRBPApiException(HttpStatus.FORBIDDEN, "Chỉ có thợ mộc mới được phép mua gói dịch vụ.");
             }
@@ -181,11 +185,11 @@ public class VNPayServiceImp implements VNPayService {
 
             Map<String, String> vnp_Params = new HashMap<>();
 
-            String returnUrl = PAYMENT_URL + "?" +
+            String dynamicReturnUrl = request.getReturnUrl() + "?" +
                     "WoodworkerId=" + URLEncoder.encode(encryptedWoodworkerId, StandardCharsets.UTF_8) +
                     "&ServicePackId=" + URLEncoder.encode(encryptedServicePackId, StandardCharsets.UTF_8) +
                     "&TransactionId=" + URLEncoder.encode(encryptedTransactionId, StandardCharsets.UTF_8);
-            vnp_Params.put("vnp_ReturnUrl", returnUrl);
+            vnp_Params.put("vnp_ReturnUrl", dynamicReturnUrl);
 
             // VNPay URL creation
             long vnpAmount = amount * 100 ;
@@ -202,7 +206,6 @@ public class VNPayServiceImp implements VNPayService {
             vnp_Params.put("vnp_Locale", "vn");
             vnp_Params.put("vnp_IpAddr", vnp_IpAddr);
             vnp_Params.put("vnp_OrderType", "other");
-
             TimeZone tz = TimeZone.getTimeZone("Asia/Ho_Chi_Minh");
             Calendar cal = Calendar.getInstance(tz);
             SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMddHHmmss");
@@ -270,6 +273,8 @@ public class VNPayServiceImp implements VNPayService {
             User dbUser = userRepository.findById(parsedUserId)
                     .orElseThrow(() -> new WDCRBPApiException(HttpStatus.NOT_FOUND, "User not found with ID: " + userId));
 
+            verifyEmail(dbUser, email);
+
             if (!"Customer".equalsIgnoreCase(dbUser.getRole()) && !"Woodworker".equalsIgnoreCase(dbUser.getRole())) {
                 throw new WDCRBPApiException(HttpStatus.FORBIDDEN, "chỉ có thợ mộc và khách hàng mới được sài dịch vụ này.");
             }
@@ -292,10 +297,10 @@ public class VNPayServiceImp implements VNPayService {
             String encryptedWalletId = AESUtil.encrypt(String.valueOf(txn.getWallet().getWalletId()), AES_KEY);
             String encryptedTransactionId = AESUtil.encrypt(String.valueOf(txn.getTransactionId()), AES_KEY);
             Map<String, String> vnp_Params = new HashMap<>();
-            String returnUrl = PAYMENT_URL + "?" +
+            String dynamicReturnUrl = request.getReturnUrl() + "?" +
                     "WalletId=" + URLEncoder.encode(encryptedWalletId, StandardCharsets.UTF_8) +
                     "&TransactionId=" + URLEncoder.encode(encryptedTransactionId, StandardCharsets.UTF_8);
-            vnp_Params.put("vnp_ReturnUrl", returnUrl);
+            vnp_Params.put("vnp_ReturnUrl", dynamicReturnUrl);
             long vnpAmount = amount * 100 ;
             String vnp_TxnRef = UUID.randomUUID().toString().replace("-", "").substring(0, 12);
             String vnp_IpAddr = "127.0.0.1";
@@ -309,8 +314,6 @@ public class VNPayServiceImp implements VNPayService {
             vnp_Params.put("vnp_Locale", "vn");
             vnp_Params.put("vnp_IpAddr", vnp_IpAddr);
             vnp_Params.put("vnp_OrderType", "other");
-            vnp_Params.put("vnp_ReturnUrl", returnUrl);
-
             TimeZone tz = TimeZone.getTimeZone("Asia/Ho_Chi_Minh");
             Calendar cal = Calendar.getInstance(tz);
             SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMddHHmmss");
@@ -360,5 +363,10 @@ public class VNPayServiceImp implements VNPayService {
         }
     }
 
+    private void verifyEmail(User user, String inputEmail) {
+        if (!user.getEmail().equalsIgnoreCase(inputEmail)) {
+            throw new WDCRBPApiException(HttpStatus.BAD_REQUEST, "Email không khớp với email của người dùng đã đăng ký.");
+        }
+    }
 }
 

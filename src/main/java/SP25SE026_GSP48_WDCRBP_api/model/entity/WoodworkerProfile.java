@@ -41,6 +41,9 @@ public class WoodworkerProfile {
     @Column(nullable = true)
     private boolean status;
 
+    @Column(nullable = true)
+    private boolean publicStatus;
+
     @Column(nullable = true,length = 2000)
     private String imgUrl;
 
