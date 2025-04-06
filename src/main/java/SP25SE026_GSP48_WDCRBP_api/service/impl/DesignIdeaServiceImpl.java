@@ -22,6 +22,9 @@ public class DesignIdeaServiceImpl implements DesignIdeaService {
     private DesignIdeaRepository ideaRepository;
 
     @Autowired
+    private WoodworkerProfileRepository wwRepository;
+
+    @Autowired
     private WoodworkerProfileService woodworkerProfileService;
 
     @Autowired
@@ -69,7 +72,7 @@ public class DesignIdeaServiceImpl implements DesignIdeaService {
     @Override
     public List<DesignIdea> getAllDesignIdeasByWWId(Long wwId)
     {
-        WoodworkerProfile woodworkerProfile = woodworkerProfileService.getWoodworkerById(wwId);
+        WoodworkerProfile woodworkerProfile = wwRepository.findWoodworkerProfileByWoodworkerId(wwId);
 
         if (woodworkerProfile == null)
             return null;
@@ -88,7 +91,8 @@ public class DesignIdeaServiceImpl implements DesignIdeaService {
     {
         List<DesignIdea> ideas = new ArrayList<>();
 
-        List<WoodworkerProfile> woodworkerProfiles = woodworkerProfileService.getAllWoodWorker();
+        List<WoodworkerProfile> woodworkerProfiles = wwRepository.findAll();
+
         for (WoodworkerProfile woodworkerProfile : woodworkerProfiles)
         {
             List<DesignIdea> idea = ideaRepository.findDesignIdeaByWoodworkerProfile(woodworkerProfile);
@@ -106,7 +110,8 @@ public class DesignIdeaServiceImpl implements DesignIdeaService {
         Category category = categoryRepository.findCategoriesByCategoryId(woodworkProductDto.getCategoryId());
 
         // Find WoodworkerProfile
-        WoodworkerProfile woodworkerProfile = woodworkerProfileService.getWoodworkerById(woodworkProductDto.getWoodworkerId());
+        WoodworkerProfile woodworkerProfile = wwRepository.findWoodworkerProfileByWoodworkerId(woodworkProductDto.getWoodworkerId());
+
         if (woodworkerProfile == null)
             return null;
 

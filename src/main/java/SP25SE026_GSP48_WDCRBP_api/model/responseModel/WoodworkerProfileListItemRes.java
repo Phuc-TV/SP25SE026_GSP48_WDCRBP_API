@@ -31,4 +31,6 @@ public class WoodworkerProfileListItemRes {
     private ServicePack servicePack;
 
     private LocalDateTime servicePackEndDate;
+
+    private Boolean publicStatus;
 }

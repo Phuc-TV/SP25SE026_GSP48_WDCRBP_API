@@ -46,4 +46,6 @@ public class WoodworkerProfileDetailRes {
     private UserDetailRes user;
 
     private ServicePack servicePack;
+
+    private Boolean publicStatus;
 }
