@@ -70,7 +70,7 @@ public class WoodworkerProfileServiceImpl implements WoodworkerProfileService {
     }
 
     @Override
-    public List<WoodworkerProfile> getAllWoodWorker() {
+    public List<WoodworkerProfileListItemRes> getAllWoodWorker() {
         List<WoodworkerProfile> list = wwRepository.findAll();
         List<WoodworkerProfile> woodworkerProfileList = new ArrayList<>();
 
@@ -97,20 +97,22 @@ public class WoodworkerProfileServiceImpl implements WoodworkerProfileService {
                 }
             }
         }
-        return woodworkerProfileList;
+        return woodworkerProfileList.stream().map(item -> modelMapper.map(item, WoodworkerProfileListItemRes.class)).toList();
     }
 
     @Override
-    public WoodworkerProfile getWoodworkerById(Long id)
+    public WoodworkerProfileDetailRes getWoodworkerById(Long id)
     {
-        WoodworkerProfile obj = wwRepository.findById(id).orElse(null);
+        WoodworkerProfile ww = wwRepository.findById(id).orElse(null);
 
-        return obj;
+        return modelMapper.map(ww, WoodworkerProfileDetailRes.class);
     }
 
     @Override
-    public WoodworkerProfile getWoodworkerByUserId(Long userId) {
-        return wwRepository.findByUser_UserId(userId).orElse(null);
+    public WoodworkerProfileDetailRes getWoodworkerByUserId(Long userId) {
+        WoodworkerProfile wwProfile = wwRepository.findByUser_UserId(userId).orElse(null);
+
+        return modelMapper.map(wwProfile, WoodworkerProfileDetailRes.class);
     }
 
 
@@ -242,7 +244,7 @@ public class WoodworkerProfileServiceImpl implements WoodworkerProfileService {
     }
 
     @Override
-    public WoodworkerProfile addServicePack(Long servicePackId, Long wwId)
+    public WoodworkerProfileListItemRes addServicePack(Long servicePackId, Long wwId)
     {
         WoodworkerProfile obj = wwRepository.findWoodworkerProfileByWoodworkerId(wwId);
 
@@ -256,7 +258,7 @@ public class WoodworkerProfileServiceImpl implements WoodworkerProfileService {
 
         availableServiceService.activateAvailableServicesByServicePack(obj,servicePack.getName());
 
-        return obj;
+        return modelMapper.map(obj, WoodworkerProfileListItemRes.class);
 
     }
 

@@ -10,17 +10,17 @@ import SP25SE026_GSP48_WDCRBP_api.model.responseModel.*;
 import java.util.List;
 
 public interface WoodworkerProfileService {
-    List<WoodworkerProfile> getAllWoodWorker();
+    List<WoodworkerProfileListItemRes> getAllWoodWorker();
 
-    WoodworkerProfile getWoodworkerById(Long id);
+    WoodworkerProfileDetailRes getWoodworkerById(Long id);
 
-    WoodworkerProfile getWoodworkerByUserId(Long userId);
+    WoodworkerProfileDetailRes getWoodworkerByUserId(Long userId);
 
     WoodworkerProfileRes registerWoodworker(WoodworkerRequest request);
 
     WoodworkerUpdateStatusRes updateWoodworkerStatus(WoodworkerUpdateStatusRequest request);
 
-    WoodworkerProfile addServicePack(Long servicePackId, Long wwId);
+    WoodworkerProfileListItemRes addServicePack(Long servicePackId, Long wwId);
 
     List<ListRegisterRes.Data> getAllInactiveWoodworkers();
 
