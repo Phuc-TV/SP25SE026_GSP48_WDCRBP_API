@@ -244,22 +244,30 @@ public class WoodworkerProfileServiceImpl implements WoodworkerProfileService {
     }
 
     @Override
-    public WoodworkerProfileListItemRes addServicePack(Long servicePackId, Long wwId)
-    {
-        WoodworkerProfile obj = wwRepository.findWoodworkerProfileByWoodworkerId(wwId);
-
+    public WoodworkerProfileListItemRes addServicePack(Long servicePackId, Long wwId) {
+        WoodworkerProfile woodworker = wwRepository.findWoodworkerProfileByWoodworkerId(wwId);
         ServicePack servicePack = servicePackRepository.findServicePackByServicePackId(servicePackId);
 
-        obj.setServicePack(servicePack);
-        obj.setServicePackStartDate(LocalDateTime.now());
-        obj.setServicePackEndDate(LocalDateTime.now().plus(servicePack.getDuration(), ChronoUnit.MONTHS));
+        LocalDateTime now = LocalDateTime.now();
+        ServicePack currentPack = woodworker.getServicePack();
 
-        wwRepository.save(obj);
+        if (woodworker.getServicePackEndDate() != null &&
+                woodworker.getServicePackEndDate().isAfter(now) &&
+                currentPack != null &&
+                currentPack.getName().equals(servicePack.getName())) {
 
-        availableServiceService.activateAvailableServicesByServicePack(obj,servicePack.getName());
+            woodworker.setServicePackEndDate(woodworker.getServicePackEndDate().plus(servicePack.getDuration(), ChronoUnit.MONTHS));
 
-        return modelMapper.map(obj, WoodworkerProfileListItemRes.class);
+        } else {
+            woodworker.setServicePack(servicePack);
+            woodworker.setServicePackStartDate(now);
+            woodworker.setServicePackEndDate(now.plus(servicePack.getDuration(), ChronoUnit.MONTHS));
+        }
 
+        wwRepository.save(woodworker);
+        availableServiceService.activateAvailableServicesByServicePack(woodworker, servicePack.getName());
+
+        return modelMapper.map(woodworker, WoodworkerProfileListItemRes.class);
     }
 
     @Override

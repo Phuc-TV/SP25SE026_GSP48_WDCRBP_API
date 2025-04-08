@@ -37,4 +37,5 @@ public class ProductRes {
     private String packType;
     private String woodworkerImgUrl;
     private LocalDateTime servicePackEndDate;
+    private Boolean isWoodworkerProfilePublic;
 }
