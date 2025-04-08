@@ -1,16 +1,27 @@
 package SP25SE026_GSP48_WDCRBP_api.service.impl;
 
+import SP25SE026_GSP48_WDCRBP_api.constant.ServiceNameConstant;
+import SP25SE026_GSP48_WDCRBP_api.constant.ServiceOrderStatus;
+import SP25SE026_GSP48_WDCRBP_api.model.entity.OrderDeposit;
+import SP25SE026_GSP48_WDCRBP_api.model.entity.OrderProgress;
+import SP25SE026_GSP48_WDCRBP_api.model.entity.ServiceOrder;
 import SP25SE026_GSP48_WDCRBP_api.model.entity.Transaction;
 import SP25SE026_GSP48_WDCRBP_api.model.exception.WDCRBPApiException;
 import SP25SE026_GSP48_WDCRBP_api.model.requestModel.TransactionUpdateRequest;
 import SP25SE026_GSP48_WDCRBP_api.model.responseModel.ListTransactionRes;
+import SP25SE026_GSP48_WDCRBP_api.repository.OrderDepositRepository;
+import SP25SE026_GSP48_WDCRBP_api.repository.OrderProgressRepository;
+import SP25SE026_GSP48_WDCRBP_api.repository.ServiceOrderRepository;
 import SP25SE026_GSP48_WDCRBP_api.repository.TransactionRepository;
 import SP25SE026_GSP48_WDCRBP_api.service.TransactionService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 @Service
@@ -18,6 +29,15 @@ import java.util.stream.Collectors;
 public class TransactionServiceImpl implements TransactionService {
 
     private final TransactionRepository transactionRepository;
+
+    @Autowired
+    private OrderDepositRepository orderDepositRepository;
+
+    @Autowired
+    private ServiceOrderRepository serviceOrderRepository;
+
+    @Autowired
+    private OrderProgressRepository orderProgressRepository;
 
     @Override
     public void updateTransaction(TransactionUpdateRequest request) {
@@ -30,6 +50,42 @@ public class TransactionServiceImpl implements TransactionService {
             transaction.setCanceledAt(request.getCanceledAt());
         }
         transactionRepository.save(transaction);
+
+        if (transaction.getOrderDeposit() != null) {
+            OrderDeposit orderDeposit = transaction.getOrderDeposit();
+            ServiceOrder serviceOrder = orderDeposit.getServiceOrder();
+
+            orderDeposit.setStatus(true);
+            orderDeposit.setUpdatedAt(LocalDateTime.now());
+            orderDepositRepository.save(orderDeposit);
+
+            serviceOrder.setAmountPaid(serviceOrder.getAmountPaid() + orderDeposit.getAmount());
+            serviceOrder.setAmountRemaining(serviceOrder.getAmountRemaining() - orderDeposit.getAmount());
+
+            OrderProgress newOrderProgress = new OrderProgress();
+            newOrderProgress.setServiceOrder(serviceOrder);
+            newOrderProgress.setCreatedTime(LocalDateTime.now());
+
+            if (Objects.equals(serviceOrder.getStatus(), ServiceOrderStatus.DA_DUYET_HOP_DONG)) {
+                if (serviceOrder.getAvailableService().getService().getServiceName().equals(ServiceNameConstant.CUSTOMIZATION)) {
+                    newOrderProgress.setStatus(ServiceOrderStatus.DANG_GIA_CONG);
+                    orderProgressRepository.save(newOrderProgress);
+
+                    serviceOrder.setStatus(ServiceOrderStatus.DANG_GIA_CONG);
+                    serviceOrder.setFeedback("");
+                    serviceOrder.setRole("Woodworker");
+                    serviceOrderRepository.save(serviceOrder);
+                } else if (serviceOrder.getAvailableService().getService().getServiceName().equals(ServiceNameConstant.PERSONALIZATION)) {
+                    serviceOrder.setFeedback("");
+                    serviceOrder.setRole("Woodworker");
+                    serviceOrderRepository.save(serviceOrder);
+                }
+            } else if (Objects.equals(serviceOrder.getStatus(), ServiceOrderStatus.DA_DUYET_THIET_KE)) {
+
+            } else if (Objects.equals(serviceOrder.getStatus(), ServiceOrderStatus.DANG_GIAO_HANG_LAP_DAT)) {
+
+            }
+        }
     }
 
     @Override

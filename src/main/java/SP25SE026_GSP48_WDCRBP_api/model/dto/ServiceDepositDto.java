@@ -12,13 +12,13 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 public class ServiceDepositDto {
-    private Long serviceDepositId;
+    private Long orderDepositId;
 
     private Short depositNumber;
 
     private Short percent;
 
-    private String description;
+    private Float amount;
 
     private Boolean status;
 

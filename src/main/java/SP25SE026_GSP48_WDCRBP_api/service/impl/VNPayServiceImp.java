@@ -39,7 +39,6 @@ public class VNPayServiceImp implements VNPayService {
 
     @Override
     public PaymentRes processOrderPayment(PaymentOrderRequest request) {
-        long amount = request.getAmount();
         String email = request.getEmail();
         String userId = request.getUserId();
         String orderDepositId = request.getOrderDepositId();
@@ -68,7 +67,7 @@ public class VNPayServiceImp implements VNPayService {
 
             Transaction txn = Transaction.builder()
                     .transactionType(transactionType)
-                    .amount(amount)
+                    .amount(orderDeposit.getAmount())
                     .description("Thanh toán cọc đơn hàng")
                     .status(false)
                     .createdAt(LocalDateTime.now())
@@ -78,9 +77,10 @@ public class VNPayServiceImp implements VNPayService {
             transactionRepository.save(txn);
             // Create a payment URL
             String encryptedTransactionId = AESUtil.encrypt(String.valueOf(txn.getTransactionId()), AES_KEY);
+            String encryptedOrderDepositId = AESUtil.encrypt(String.valueOf(request.getOrderDepositId()), AES_KEY);
             Map<String, String> vnp_Params = new HashMap<>();
-            String dynamicReturnUrl = returnUrl + "?transactionId=" + URLEncoder.encode(encryptedTransactionId, StandardCharsets.UTF_8);
-            long vnpAmount = amount * 100 ;
+            String dynamicReturnUrl = returnUrl + "?transactionId=" + URLEncoder.encode(encryptedTransactionId, StandardCharsets.UTF_8) + "&orderDepositId=" + URLEncoder.encode(encryptedOrderDepositId, StandardCharsets.UTF_8);
+            long vnpAmount = (long) (Math.ceil(orderDeposit.getAmount() * 100)) ;
             String vnp_TxnRef = UUID.randomUUID().toString().replace("-", "").substring(0, 12);
             String vnp_IpAddr = "127.0.0.1";
             vnp_Params.put("vnp_Version", VnPayConfig.vnp_Version);

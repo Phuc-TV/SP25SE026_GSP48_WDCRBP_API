@@ -64,6 +64,7 @@ public class ContractServiceImpl implements ContractService {
         if (serviceOrder.getStatus().equals(ServiceOrderStatus.DA_DUYET_LICH_HEN)) {
             OrderProgress newOrderProgress = new OrderProgress();
             newOrderProgress.setServiceOrder(serviceOrder);
+            newOrderProgress.setCreatedTime(LocalDateTime.now());
             newOrderProgress.setStatus(ServiceOrderStatus.DANG_CHO_KHACH_DUYET_HOP_DONG);
             orderProgressRepository.save(newOrderProgress);
         }
@@ -126,6 +127,12 @@ public class ContractServiceImpl implements ContractService {
     public Contract customerSignContract(Long serviceOrderId, String customerSign, Long cusId)
     {
         ServiceOrder serviceOrder = serviceRepository.findServiceOrderByOrderId(serviceOrderId);
+        serviceOrder.setStatus(ServiceOrderStatus.DA_DUYET_HOP_DONG);
+
+        OrderProgress newOrderProgress = new OrderProgress();
+        newOrderProgress.setServiceOrder(serviceOrder);
+        newOrderProgress.setCreatedTime(LocalDateTime.now());
+        newOrderProgress.setStatus(ServiceOrderStatus.DA_DUYET_HOP_DONG);
 
         Contract contract = contractRepository.findContractByServiceOrder(serviceOrder);
         contract.setCustomerSignature(customerSign);
@@ -141,22 +148,24 @@ public class ContractServiceImpl implements ContractService {
         {
             OrderDeposit orderDeposit = new OrderDeposit();
 
-            List<ServiceDeposit> serviceDeposit =
-                    serviceDepositRepository.findServiceDepositsByService(serviceOrder.getAvailableService().getService());
+            int depositNumber = i + 1;
+            ServiceDeposit serviceDeposit =
+                    serviceDepositRepository.findServiceDepositsByService(serviceOrder.getAvailableService().getService()).stream().filter(item -> item.getDepositNumber() == depositNumber).findFirst().get();
 
-            orderDeposit.setAmount(serviceOrder.getTotalAmount() * (serviceDeposit.get(i).getPercent()/100));
-            orderDeposit.setPercent(serviceDeposit.get(i).getPercent());
+            float percent = (float) serviceDeposit.getPercent() / 100;
+            float totalAmount = serviceOrder.getTotalAmount();
+
+            orderDeposit.setAmount(percent * totalAmount);
+            orderDeposit.setDepositNumber(serviceDeposit.getDepositNumber());
+            orderDeposit.setPercent(serviceDeposit.getPercent());
             orderDeposit.setServiceOrder(serviceOrder);
             orderDeposit.setCreatedAt(LocalDateTime.now());
 
             orderDepositRepository.save(orderDeposit);
         }
 
-        OrderProgress orderProgress = orderProgressRepository.findOrderProgressByServiceOrder(serviceOrder).
-                get(orderProgressRepository.findAll().size()-1);
-        String s = "Đang chờ thanh toán";
-        orderProgress.setStatus(s);
-        orderProgressRepository.save(orderProgress);
+        serviceRepository.save(serviceOrder);
+        orderProgressRepository.save(newOrderProgress);
 
         return contract;
     }
@@ -166,6 +175,11 @@ public class ContractServiceImpl implements ContractService {
     {
         ServiceOrder serviceOrder = serviceRepository.findServiceOrderByOrderId(serviceOrderId);
         Contract contract = contractRepository.findContractByServiceOrder(serviceOrder);
+
+        if (contract == null) {
+            return null;
+        }
+
         User woodworker = userRepository.findUserByUserId(serviceOrder.getAvailableService().getWoodworkerProfile().getUser().getUserId());
 
         ContractDetailRes contractDetailRes = modelMapper.map(contract, ContractDetailRes.class);

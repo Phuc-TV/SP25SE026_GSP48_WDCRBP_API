@@ -247,7 +247,6 @@ public class ServiceOrderServiceImpl implements ServiceOrderService {
 
         // Create new progress record with next status based on current status and role
         OrderProgress newOrderProgress = new OrderProgress();
-        OrderProgress continueOrderProgress = new OrderProgress();
         newOrderProgress.setServiceOrder(serviceOrder);
         newOrderProgress.setCreatedTime(LocalDateTime.now());
 
@@ -283,19 +282,11 @@ public class ServiceOrderServiceImpl implements ServiceOrderService {
                     // Customer approving contract
                     newOrderProgress.setStatus(ServiceOrderStatus.DA_DUYET_HOP_DONG);
                     serviceOrder.setStatus(ServiceOrderStatus.DA_DUYET_HOP_DONG);
-
-                    if (serviceOrder.getAvailableService().getService().getServiceName().equals(ServiceNameConstant.CUSTOMIZATION)) {
-                        continueOrderProgress.setServiceOrder(serviceOrder);
-                        continueOrderProgress.setCreatedTime(LocalDateTime.now());
-                        continueOrderProgress.setStatus(ServiceOrderStatus.DANG_GIA_CONG);
-                        serviceOrder.setStatus(ServiceOrderStatus.DANG_GIA_CONG);
-                    }
                 } else if (currentStatus.equals(ServiceOrderStatus.DANG_CHO_KHACH_DUYET_THIET_KE)) {
                     // Customer apporoving design
-                    newOrderProgress.setStatus(ServiceOrderStatus.DANG_GIA_CONG);
-                    serviceOrder.setStatus(ServiceOrderStatus.DANG_GIA_CONG);
+                    newOrderProgress.setStatus(ServiceOrderStatus.DA_DUYET_THIET_KE);
+                    serviceOrder.setStatus(ServiceOrderStatus.DA_DUYET_THIET_KE);
                 }
-
                 break;
         }
 
@@ -303,10 +294,6 @@ public class ServiceOrderServiceImpl implements ServiceOrderService {
             // Empty
         } else {
             orderProgressRepository.save(newOrderProgress);
-        }
-
-        if (continueOrderProgress.getStatus() != null) {
-            orderProgressRepository.save(continueOrderProgress);
         }
 
         // Toggle the role between Woodworker and Customer
