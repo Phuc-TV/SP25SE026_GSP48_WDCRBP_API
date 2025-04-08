@@ -8,7 +8,6 @@ import java.util.List;
 
 public interface RequestedProductRepository extends JpaRepository<RequestedProduct, Long> {
     List<RequestedProduct> findRequestedProductByServiceOrder(ServiceOrder serviceOrder);
-
     RequestedProduct findRequestedProductByRequestedProductId(Long requestedProductId);
     List<RequestedProduct> findByServiceOrder(ServiceOrder serviceOrder);
 }
