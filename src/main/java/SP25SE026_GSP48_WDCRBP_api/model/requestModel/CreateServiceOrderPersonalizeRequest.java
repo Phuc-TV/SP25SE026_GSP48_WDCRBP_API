@@ -14,6 +14,7 @@ import java.util.List;
 @AllArgsConstructor
 public class CreateServiceOrderPersonalizeRequest {
     private Long availableServiceId;
+    private String note;
     private Long userId;
     private String address;
     private List<RequestedProductPersonalizeDto> requestedProducts;

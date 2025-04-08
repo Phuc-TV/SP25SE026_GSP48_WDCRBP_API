@@ -26,6 +26,7 @@ public class ServiceOrderMapper {
         dto.setService(avaliableServiceDto);
         dto.setUser(userDetailRes);
         dto.setRole(entity.getRole());
+        dto.setCreatedAt(entity.getCreatedAt());
 
         return dto;
     }
@@ -51,6 +52,7 @@ public class ServiceOrderMapper {
         dto.setRequestedProduct(products);
         dto.setConsultantAppointment(consultantAppointmentDetailRes);
         dto.setReview(reviewRes);
+        dto.setCreatedAt(serviceOrderDto.getCreatedAt());
 
         return dto;
     }

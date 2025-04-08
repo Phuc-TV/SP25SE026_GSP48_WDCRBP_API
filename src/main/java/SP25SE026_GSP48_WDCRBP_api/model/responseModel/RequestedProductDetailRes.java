@@ -29,4 +29,6 @@ public class RequestedProductDetailRes {
     private Category category;
 
     private DesignVariantDetailRes designIdeaVariantDetail;
+
+    private PersonalProductDetailRes personalProductDetail;
 }

@@ -8,6 +8,9 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+
 @Getter
 @Setter
 @NoArgsConstructor
@@ -22,6 +25,7 @@ public class ServiceOrderDto {
     private String feedback;
     private Float amountPaid;
     private Float amountRemaining;
+    private LocalDateTime createdAt;
     private String role;
     private AvaliableServiceDto service;
     private UserDetailRes user;
