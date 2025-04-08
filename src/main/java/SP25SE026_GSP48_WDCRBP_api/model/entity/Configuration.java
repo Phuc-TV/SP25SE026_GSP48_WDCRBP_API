@@ -21,7 +21,7 @@ public class Configuration {
     @Column(nullable = true)
     private String description;
 
-    @Column(nullable = true)
+    @Column(nullable = true, length = 2000)
     private String value;
 
     @Column(nullable = true)
