@@ -1,5 +1,7 @@
 package SP25SE026_GSP48_WDCRBP_api.service.impl;
 
+import SP25SE026_GSP48_WDCRBP_api.constant.ServiceNameConstant;
+import SP25SE026_GSP48_WDCRBP_api.constant.ServiceOrderStatus;
 import SP25SE026_GSP48_WDCRBP_api.constant.TransactionTypeConstant;
 import SP25SE026_GSP48_WDCRBP_api.model.entity.*;
 import SP25SE026_GSP48_WDCRBP_api.model.exception.WDCRBPApiException;
@@ -14,9 +16,11 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.Collections;
+import java.util.Objects;
 
 @Service
 @RequiredArgsConstructor
@@ -42,6 +46,12 @@ public class WalletServiceImpl implements WalletService {
 
     @Autowired
     private OrderDepositRepository orderDepositRepository;
+
+    @Autowired
+    private ServiceOrderRepository serviceOrderRepository;
+
+    @Autowired
+    private OrderProgressRepository orderProgressRepository;
 
     @Autowired
     private WoodworkerProfileRepository woodworkerProfileRepository;
@@ -104,8 +114,11 @@ public class WalletServiceImpl implements WalletService {
     public ListTransactionRes createWalletOrderPayment(PaymentOrderRequest request) {
         Long userId = Long.parseLong(request.getUserId());
         Long orderDepositId = Long.parseLong(request.getOrderDepositId());
-        Long amount = request.getAmount();
         String email = request.getEmail();
+
+        OrderDeposit orderDeposit = orderDepositRepository.findById(orderDepositId).get();
+        ServiceOrder serviceOrder = orderDeposit.getServiceOrder();
+
         User dbUser = userRepository.findById(userId)
                 .orElseThrow(() -> new WDCRBPApiException(HttpStatus.NOT_FOUND, "Không tìm thấy người dùng với ID: " + userId));
         if (!"Customer".equalsIgnoreCase(dbUser.getRole())) {
@@ -115,25 +128,34 @@ public class WalletServiceImpl implements WalletService {
                 .filter(w -> w.getUser() != null && w.getUser().getUserId().equals(userId))
                 .findFirst()
                 .orElseThrow(() -> new WDCRBPApiException(HttpStatus.NOT_FOUND, "Không tìm thấy ví cho người dùng ID: " + userId));
-        if (wallet.getBalance() < amount) {
+        if (wallet.getBalance() < orderDeposit.getAmount()) {
             // Not enough balance, send failure email
             String failureMessage = "Thanh toán không thành công do số dư không đủ.";
             mailServiceImpl.sendEmail(email, "Lỗi thanh toán", "payment", failureMessage);
             throw new WDCRBPApiException(HttpStatus.BAD_REQUEST, "Số dư không đủ.");
         }
-        wallet.setBalance(wallet.getBalance() - amount);
+        wallet.setBalance(wallet.getBalance() - orderDeposit.getAmount());
         wallet.setUpdatedAt(LocalDateTime.now());
         walletRepository.save(wallet);
+
+        orderDeposit.setStatus(true);
+        orderDeposit.setUpdatedAt(LocalDateTime.now());
+        orderDepositRepository.save(orderDeposit);
+
         Transaction txn = new Transaction();
         txn.setTransactionType(TransactionTypeConstant.THANH_TOAN_BANG_VI);
-        txn.setAmount(amount);
+        txn.setAmount(orderDeposit.getAmount());
         txn.setDescription("Thanh toán đặt cọc đơn hàng");
         txn.setCreatedAt(LocalDateTime.now());
         txn.setStatus(true);
         txn.setUser(dbUser);
-        txn.setOrderDeposit(orderDepositRepository.findById(orderDepositId).get());
+        txn.setOrderDeposit(orderDeposit);
         txn.setWallet(wallet);
         transactionRepository.save(txn);
+
+        serviceOrder.setAmountPaid(serviceOrder.getAmountPaid() + orderDeposit.getAmount());
+        serviceOrder.setAmountRemaining(serviceOrder.getAmountRemaining() - orderDeposit.getAmount());
+
         String successMessage = "Thanh toán của bạn đã thành công!";
         mailServiceImpl.sendEmail(email, "Thanh toán thành công", "payment", successMessage);
         ListTransactionRes.Data transactionData = new ListTransactionRes.Data();
@@ -148,6 +170,31 @@ public class WalletServiceImpl implements WalletService {
         transactionData.setWalletId(txn.getWallet().getWalletId());
         ListTransactionRes response = new ListTransactionRes();
         response.setData(Collections.singletonList(transactionData));
+
+        OrderProgress newOrderProgress = new OrderProgress();
+        newOrderProgress.setServiceOrder(serviceOrder);
+        newOrderProgress.setCreatedTime(LocalDateTime.now());
+
+        if (Objects.equals(serviceOrder.getStatus(), ServiceOrderStatus.DA_DUYET_HOP_DONG)) {
+            if (serviceOrder.getAvailableService().getService().getServiceName().equals(ServiceNameConstant.CUSTOMIZATION)) {
+                newOrderProgress.setStatus(ServiceOrderStatus.DANG_GIA_CONG);
+                orderProgressRepository.save(newOrderProgress);
+
+                serviceOrder.setStatus(ServiceOrderStatus.DANG_GIA_CONG);
+                serviceOrder.setFeedback("");
+                serviceOrder.setRole("Woodworker");
+                serviceOrderRepository.save(serviceOrder);
+            } else if (serviceOrder.getAvailableService().getService().getServiceName().equals(ServiceNameConstant.PERSONALIZATION)) {
+                serviceOrder.setFeedback("");
+                serviceOrder.setRole("Woodworker");
+                serviceOrderRepository.save(serviceOrder);
+            }
+        } else if (Objects.equals(serviceOrder.getStatus(), ServiceOrderStatus.DA_DUYET_THIET_KE)) {
+
+        } else if (Objects.equals(serviceOrder.getStatus(), ServiceOrderStatus.DANG_GIAO_HANG_LAP_DAT)) {
+
+        }
+
         return response;
     }
 
