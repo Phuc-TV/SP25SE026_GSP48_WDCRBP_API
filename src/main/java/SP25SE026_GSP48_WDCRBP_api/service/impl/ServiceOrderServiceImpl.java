@@ -19,6 +19,8 @@ import org.springframework.stereotype.Service;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
+import java.util.stream.Collectors;
 
 @Service
 public class ServiceOrderServiceImpl implements ServiceOrderService {
@@ -42,6 +44,9 @@ public class ServiceOrderServiceImpl implements ServiceOrderService {
 
     @Autowired
     private AvailableServiceRepository availableServiceRepository;
+
+    @Autowired
+    private CategoryRepository categoryRepository;
 
     @Autowired
     private OrderProgressRepository orderProgressRepository;
@@ -138,7 +143,15 @@ public class ServiceOrderServiceImpl implements ServiceOrderService {
         List<RequestedProductDetailRes> requestedProductDetailResList = new ArrayList<>();
 
         for (RequestedProduct requestedProduct : requestedProducts) {
-            // Customization
+            RequestedProductDetailRes requestedProductDetailRes = new RequestedProductDetailRes();
+
+            requestedProductDetailRes.setRequestedProductId(requestedProduct.getRequestedProductId());
+            requestedProductDetailRes.setQuantity(requestedProduct.getQuantity());
+            requestedProductDetailRes.setTotalAmount(requestedProduct.getTotalAmount());
+            requestedProductDetailRes.setCategory(requestedProduct.getCategory());
+            requestedProductDetailRes.setCreatedAt(requestedProduct.getCreatedAt());
+            requestedProductDetailRes.setHasDesign(requestedProduct.getDesignIdeaVariant() != null);
+
             if (requestedProduct.getDesignIdeaVariant() != null) {
                 // Design idea
                 DesignIdea idea = requestedProduct.getDesignIdeaVariant().getDesignIdea();
@@ -149,20 +162,38 @@ public class ServiceOrderServiceImpl implements ServiceOrderService {
                         designIdeaVariantConfigRepository.findDesignIdeaVariantConfigByDesignIdeaVariant(variant);
                 // Design idea detail res
                 DesignVariantDetailRes designIdeaDetailRes = DesignIdeaVariantMapper.toDto(variant, configs, idea);
-                // RequestedProduct for Customize detail
-                RequestedProductDetailRes requestedProductDetailRes = new RequestedProductDetailRes();
 
-                requestedProductDetailRes.setRequestedProductId(requestedProduct.getRequestedProductId());
-                requestedProductDetailRes.setQuantity(requestedProduct.getQuantity());
-                requestedProductDetailRes.setTotalAmount(requestedProduct.getTotalAmount());
-                requestedProductDetailRes.setCreatedAt(requestedProduct.getCreatedAt());
-                requestedProductDetailRes.setHasDesign(requestedProduct.getDesignIdeaVariant() != null);
                 requestedProductDetailRes.setDesignIdeaVariantDetail(designIdeaDetailRes);
-
-                requestedProductDetailResList.add(requestedProductDetailRes);
             } else {
                 // Personalization
+                PersonalProductDetailRes personalProductDetailRes = new PersonalProductDetailRes();
+                List<CustomerSelection> customerSelections =
+                        customerSelectionRepository.findByRequestedProduct(requestedProduct);
+                List<ProductImages> productImages =
+                        productImagesRepository.findByRequestedProduct(requestedProduct);
+                String allMediaUrls = productImages.stream()
+                        .map(ProductImages::getMediaUrls)
+                        .filter(Objects::nonNull)
+                        .collect(Collectors.joining(";"));
+                personalProductDetailRes.setDesignUrls(allMediaUrls);
+
+                List<TechSpecDetailRes> techSpecDetailResList = new ArrayList<>();
+                for (CustomerSelection customerSelection : customerSelections) {
+                    TechSpec techSpec = customerSelection.getTechSpec();
+                    if (techSpec != null) {
+                        TechSpecDetailRes techSpecDetailRes = new TechSpecDetailRes();
+                        techSpecDetailRes.setName(techSpec.getName());
+                        techSpecDetailRes.setValue(customerSelection.getValue());
+                        techSpecDetailRes.setOptionType(techSpec.getOptionType());
+                        techSpecDetailResList.add(techSpecDetailRes);
+                    }
+                }
+
+                personalProductDetailRes.setTechSpecList(techSpecDetailResList);
+                requestedProductDetailRes.setPersonalProductDetail(personalProductDetailRes);
             }
+
+            requestedProductDetailResList.add(requestedProductDetailRes);
         }
 
         return ServiceOrderMapper.toServiceOrderDetailRes(serviceOrderDto, requestedProductDetailResList, consultantAppointmentDetailRes, reviewRes);
@@ -326,16 +357,18 @@ public class ServiceOrderServiceImpl implements ServiceOrderService {
     public ServiceOrder createServiceOrderPersonalize(CreateServiceOrderPersonalizeRequest createServiceOrderPersonalizeRequest) {
         //Create ServiceOrder
         User user = userRepository.findById(createServiceOrderPersonalizeRequest.getUserId()).orElse(null);
+        short qty = 0;
 
         AvailableService availableService =
                 availableServiceRepository.findById(createServiceOrderPersonalizeRequest.getAvailableServiceId()).orElse(null);
 
         ServiceOrder serviceOrder = new ServiceOrder();
         serviceOrder.setAvailableService(availableService);
+        serviceOrder.setStatus(ServiceOrderStatus.DANG_CHO_THO_MOC_XAC_NHAN);
         serviceOrder.setUser(user);
+        serviceOrder.setDescription(createServiceOrderPersonalizeRequest.getNote());
         serviceOrder.setCreatedAt(LocalDateTime.now());
         serviceOrder.setRole("Woodworker");
-
         orderRepository.save(serviceOrder);
 
         List<RequestedProductPersonalizeDto> requestedProducts =
@@ -346,6 +379,10 @@ public class ServiceOrderServiceImpl implements ServiceOrderService {
             requestedProduct.setQuantity(requestedProductPersonalizeDto.getQuantity());
             requestedProduct.setServiceOrder(serviceOrder);
             requestedProduct.setCreatedAt(LocalDateTime.now());
+
+            Category category = categoryRepository.findCategoriesByCategoryId(Long.parseLong(requestedProductPersonalizeDto.getCategoryId()));
+            requestedProduct.setCategory(category);
+            qty = (short) (qty + requestedProductPersonalizeDto.getQuantity());
 
             requestedProductRepository.save(requestedProduct);
 
@@ -362,17 +399,19 @@ public class ServiceOrderServiceImpl implements ServiceOrderService {
             }
         }
 
+        serviceOrder.setQuantity(qty);
+        orderRepository.save(serviceOrder);
+
         //Create OrderProgress
         OrderProgress orderProgress = new OrderProgress();
         orderProgress.setServiceOrder(serviceOrder);
         orderProgress.setCreatedTime(LocalDateTime.now());
-
         orderProgress.setStatus(ServiceOrderStatus.DANG_CHO_THO_MOC_XAC_NHAN);
+        orderProgressRepository.save(orderProgress);
 
         Shipment shipment = new Shipment();
         shipment.setServiceOrder(serviceOrder);
         shipment.setToAddress(createServiceOrderPersonalizeRequest.getAddress());
-
         shipmentRepository.save(shipment);
 
         return serviceOrder;
@@ -383,7 +422,7 @@ public class ServiceOrderServiceImpl implements ServiceOrderService {
     {
         ServiceOrder serviceOrder = orderRepository.findById(serviceId).orElse(null);
 
-        serviceOrder.setRole("Woodworker");
+        serviceOrder.setRole("Customer");
         serviceOrder.setFeedback(null);
 
         orderRepository.save(serviceOrder);

@@ -19,10 +19,10 @@ public class QuotationDetail {
     private String costType;
 
     @Column(nullable = false)
-    private String costAmount;
+    private float costAmount;
 
     @Column(nullable = false)
-    private Short quantityRequired;
+    private String quantityRequired;
 
     @ManyToOne
     @JoinColumn(name = "requested_product_id", nullable = false)

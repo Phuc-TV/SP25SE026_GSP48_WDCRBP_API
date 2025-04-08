@@ -12,6 +12,7 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 public class RequestedProductPersonalizeDto {
+    private String categoryId;
     private Byte quantity;
     private List<TechSpecPersonalizeDto> techSpecs;
 }

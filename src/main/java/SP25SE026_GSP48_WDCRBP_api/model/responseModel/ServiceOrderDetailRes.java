@@ -8,6 +8,8 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Getter
@@ -27,6 +29,7 @@ public class ServiceOrderDetailRes {
     private String role;
     private AvaliableServiceDto service;
     private UserDetailRes user;
+    private LocalDateTime createdAt;
     private List<RequestedProductDetailRes> requestedProduct;
     private ConsultantAppointmentDetailRes consultantAppointment;
     private ReviewRes review;
