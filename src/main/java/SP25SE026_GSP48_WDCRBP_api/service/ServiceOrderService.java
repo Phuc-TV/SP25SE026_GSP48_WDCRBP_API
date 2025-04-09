@@ -26,4 +26,6 @@ public interface ServiceOrderService {
     ServiceOrder createServiceOrderPersonalize(CreateServiceOrderPersonalizeRequest createServiceOrderPersonalizeRequest);
 
     List<ProductImages> addProductImage(List<ProductImagesDto> productImagesDtos, Long serviceId);
+
+    List<ProductImagesDto> addProductFinishImage(List<ProductImagesDto> productImagesDtos, Long serviceId);
 }

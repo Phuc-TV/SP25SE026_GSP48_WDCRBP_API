@@ -1,5 +1,6 @@
 package SP25SE026_GSP48_WDCRBP_api.service.impl;
 
+import SP25SE026_GSP48_WDCRBP_api.constant.ServiceNameConstant;
 import SP25SE026_GSP48_WDCRBP_api.model.entity.*;
 import SP25SE026_GSP48_WDCRBP_api.model.requestModel.ReviewRequest;
 import SP25SE026_GSP48_WDCRBP_api.model.requestModel.UpdateReviewStatusRequest;
@@ -14,6 +15,7 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -101,7 +103,6 @@ public class ReviewServiceImpl implements ReviewService {
                 .reviewId(review.getReviewId())
                 .userId(review.getUser().getUserId())
                 .username(review.getUser().getUsername())
-                .description(review.getDescription())
                 .rating(review.getRating())
                 .comment(review.getComment())
                 .createdAt(review.getCreatedAt())
@@ -117,21 +118,24 @@ public class ReviewServiceImpl implements ReviewService {
     public ReviewRes createReview(ReviewRequest request) {
         User user = userRepository.findById(request.getUserId())
                 .orElseThrow(() -> new RuntimeException("User not found"));
+        ServiceOrder serviceOrder = serviceOrderRepository.findServiceOrderByOrderId(request.getServiceOrderId());
 
         Review review = Review.builder()
                 .user(user)
-                .description(request.getDescription())
                 .rating(request.getRating())
                 .comment(request.getComment())
                 .createdAt(LocalDateTime.now())
                 .updatedAt(LocalDateTime.now())
-                .woodworkerResponse(request.getWoodworkerResponse())
-                .status(true)
+                .status(false)
                 .woodworkerResponseStatus(false)
                 .responseAt(LocalDateTime.now())
                 .build();
 
         Review saved = reviewRepository.save(review);
+
+        serviceOrder.setReview(saved);
+        serviceOrderRepository.save(serviceOrder);
+
         return toReviewRes(saved, "");
     }
 
@@ -141,6 +145,35 @@ public class ReviewServiceImpl implements ReviewService {
                 .orElseThrow(() -> new RuntimeException("Review not found"));
         review.setStatus(dto.getStatus());
         review.setUpdatedAt(LocalDateTime.now());
+
+        ServiceOrder serviceOrder = serviceOrderRepository.findServiceOrderByReview(review);
+        WoodworkerProfile woodworker = serviceOrder.getAvailableService().getWoodworkerProfile();
+
+        woodworker.setTotalStar((short) (
+                Optional.ofNullable(woodworker.getTotalStar()).orElse((short) 0) + review.getRating()
+        ));
+        woodworker.setTotalReviews((short) (
+                Optional.ofNullable(woodworker.getTotalReviews()).orElse((short) 0) + 1
+        ));
+        woodworkerProfileRepository.save(woodworker);
+
+        if (serviceOrder.getAvailableService().getService().getServiceName().equals(ServiceNameConstant.CUSTOMIZATION)) {
+            List<RequestedProduct> requestedProducts = serviceOrder.getRequestedProducts();
+
+            for (RequestedProduct requestedProduct : requestedProducts) {
+                DesignIdea designIdea = requestedProduct.getDesignIdeaVariant().getDesignIdea();
+                designIdea.setTotalStar((short) (
+                        Optional.ofNullable(designIdea.getTotalStar()).orElse((short) 0) + review.getRating()
+                ));
+                designIdea.setTotalReviews((short) (
+                        Optional.ofNullable(designIdea.getTotalReviews()).orElse((short) 0) + 1
+                ));
+                designIdeaRepository.save(designIdea);
+            }
+        } else if (serviceOrder.getAvailableService().getService().getServiceName().equals(ServiceNameConstant.SALE)) {
+
+        }
+
         return toReviewRes(reviewRepository.save(review), "");
     }
 
