@@ -225,6 +225,7 @@ public class ServiceOrderServiceImpl implements ServiceOrderService {
         serviceOrder.setStatus(ServiceOrderStatus.DANG_CHO_THO_MOC_XAC_NHAN);
         serviceOrder.setCreatedAt(LocalDateTime.now());
         serviceOrder.setQuantity(quantity);
+        serviceOrder.setInstall(createServiceOrderCusRequest.getIsInstall());
         serviceOrder.setRole("Woodworker");
 
         orderRepository.save(serviceOrder);
@@ -258,11 +259,23 @@ public class ServiceOrderServiceImpl implements ServiceOrderService {
 
         orderProgressRepository.save(orderProgress);
 
-        Shipment shipment = new Shipment();
-        shipment.setServiceOrder(serviceOrder);
-        shipment.setToAddress(createServiceOrderCusRequest.getAddress());
-
-        shipmentRepository.save(shipment);
+        if (createServiceOrderCusRequest.getIsInstall()) {
+            Shipment shipment = new Shipment();
+            shipment.setServiceOrder(serviceOrder);
+            shipment.setToAddress(createServiceOrderCusRequest.getAddress());
+            shipment.setFrom_address(availableService.getWoodworkerProfile().getAddress());
+            shipment.setShippingUnit(availableService.getWoodworkerProfile().getBrandName());
+            shipment.setShipType("Giao hàng và lắp đặt bởi xưởng mộc");
+            shipmentRepository.save(shipment);
+        } else {
+            Shipment shipment = new Shipment();
+            shipment.setServiceOrder(serviceOrder);
+            shipment.setToAddress(createServiceOrderCusRequest.getAddress());
+            shipment.setFrom_address(availableService.getWoodworkerProfile().getAddress());
+            shipment.setShippingUnit("Giao hàng nhanh (GHN)");
+            shipment.setShipType("Giao hàng bởi bên thứ 3 (GHN)");
+            shipmentRepository.save(shipment);
+        }
 
         return CoreApiResponse.success(serviceOrder, "successfully");
     }
@@ -368,6 +381,7 @@ public class ServiceOrderServiceImpl implements ServiceOrderService {
         serviceOrder.setDescription(createServiceOrderPersonalizeRequest.getNote());
         serviceOrder.setCreatedAt(LocalDateTime.now());
         serviceOrder.setRole("Woodworker");
+        serviceOrder.setInstall(createServiceOrderPersonalizeRequest.getIsInstall());
         orderRepository.save(serviceOrder);
 
         List<RequestedProductPersonalizeDto> requestedProducts =
@@ -408,10 +422,23 @@ public class ServiceOrderServiceImpl implements ServiceOrderService {
         orderProgress.setStatus(ServiceOrderStatus.DANG_CHO_THO_MOC_XAC_NHAN);
         orderProgressRepository.save(orderProgress);
 
-        Shipment shipment = new Shipment();
-        shipment.setServiceOrder(serviceOrder);
-        shipment.setToAddress(createServiceOrderPersonalizeRequest.getAddress());
-        shipmentRepository.save(shipment);
+        if (createServiceOrderPersonalizeRequest.getIsInstall()) {
+            Shipment shipment = new Shipment();
+            shipment.setServiceOrder(serviceOrder);
+            shipment.setToAddress(createServiceOrderPersonalizeRequest.getAddress());
+            shipment.setFrom_address(availableService.getWoodworkerProfile().getAddress());
+            shipment.setShippingUnit(availableService.getWoodworkerProfile().getBrandName());
+            shipment.setShipType("Giao hàng và lắp đặt bởi xưởng mộc");
+            shipmentRepository.save(shipment);
+        } else {
+            Shipment shipment = new Shipment();
+            shipment.setServiceOrder(serviceOrder);
+            shipment.setToAddress(createServiceOrderPersonalizeRequest.getAddress());
+            shipment.setFrom_address(availableService.getWoodworkerProfile().getAddress());
+            shipment.setShippingUnit("Giao hàng nhanh (GHN)");
+            shipment.setShipType("Giao hàng bởi bên thứ 3 (GHN)");
+            shipmentRepository.save(shipment);
+        }
 
         return serviceOrder;
     }

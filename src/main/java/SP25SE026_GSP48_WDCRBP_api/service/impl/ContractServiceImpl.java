@@ -79,6 +79,7 @@ public class ContractServiceImpl implements ContractService {
             contract.setCompleteDate(wwCreateContractCustomizeRequest.getCompleteDate());
             contract.setWoodworkerSignature(wwCreateContractCustomizeRequest.getWoodworkerSignature());
             contract.setSignDate(LocalDateTime.now());
+            contract.setWoodworkerTerms(wwCreateContractCustomizeRequest.getWoodworkerTerms());
 
             List<RequestedProduct> requestedProduct =
                     requestedProductRepository.findRequestedProductByServiceOrder(serviceOrder);
@@ -112,6 +113,8 @@ public class ContractServiceImpl implements ContractService {
                 contract1.setCompleteDate(wwCreateContractCustomizeRequest.getCompleteDate());
             if (wwCreateContractCustomizeRequest.getWarrantyPeriod() != null)
                 contract1.setWarrantyPeriod(wwCreateContractCustomizeRequest.getWarrantyPeriod());
+            if (wwCreateContractCustomizeRequest.getWoodworkerTerms() != null)
+                contract1.setWoodworkerTerms(wwCreateContractCustomizeRequest.getWoodworkerTerms());
             List<RequestedProduct> requestedProduct =
                     requestedProductRepository.findRequestedProductByServiceOrder(serviceOrder);
             float i =0;

@@ -18,4 +18,5 @@ public class CreateServiceOrderCusRequest {
     private List<DesignIdeaVariantCusDto> designIdeaVariantIds;
     private String address;
     private String description;
+    private Boolean isInstall;
 }

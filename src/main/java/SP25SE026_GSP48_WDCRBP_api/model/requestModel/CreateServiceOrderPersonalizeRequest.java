@@ -18,4 +18,5 @@ public class CreateServiceOrderPersonalizeRequest {
     private Long userId;
     private String address;
     private List<RequestedProductPersonalizeDto> requestedProducts;
+    private Boolean isInstall;
 }

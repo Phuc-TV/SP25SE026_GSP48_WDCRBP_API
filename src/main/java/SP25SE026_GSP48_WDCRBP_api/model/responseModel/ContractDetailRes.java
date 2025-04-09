@@ -16,6 +16,8 @@ public class ContractDetailRes {
 
     private String woodworkerSignature;
 
+    private String woodworkerTerms;
+
     private String warrantyPolicy;
 
     private float contractTotalAmount;

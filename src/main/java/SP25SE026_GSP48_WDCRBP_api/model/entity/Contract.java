@@ -24,6 +24,9 @@ public class Contract {
     @Column(nullable = true,length = 2000)
     private String woodworkerSignature;
 
+    @Column(nullable = true,length = 2000)
+    private String woodworkerTerms;
+
     @Column(nullable = true)
     private String warrantyPolicy;
 
