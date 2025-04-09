@@ -20,7 +20,7 @@ public class ProductImages {
     private String mediaUrls;
 
     @Column(nullable = true)
-    private Byte versionNo;
+    private String type;
 
     @ManyToOne
     @JoinColumn(name = "requested_product_id", nullable = false)

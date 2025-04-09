@@ -1,6 +1,7 @@
 package SP25SE026_GSP48_WDCRBP_api.repository;
 
 import SP25SE026_GSP48_WDCRBP_api.model.entity.AvailableService;
+import SP25SE026_GSP48_WDCRBP_api.model.entity.Review;
 import SP25SE026_GSP48_WDCRBP_api.model.entity.ServiceOrder;
 import SP25SE026_GSP48_WDCRBP_api.model.entity.User;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -28,5 +29,7 @@ public interface ServiceOrderRepository extends JpaRepository<ServiceOrder, Long
         AND r.status = true
     """)
     List<ServiceOrder> findServiceOrdersByProductId(@Param("productId") Long productId);
+
+    ServiceOrder findServiceOrderByReview(Review review);
 }
 

@@ -28,6 +28,8 @@ public class RequestedProductDetailRes {
 
     private Category category;
 
+    private String finishImgUrls;
+
     private DesignVariantDetailRes designIdeaVariantDetail;
 
     private PersonalProductDetailRes personalProductDetail;

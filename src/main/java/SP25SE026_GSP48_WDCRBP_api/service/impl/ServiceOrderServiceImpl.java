@@ -151,31 +151,31 @@ public class ServiceOrderServiceImpl implements ServiceOrderService {
             requestedProductDetailRes.setCategory(requestedProduct.getCategory());
             requestedProductDetailRes.setCreatedAt(requestedProduct.getCreatedAt());
             requestedProductDetailRes.setHasDesign(requestedProduct.getDesignIdeaVariant() != null);
+            ProductImages finishImages =
+                    productImagesRepository.findByRequestedProduct(requestedProduct).stream().filter(design -> design.getType().equals("finish")).findFirst().orElse(null);
+            if (finishImages != null)
+            {
+                requestedProductDetailRes.setFinishImgUrls(finishImages.getMediaUrls());
+            }
 
             if (requestedProduct.getDesignIdeaVariant() != null) {
-                // Design idea
                 DesignIdea idea = requestedProduct.getDesignIdeaVariant().getDesignIdea();
-                // Design idea variant
                 DesignIdeaVariant variant = designIdeaVariantRepository.findDesignIdeaVariantByDesignIdeaVariantId(requestedProduct.getDesignIdeaVariant().getDesignIdeaVariantId());
-                // Design idea variant config
                 List<DesignIdeaVariantConfig> configs =
                         designIdeaVariantConfigRepository.findDesignIdeaVariantConfigByDesignIdeaVariant(variant);
-                // Design idea detail res
                 DesignVariantDetailRes designIdeaDetailRes = DesignIdeaVariantMapper.toDto(variant, configs, idea);
 
                 requestedProductDetailRes.setDesignIdeaVariantDetail(designIdeaDetailRes);
             } else {
-                // Personalization
                 PersonalProductDetailRes personalProductDetailRes = new PersonalProductDetailRes();
                 List<CustomerSelection> customerSelections =
                         customerSelectionRepository.findByRequestedProduct(requestedProduct);
-                List<ProductImages> productImages =
-                        productImagesRepository.findByRequestedProduct(requestedProduct);
-                String allMediaUrls = productImages.stream()
-                        .map(ProductImages::getMediaUrls)
-                        .filter(Objects::nonNull)
-                        .collect(Collectors.joining(";"));
-                personalProductDetailRes.setDesignUrls(allMediaUrls);
+                ProductImages productImages =
+                        productImagesRepository.findByRequestedProduct(requestedProduct).stream().filter(design -> design.getType().equals("design")).findFirst().orElse(null);
+                if (productImages != null)
+                {
+                    personalProductDetailRes.setDesignUrls(productImages.getMediaUrls());
+                }
 
                 List<TechSpecDetailRes> techSpecDetailResList = new ArrayList<>();
                 for (CustomerSelection customerSelection : customerSelections) {
@@ -433,6 +433,7 @@ public class ServiceOrderServiceImpl implements ServiceOrderService {
                         requestedProductRepository.findRequestedProductByRequestedProductId(productImagesDto.getProductId());
                 ProductImages productImage = productImagesRepository.findByRequestedProduct(requestedProduct).stream().findFirst().orElse(null);
                 productImage.setMediaUrls(productImagesDto.getMediaUrls());
+                productImage.setType("design");
                 productImagesRepository.save(productImage);
 
                 productImages.add(productImage);
@@ -459,11 +460,45 @@ public class ServiceOrderServiceImpl implements ServiceOrderService {
                 ProductImages productImage = new ProductImages();
                 productImage.setRequestedProduct(requestedProduct);
                 productImage.setMediaUrls(productImagesDto.getMediaUrls());
+                productImage.setType("design");
                 productImagesRepository.save(productImage);
 
                 productImages.add(productImage);
             }
             return productImages;
         }
+    }
+
+    @Override
+    public List<ProductImagesDto> addProductFinishImage(List<ProductImagesDto> productImagesDtos, Long serviceId) {
+        ServiceOrder serviceOrder = orderRepository.findById(serviceId).orElse(null);
+        List<ProductImages> productImages = new ArrayList<>();
+        for (ProductImagesDto productImagesDto : productImagesDtos)
+        {
+            RequestedProduct requestedProduct =
+                    requestedProductRepository.findRequestedProductByRequestedProductId(productImagesDto.getProductId());
+            ProductImages productImage = new ProductImages();
+            productImage.setRequestedProduct(requestedProduct);
+            productImage.setMediaUrls(productImagesDto.getMediaUrls());
+            productImage.setType("finish");
+            productImagesRepository.save(productImage);
+
+            productImages.add(productImage);
+        }
+
+        OrderProgress orderProgress = new OrderProgress();
+        orderProgress.setServiceOrder(serviceOrder);
+        orderProgress.setCreatedTime(LocalDateTime.now());
+        orderProgress.setStatus(ServiceOrderStatus.DANG_GIAO_HANG_LAP_DAT);
+        orderProgressRepository.save(orderProgress);
+
+        serviceOrder.setRole("Customer");
+        serviceOrder.setFeedback("");
+        serviceOrder.setStatus(ServiceOrderStatus.DANG_GIAO_HANG_LAP_DAT);
+        orderRepository.save(serviceOrder);
+
+        return productImages.stream()
+                .map(productImage -> modelMapper.map(productImage, ProductImagesDto.class))
+                .collect(Collectors.toList());
     }
 }

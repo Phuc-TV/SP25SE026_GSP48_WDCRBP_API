@@ -108,4 +108,12 @@ public class ServiceOrderController {
         return CoreApiResponse.success(productImagesDtos);
     }
 
+    @SecurityRequirement(name = "Bear Authentication")
+    @PostMapping("/finish-product-image")
+    public CoreApiResponse addFinishProductImage(@RequestBody List<ProductImagesDto> request, @RequestParam Long serviceId)
+    {
+        List<ProductImagesDto> productImages = serviceOrderService.addProductFinishImage(request,serviceId);
+
+        return CoreApiResponse.success(productImages);
+    }
 }

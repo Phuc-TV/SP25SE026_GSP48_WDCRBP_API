@@ -23,9 +23,6 @@ public class Review {
     private User user;
 
     @Column(nullable = true)
-    private String description;
-
-    @Column(nullable = true)
     private Integer rating;
 
     @Column(nullable = true)
