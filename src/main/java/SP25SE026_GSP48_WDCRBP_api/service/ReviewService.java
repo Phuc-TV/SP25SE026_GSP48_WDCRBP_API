@@ -15,5 +15,6 @@ public interface ReviewService {
     ReviewRes createReview(ReviewRequest request);
     ReviewRes updateReviewStatus(Long reviewId, UpdateReviewStatusRequest updateReviewStatusRequest);
     ReviewRes updateWoodworkerResponseStatus(Long reviewId, UpdateWoodworkerResponseStatusRequest updateWoodworkerResponseStatusRequest);
-
+    List<ReviewRes> getAllPendingReviews();
+    List<ReviewRes> getPendingReviewsWithWoodworkerResponse();
 }
