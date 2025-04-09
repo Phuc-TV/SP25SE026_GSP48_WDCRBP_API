@@ -203,7 +203,7 @@ public class WalletServiceImpl implements WalletService {
 
             serviceOrder.setStatus(ServiceOrderStatus.DA_HOAN_TAT);
             serviceOrder.setFeedback("");
-            serviceOrder.setRole("Customer");
+            serviceOrder.setRole("");
             serviceOrderRepository.save(serviceOrder);
         }
 

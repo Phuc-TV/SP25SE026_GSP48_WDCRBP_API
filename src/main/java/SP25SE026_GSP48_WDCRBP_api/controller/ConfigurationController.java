@@ -14,6 +14,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/v1/configuration")
+@CrossOrigin(origins = "*")
 @RequiredArgsConstructor
 public class ConfigurationController {
 
