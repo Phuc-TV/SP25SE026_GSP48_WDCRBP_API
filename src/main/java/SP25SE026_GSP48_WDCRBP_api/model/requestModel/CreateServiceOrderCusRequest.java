@@ -19,4 +19,5 @@ public class CreateServiceOrderCusRequest {
     private String address;
     private String description;
     private Boolean isInstall;
+    private int priceShipping;
 }

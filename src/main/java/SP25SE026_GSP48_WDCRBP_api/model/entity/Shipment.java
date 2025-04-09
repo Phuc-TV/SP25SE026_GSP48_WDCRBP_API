@@ -12,7 +12,6 @@ import lombok.*;
 @Table(name = "Shipment ")
 public class Shipment {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long shipmentId;
 
     @Column(nullable = true)

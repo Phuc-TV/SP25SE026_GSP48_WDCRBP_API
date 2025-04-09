@@ -245,7 +245,7 @@ public class ServiceOrderServiceImpl implements ServiceOrderService {
             requestedProductRepository.save(requestedProduct);
         }
 
-        serviceOrder.setTotalAmount(totalAmount);
+        serviceOrder.setTotalAmount(totalAmount + createServiceOrderCusRequest.getPriceShipping());
         serviceOrder.setAmountRemaining(totalAmount);
         serviceOrder.setAmountPaid(0.f);
         orderRepository.save(serviceOrder);
