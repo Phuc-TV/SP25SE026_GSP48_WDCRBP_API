@@ -186,4 +186,19 @@ public class ReviewServiceImpl implements ReviewService {
         return toReviewRes(reviewRepository.save(review), "");
     }
 
+    @Override
+    public List<ReviewRes> getAllPendingReviews() {
+        List<Review> reviews = reviewRepository.findAllByStatusFalse();
+        return reviews.stream()
+                .map(review -> toReviewRes(review, ""))
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public List<ReviewRes> getPendingReviewsWithWoodworkerResponse() {
+        List<Review> reviews = reviewRepository.findAllByStatusFalseAndWoodworkerResponseIsNotNull();
+        return reviews.stream()
+                .map(review -> toReviewRes(review, ""))
+                .collect(Collectors.toList());
+    }
 }

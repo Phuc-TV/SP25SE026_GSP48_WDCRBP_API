@@ -93,4 +93,24 @@ public class ReviewController {
             return CoreApiResponse.error(HttpStatus.BAD_REQUEST, "Cập nhật phản hồi thất bại: " + e.getMessage());
         }
     }
+
+    @GetMapping("/status-false")
+    public CoreApiResponse<List<ReviewRes>> getAllPendingReviews() {
+        try {
+            List<ReviewRes> reviews = reviewService.getAllPendingReviews();
+            return CoreApiResponse.success(reviews, "Lấy danh sách đánh giá chưa duyệt thành công");
+        } catch (Exception e) {
+            return CoreApiResponse.error(HttpStatus.INTERNAL_SERVER_ERROR, "Lỗi khi lấy đánh giá chưa duyệt: " + e.getMessage());
+        }
+    }
+
+    @GetMapping("/WWResponse-status-false")
+    public CoreApiResponse<List<ReviewRes>> getPendingReviewsWithWWResponse() {
+        try {
+            List<ReviewRes> reviews = reviewService.getPendingReviewsWithWoodworkerResponse();
+            return CoreApiResponse.success(reviews, "Lấy đánh giá có phản hồi của thợ mộc thành công");
+        } catch (Exception e) {
+            return CoreApiResponse.error(HttpStatus.INTERNAL_SERVER_ERROR, "Lỗi khi lấy đánh giá có phản hồi của thợ mộc: " + e.getMessage());
+        }
+    }
 }
