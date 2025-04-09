@@ -10,11 +10,7 @@ import lombok.Setter;
 @NoArgsConstructor
 @AllArgsConstructor
 public class ProductImagesDto {
-    private Long designFileId;
-
     private String mediaUrls;
-
-    private Byte versionNo;
 
     private Long productId;
 }

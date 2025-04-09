@@ -36,7 +36,7 @@ public class QuotationDetailServiceImpl implements QuotationDetailService {
 
         float totalAmount = 0f;
 
-        for (QuotationDTO dto : requestDTO.getQutotaions()) {
+        for (QuotationDTO dto : requestDTO.getQuotations()) {
             QuotationDetail detail = QuotationDetail.builder()
                     .costType(dto.getCostType())
                     .costAmount(dto.getCostAmount())
@@ -119,7 +119,7 @@ public class QuotationDetailServiceImpl implements QuotationDetailService {
                     .createdAt(rp.getCreatedAt())
                     .totalAmount(rp.getTotalAmount())
                     .hasDesign(rp.getHasDesign())
-                    .category(rp.getCategory() != null ? rp.getCategory().toString() : null)
+                    .category(rp.getCategory() != null ? rp.getCategory().getCategoryName() : null)
                     .build();
 
             List<QuotationDetailRes.QuotationInfo> quotationInfos = details.stream()

@@ -190,9 +190,21 @@ public class WalletServiceImpl implements WalletService {
                 serviceOrderRepository.save(serviceOrder);
             }
         } else if (Objects.equals(serviceOrder.getStatus(), ServiceOrderStatus.DA_DUYET_THIET_KE)) {
+            newOrderProgress.setStatus(ServiceOrderStatus.DANG_GIA_CONG);
+            orderProgressRepository.save(newOrderProgress);
 
+            serviceOrder.setStatus(ServiceOrderStatus.DANG_GIA_CONG);
+            serviceOrder.setFeedback("");
+            serviceOrder.setRole("Woodworker");
+            serviceOrderRepository.save(serviceOrder);
         } else if (Objects.equals(serviceOrder.getStatus(), ServiceOrderStatus.DANG_GIAO_HANG_LAP_DAT)) {
+            newOrderProgress.setStatus(ServiceOrderStatus.DA_HOAN_TAT);
+            orderProgressRepository.save(newOrderProgress);
 
+            serviceOrder.setStatus(ServiceOrderStatus.DA_HOAN_TAT);
+            serviceOrder.setFeedback("");
+            serviceOrder.setRole("Customer");
+            serviceOrderRepository.save(serviceOrder);
         }
 
         return response;
