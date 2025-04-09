@@ -90,7 +90,9 @@ public class ContractServiceImpl implements ContractService {
             }
 
             serviceOrder.setFeedback("");
+            serviceOrder.setAmountPaid((float) 0);
             serviceOrder.setTotalAmount(i);
+            serviceOrder.setAmountRemaining(i);
             serviceOrder.setRole("Customer");
             serviceOrder.setStatus(ServiceOrderStatus.DANG_CHO_KHACH_DUYET_HOP_DONG);
             serviceRepository.save(serviceOrder);
@@ -106,17 +108,25 @@ public class ContractServiceImpl implements ContractService {
         {
             if (wwCreateContractCustomizeRequest.getWarrantyPolicy() != null)
                 contract1.setWarrantyPolicy(wwCreateContractCustomizeRequest.getWarrantyPolicy());
-
             if (wwCreateContractCustomizeRequest.getCompleteDate() != null)
                 contract1.setCompleteDate(wwCreateContractCustomizeRequest.getCompleteDate());
-
             if (wwCreateContractCustomizeRequest.getWarrantyPeriod() != null)
                 contract1.setWarrantyPeriod(wwCreateContractCustomizeRequest.getWarrantyPeriod());
-
+            List<RequestedProduct> requestedProduct =
+                    requestedProductRepository.findRequestedProductByServiceOrder(serviceOrder);
+            float i =0;
+            for (RequestedProduct rp : requestedProduct)
+            {
+                i = i+ rp.getTotalAmount();
+            }
+            contract1.setContractTotalAmount(i);
             contractRepository.save(contract1);
 
             serviceOrder.setFeedback("");
             serviceOrder.setRole("Customer");
+            serviceOrder.setAmountPaid((float) 0);
+            serviceOrder.setTotalAmount(i);
+            serviceOrder.setAmountRemaining(i);
             serviceRepository.save(serviceOrder);
 
             return contract1;

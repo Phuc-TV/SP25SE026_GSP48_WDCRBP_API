@@ -18,5 +18,5 @@ public class QuotationDetailRequest {
     private Long requestedProductId;
 
     @NotEmpty(message = "At least one quotation is required")
-    private List<@Valid QuotationDTO> qutotaions; // yes, typo matches FE, or fix it
+    private List<@Valid QuotationDTO> quotations; // yes, typo matches FE, or fix it
 }

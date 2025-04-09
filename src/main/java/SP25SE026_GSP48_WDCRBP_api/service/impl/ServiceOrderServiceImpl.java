@@ -327,13 +327,12 @@ public class ServiceOrderServiceImpl implements ServiceOrderService {
             orderProgressRepository.save(newOrderProgress);
         }
 
-        // Toggle the role between Woodworker and Customer
-        serviceOrder.setRole(serviceOrder.getRole().equals("Woodworker") ? "Customer" : "Woodworker");
-
-        // Clear feedback when moving to next stage
+        if (serviceOrder.getStatus().equals(ServiceOrderStatus.DA_DUYET_THIET_KE)) {
+            serviceOrder.setRole("Customer");
+        } else {
+            serviceOrder.setRole(serviceOrder.getRole().equals("Woodworker") ? "Customer" : "Woodworker");
+        }
         serviceOrder.setFeedback(null);
-
-        // Save changes
         orderRepository.save(serviceOrder);
 
         return serviceOrder;
@@ -422,23 +421,49 @@ public class ServiceOrderServiceImpl implements ServiceOrderService {
     {
         ServiceOrder serviceOrder = orderRepository.findById(serviceId).orElse(null);
 
-        serviceOrder.setRole("Customer");
-        serviceOrder.setFeedback(null);
+        if (serviceOrder.getStatus().equals(ServiceOrderStatus.DANG_CHO_KHACH_DUYET_THIET_KE)) {
+            serviceOrder.setRole("Customer");
+            serviceOrder.setFeedback("");
+            orderRepository.save(serviceOrder);
 
-        orderRepository.save(serviceOrder);
+            List<ProductImages> productImages = new ArrayList<>();
+            for (ProductImagesDto productImagesDto : productImagesDtos)
+            {
+                RequestedProduct requestedProduct =
+                        requestedProductRepository.findRequestedProductByRequestedProductId(productImagesDto.getProductId());
+                ProductImages productImage = productImagesRepository.findByRequestedProduct(requestedProduct).stream().findFirst().orElse(null);
+                productImage.setMediaUrls(productImagesDto.getMediaUrls());
+                productImagesRepository.save(productImage);
 
-        List<ProductImages> productImages = new ArrayList<>();
-        for (ProductImagesDto productImagesDto : productImagesDtos)
-        {
-            RequestedProduct requestedProduct =
-                    requestedProductRepository.findRequestedProductByRequestedProductId(productImagesDto.getProductId());
-            ProductImages productImage = new ProductImages();
-            productImage.setRequestedProduct(requestedProduct);
-            productImage.setMediaUrls(productImagesDto.getMediaUrls());
-            productImagesRepository.save(productImage);
+                productImages.add(productImage);
+            }
 
-            productImages.add(productImage);
+            return productImages;
+        } else {
+            OrderProgress orderProgress = new OrderProgress();
+            orderProgress.setServiceOrder(serviceOrder);
+            orderProgress.setCreatedTime(LocalDateTime.now());
+            orderProgress.setStatus(ServiceOrderStatus.DANG_CHO_KHACH_DUYET_THIET_KE);
+            orderProgressRepository.save(orderProgress);
+
+            serviceOrder.setRole("Customer");
+            serviceOrder.setFeedback("");
+            serviceOrder.setStatus(ServiceOrderStatus.DANG_CHO_KHACH_DUYET_THIET_KE);
+            orderRepository.save(serviceOrder);
+
+            List<ProductImages> productImages = new ArrayList<>();
+            for (ProductImagesDto productImagesDto : productImagesDtos)
+            {
+                RequestedProduct requestedProduct =
+                        requestedProductRepository.findRequestedProductByRequestedProductId(productImagesDto.getProductId());
+                ProductImages productImage = new ProductImages();
+                productImage.setRequestedProduct(requestedProduct);
+                productImage.setMediaUrls(productImagesDto.getMediaUrls());
+                productImagesRepository.save(productImage);
+
+                productImages.add(productImage);
+            }
+            return productImages;
         }
-        return productImages;
     }
 }
