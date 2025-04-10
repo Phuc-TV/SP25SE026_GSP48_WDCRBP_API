@@ -13,7 +13,6 @@ public class MailServiceImpl {
 
     private final JavaMailSender mailSender;
 
-    // Method to send different types of emails (password, payment, OTP, etc.)
     public void sendEmail(String to, String subject, String messageType, String linkOrPassword) {
         try {
             MimeMessage mimeMessage = mailSender.createMimeMessage();
@@ -22,75 +21,77 @@ public class MailServiceImpl {
             helper.setTo(to);
             helper.setSubject(subject);
 
-            String htmlContent = "";
-
-            // Check the message type and apply the appropriate HTML content
-            if ("password".equalsIgnoreCase(messageType)) {
-                // Password email content
-                htmlContent = "<div style='font-family: Arial, sans-serif; padding: 20px;'>"
-                        + "<h2 style='color: #4CAF50;'>Mật khẩu tài khoản thợ mộc của bạn</h2>"
-                        + "<p>Kính gửi người dùng,</p>"
-                        + "<p>Mật khẩu tài khoản của bạn là: <strong>" + linkOrPassword + "</strong></p>"
-                        + "<p>Cảm ơn bạn đã sử dụng dịch vụ của chúng tôi.</p>"
-                        + "<p>Nếu bạn không yêu cầu điều này, vui lòng liên hệ ngay với bộ phận hỗ trợ.</p>"
-                        + "<hr style='margin-top: 30px;'>"
-                        + "<p style='font-size: 12px; color: #888;'>Nền tảng đặt dịch vụ thiết kế, chế tác & sửa chữa đồ gỗ</p>"
-                        + "</div>";
-            } else if ("payment".equalsIgnoreCase(messageType)) {
-                // Payment link email content
-                htmlContent = "<div style='font-family: Arial, sans-serif; padding: 20px;'>"
-                        + "<h2 style='color: #4CAF50;'>Hệ thống thanh toán VNPay</h2>"
-                        + "<p>Kính gửi người dùng,</p>"
-                        + "<p>Vui lòng nhấp vào nút bên dưới để hoàn tất thanh toán:</p>"
-                        + "<a href='" + linkOrPassword + "' style='display: inline-block; "
-                        + "padding: 10px 20px; background-color: #4CAF50; color: white; "
-                        + "text-decoration: none; border-radius: 5px;'>Trả ngay</a>"
-                        + "<p style='margin-top: 20px;'>Nếu bạn không yêu cầu, vui lòng bỏ qua email này.</p>"
-                        + "<hr style='margin-top: 30px;'>"
-                        + "<p style='font-size: 12px; color: #888;'>Nền tảng đặt dịch vụ thiết kế, chế tác & sửa chữa đồ gỗ</p>"
-                        + "</div>";
-            } else if ("otp".equalsIgnoreCase(messageType)) {
-                // OTP email content
-                htmlContent = "<div style='font-family: Arial, sans-serif; padding: 20px;'>"
-                        + "<h2 style='color: #4CAF50;'>OTP của bạn tới rồi đây!</h2>"
-                        + "<p>Kính gửi người dùng,</p>"
-                        + "<p>OTP của bạn là: <strong>" + linkOrPassword + "</strong></p>"
-                        + "<p>Nếu bạn không yêu cầu điều này, vui lòng liên hệ ngay với bộ phận hỗ trợ.</p>"
-                        + "<hr style='margin-top: 30px;'>"
-                        + "<p style='font-size: 12px; color: #D17B49;'>Nền tảng đặt dịch vụ thiết kế, chế tác & sửa chữa đồ gỗ</p>"
-                        + "</div>";
-            } else if ("status-rejection".equalsIgnoreCase(messageType)) {
-                // Email for status rejection
-                htmlContent = "<div style='font-family: Arial, sans-serif; padding: 20px;'>"
-                        + "<h2 style='color: #F44336;'>Yêu cầu cập nhật trạng thái không được chấp nhận</h2>"
-                        + "<p>Kính gửi thợ mộc,</p>"
-                        + "<p>Chúng tôi rất tiếc phải thông báo rằng yêu cầu cập nhật trạng thái của bạn đã bị từ chối.</p>"
-                        + "<p><strong>Lý do:</strong> " + linkOrPassword + "</p>"
-                        + "<p>Vui lòng kiểm tra lại thông tin hoặc liên hệ bộ phận hỗ trợ để biết thêm chi tiết.</p>"
-                        + "<hr style='margin-top: 30px;'>"
-                        + "<p style='font-size: 12px; color: #888;'>Nền tảng đặt dịch vụ thiết kế, chế tác & sửa chữa đồ gỗ</p>"
-                        + "</div>";
-            } else if ("buy-pack-success".equalsIgnoreCase(messageType)) {
-                // Email for successful service pack purchase
-                htmlContent = "<div style='font-family: Arial, sans-serif; padding: 20px;'>"
-                        + "<h2 style='color: #4CAF50;'>Mua gói dịch vụ thành công</h2>"
-                        + "<p>Kính gửi thợ mộc,</p>"
-                        + "<p>Chúc mừng bạn đã mua gói dịch vụ thành công!</p>"
-                        + "<p>Gói dịch vụ của bạn là: <strong>" + linkOrPassword + "</strong></p>"
-                        + "<p>Cảm ơn bạn đã sử dụng dịch vụ của chúng tôi.</p>"
-                        + "<hr style='margin-top: 30px;'>"
-                        + "<p style='font-size: 12px; color: #888;'>Nền tảng đặt dịch vụ thiết kế, chế tác & sửa chữa đồ gỗ</p>"
-                        + "</div>";
-            }
-
-            // Set the email content as HTML
+            String htmlContent = generateEmailContent(messageType, linkOrPassword);
             helper.setText(htmlContent, true);
 
-            // Send the email
             mailSender.send(mimeMessage);
 
         } catch (MessagingException e) {
             throw new RuntimeException("Failed to send email: " + e.getMessage(), e);
         }
+    }
+
+    private String generateEmailContent(String type, String data) {
+        String title;
+        String recipientName = "người dùng";
+        String contentBody;
+        String actionButton = "";
+
+        switch (type.toLowerCase()) {
+            case "password":
+                title = "Mật khẩu tài khoản của bạn";
+                contentBody = "Mật khẩu tài khoản của bạn là:<br><br>"
+                        + "<strong style='font-size: 18px;'>" + data + "</strong>";
+                break;
+            case "payment":
+                title = "Thanh toán đơn hàng";
+                contentBody = "Vui lòng nhấn nút bên dưới để hoàn tất thanh toán.";
+                actionButton = "<a href='" + data + "' style='display:inline-block;padding:12px 24px;"
+                        + "background-color:#4CAF50;color:#fff;text-decoration:none;"
+                        + "border-radius:5px;margin-top:20px;'>Thanh toán ngay</a>";
+                break;
+            case "otp":
+                title = "OTP Xác thực";
+                contentBody = "Mã OTP của bạn là:<br><br>"
+                        + "<strong style='font-size: 24px; color: #4CAF50;'>" + data + "</strong>";
+                break;
+            case "status-rejection":
+                title = "Yêu cầu cập nhật trạng thái bị từ chối";
+                recipientName = "thợ mộc";
+                contentBody = "Rất tiếc, yêu cầu cập nhật trạng thái của bạn đã bị từ chối.<br><br><strong>Lý do:</strong> " + data;
+                break;
+            case "buy-pack-success":
+                title = "Mua gói dịch vụ thành công";
+                recipientName = "thợ mộc";
+                contentBody = "Bạn đã mua gói dịch vụ thành công!<br><br><strong>Gói:</strong> " + data;
+                break;
+            default:
+                title = "Thông báo từ hệ thống";
+                contentBody = "Đây là email thông báo mặc định.";
+                break;
+        }
+
+        return "<!DOCTYPE html>"
+                + "<html><head><meta charset='UTF-8'><title>Email</title>"
+                + "<style>"
+                + "body { font-family: Arial, sans-serif; background-color: #F5F5F5; margin: 0; padding: 0; }"
+                + ".container { max-width: 1000px; margin: 20px auto; background-color: #fff; border-radius: 8px; overflow: hidden; }"
+                + ".header, .footer { background-color: #E9E9E9; padding: 15px; text-align: center; }"
+                + ".content { padding: 30px; }"
+                + ".content h2 { color: #333; margin-top: 0; }"
+                + ".content p { color: #555; font-size: 15px; line-height: 1.6; }"
+                + "a.button { display:inline-block; padding: 12px 24px; background-color:#4CAF50; color:#fff; text-decoration:none; border-radius:6px; }"
+                + "</style></head><body>"
+                + "<div class='container'>"
+                + "<div class='header'><h1>Nền tảng Đồ Gỗ</h1></div>"
+                + "<div class='content'>"
+                + "<h2>Xin chào, " + recipientName + "!</h2>"
+                + "<p><strong>" + title + "</strong></p>"
+                + "<p>" + contentBody + "</p>"
+                + actionButton
+                + "<p style='margin-top:30px;'>Nếu bạn không yêu cầu điều này, vui lòng bỏ qua email này.</p>"
+                + "</div>"
+                + "<div class='footer'><p>© 2025 Nền tảng đồ gỗ. All rights reserved.</p></div>"
+                + "</div></body></html>";
     }
 }
