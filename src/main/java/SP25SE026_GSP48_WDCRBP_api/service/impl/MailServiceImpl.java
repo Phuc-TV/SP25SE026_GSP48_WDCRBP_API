@@ -33,65 +33,78 @@ public class MailServiceImpl {
 
     private String generateEmailContent(String type, String data) {
         String title;
-        String recipientName = "người dùng";
-        String contentBody;
-        String actionButton = "";
+        String recipientName = "bạn";
+        String messageBody;
+        String coreContent;
 
         switch (type.toLowerCase()) {
+            case "otp":
+                title = "<strong>Mã xác thực OTP</strong>";
+                messageBody = "Cảm ơn bạn đã sử dụng dịch vụ của chúng tôi. Hãy sử dụng mã OTP dưới đây để hoàn tất quy trình xác thực.";
+                coreContent = "<p style='margin-top: 60px; font-size: 40px; font-weight: 600; letter-spacing: 25px; color: #ba3d4f;'>"
+                        + data + "</p>";
+                break;
             case "password":
-                title = "Mật khẩu tài khoản của bạn";
-                contentBody = "Mật khẩu tài khoản của bạn là:<br><br>"
-                        + "<strong style='font-size: 18px;'>" + data + "</strong>";
+                title = "Mật khẩu truy cập hệ thống";
+                messageBody = "Mật khẩu truy cập hệ thống của bạn là:";
+                coreContent = "<p style='margin-top: 40px; font-size: 24px; font-weight: bold; color: #1f1f1f;'>"
+                        + data + "</p>";
                 break;
             case "payment":
-                title = "Thanh toán đơn hàng";
-                contentBody = "Vui lòng nhấn nút bên dưới để hoàn tất thanh toán.";
-                actionButton = "<a href='" + data + "' style='display:inline-block;padding:12px 24px;"
-                        + "background-color:#4CAF50;color:#fff;text-decoration:none;"
-                        + "border-radius:5px;margin-top:20px;'>Thanh toán ngay</a>";
-                break;
-            case "otp":
-                title = "OTP Xác thực";
-                contentBody = "Mã OTP của bạn là:<br><br>"
-                        + "<strong style='font-size: 24px; color: #4CAF50;'>" + data + "</strong>";
+                title = "Yêu cầu thanh toán đơn hàng";
+                messageBody = "Hãy nhấp vào nút bên dưới để tiến hành thanh toán đơn hàng của bạn.";
+                coreContent = "<a href='" + data + "' style='display:inline-block;margin-top:40px;padding:12px 30px;background-color:#ba3d4f;color:#fff;font-weight:500;border-radius:8px;text-decoration:none;'>Thanh toán ngay</a>";
                 break;
             case "status-rejection":
-                title = "Yêu cầu cập nhật trạng thái bị từ chối";
+                title = "Cập nhật trạng thái bị từ chối";
                 recipientName = "thợ mộc";
-                contentBody = "Rất tiếc, yêu cầu cập nhật trạng thái của bạn đã bị từ chối.<br><br><strong>Lý do:</strong> " + data;
+                messageBody = "Yêu cầu cập nhật trạng thái của bạn đã bị từ chối.<br><br><strong>Lý do:</strong> " + data;
+                coreContent = "";
                 break;
             case "buy-pack-success":
-                title = "Mua gói dịch vụ thành công";
+                title = "Gói dịch vụ đã được kích hoạt";
                 recipientName = "thợ mộc";
-                contentBody = "Bạn đã mua gói dịch vụ thành công!<br><br><strong>Gói:</strong> " + data;
+                messageBody = "Cảm ơn bạn đã mua gói dịch vụ. Gói của bạn là:";
+                coreContent = "<p style='margin-top: 40px; font-size: 20px; font-weight: bold; color: #1f1f1f;'>"
+                        + data + "</p>";
                 break;
             default:
-                title = "Thông báo từ hệ thống";
-                contentBody = "Đây là email thông báo mặc định.";
-                break;
+                title = "Thông báo hệ thống";
+                messageBody = "Đây là thông báo từ hệ thống.";
+                coreContent = "";
         }
 
         return "<!DOCTYPE html>"
-                + "<html><head><meta charset='UTF-8'><title>Email</title>"
-                + "<style>"
-                + "body { font-family: Arial, sans-serif; background-color: #F5F5F5; margin: 0; padding: 0; }"
-                + ".container { max-width: 1000px; margin: 20px auto; background-color: #fff; border-radius: 8px; overflow: hidden; }"
-                + ".header, .footer { background-color: #E9E9E9; padding: 15px; text-align: center; }"
-                + ".content { padding: 30px; }"
-                + ".content h2 { color: #333; margin-top: 0; }"
-                + ".content p { color: #555; font-size: 15px; line-height: 1.6; }"
-                + "a.button { display:inline-block; padding: 12px 24px; background-color:#4CAF50; color:#fff; text-decoration:none; border-radius:6px; }"
-                + "</style></head><body>"
-                + "<div class='container'>"
-                + "<div class='header'><h1>Nền tảng Đồ Gỗ</h1></div>"
-                + "<div class='content'>"
-                + "<h2>Xin chào, " + recipientName + "!</h2>"
-                + "<p><strong>" + title + "</strong></p>"
-                + "<p>" + contentBody + "</p>"
-                + actionButton
-                + "<p style='margin-top:30px;'>Nếu bạn không yêu cầu điều này, vui lòng bỏ qua email này.</p>"
-                + "</div>"
-                + "<div class='footer'><p>© 2025 Nền tảng đồ gỗ. All rights reserved.</p></div>"
-                + "</div></body></html>";
+                + "<html lang='en'><head><meta charset='UTF-8'><meta name='viewport' content='width=device-width, initial-scale=1.0'>"
+                + "<link href='https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap' rel='stylesheet'>"
+                + "<title>Email Notification</title></head>"
+                + "<body style='margin: 0; font-family: Poppins, sans-serif; background: #ffffff; font-size: 14px;'>"
+                + "<div style='max-width: 680px; margin: 0 auto; padding: 45px 30px 60px; background: #f4f7ff; "
+                + "background-image: url(https://archisketch-resources.s3.ap-northeast-2.amazonaws.com/vrstyler/1661497957196_595865/email-template-background-banner);"
+                + "background-repeat: no-repeat; background-size: 800px 452px; background-position: top center; color: #434343;'>"
+
+                + "<header><table style='width: 100%;'><tr><td>"
+                + "<img src='https://i.imgur.com/Ke4MgOK.png' height='30px' alt='Logo'/>"
+                + "</td><td style='text-align: right;'><span style='font-size: 16px; line-height: 30px; color: #ffffff;'>"
+                + java.time.LocalDate.now()
+                + "</span></td></tr></table></header>"
+
+                + "<main><div style='margin-top: 70px; padding: 92px 30px 115px; background: #ffffff; border-radius: 30px; text-align: center;'>"
+                + "<div style='max-width: 489px; margin: 0 auto;'>"
+                + "<h1 style='font-size: 24px; font-weight: 500; color: #1f1f1f; margin-bottom: 20px;'>" + title + "</h1>"
+                + "<p style='font-size: 16px; font-weight: 500;'>Chào " + recipientName + ",</p>"
+                + "<p style='margin-top: 17px; font-weight: 500; letter-spacing: 0.56px;'>" + messageBody + "</p>"
+                + coreContent
+                + "</div></div>"
+
+                + "<p style='max-width: 400px; margin: 90px auto 0; text-align: center; font-weight: 500; color: #8c8c8c;'>"
+                + "Cần trợ giúp? Gửi email đến <a href='mailto:support@yourplatform.vn' style='color: #499fb6;'>namndpse171442@fpt.edu.vn</a>"
+                + "</p></main>"
+
+                + "<footer style='max-width: 490px; margin: 20px auto 0; text-align: center; border-top: 1px solid #e6ebf1;'>"
+                + "<p style='margin-top: 40px; font-size: 16px; font-weight: 600;'>Nền tảng đồ gỗ</p>"
+                + "<p style='margin-top: 8px;'>Địa chỉ: 123 Đường Gỗ Việt, Q.Tân Bình, TP.HCM</p>"
+                + "<div style='margin-top: 16px;'>"
+                + "</div><p style='margin-top: 16px;'>© 2025 Nền tảng đồ gỗ. All rights reserved.</p></footer></div></body></html>";
     }
 }
