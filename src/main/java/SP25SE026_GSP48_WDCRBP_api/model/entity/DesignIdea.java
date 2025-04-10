@@ -30,6 +30,9 @@ public class DesignIdea {
     @Column(nullable = true)
     private Short totalReviews;
 
+    @Column(nullable = true)
+    private Boolean isInstall;
+
     @ManyToOne
     @JoinColumn(name = "categoryId", nullable = true)
     private Category category;

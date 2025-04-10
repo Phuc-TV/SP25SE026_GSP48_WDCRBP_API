@@ -4,6 +4,7 @@ import SP25SE026_GSP48_WDCRBP_api.components.CoreApiResponse;
 import SP25SE026_GSP48_WDCRBP_api.model.dto.ItemDTO;
 import SP25SE026_GSP48_WDCRBP_api.model.entity.Configuration;
 import SP25SE026_GSP48_WDCRBP_api.model.requestModel.CalculateFeeRequest;
+import SP25SE026_GSP48_WDCRBP_api.model.requestModel.GetGHNAvailableServiceRequest;
 import SP25SE026_GSP48_WDCRBP_api.model.responseModel.CalculateFeeResponse;
 import SP25SE026_GSP48_WDCRBP_api.service.ConfigurationService;
 import SP25SE026_GSP48_WDCRBP_api.service.GHNApiService;
@@ -102,20 +103,25 @@ public class GHNApiServiceImpl implements GHNApiService {
         request.setWeight(totalWeight);
 
         HttpHeaders headers = getDefaultHeaders();
-        headers.set("ShopId", "885"); // có thể cho vào config DB nếu muốn linh hoạt
+        headers.set("ShopId", "196376"); // có thể cho vào config DB nếu muốn linh hoạt
 
         HttpEntity<CalculateFeeRequest> entity = new HttpEntity<>(request, headers);
 
         String url = "https://dev-online-gateway.ghn.vn/shiip/public-api/v2/shipping-order/fee";
-        RestTemplate restTemplate = new RestTemplate();
-        ResponseEntity<CalculateFeeResponse> response = restTemplate.exchange(
-                url,
-                HttpMethod.POST,
-                entity,
-                CalculateFeeResponse.class
-        );
 
-        return CoreApiResponse.success(response.getBody(), "Tính phí thành công");
+        return callExternalAPI(url, HttpMethod.POST, entity);
+    }
+
+    @Override
+    public CoreApiResponse getAvailableService(GetGHNAvailableServiceRequest request) {
+        HttpHeaders headers = getDefaultHeaders();
+        request.setShop_id(196376);
+
+        HttpEntity<GetGHNAvailableServiceRequest> entity = new HttpEntity<>(request, headers);
+
+        String url = "https://dev-online-gateway.ghn.vn/shiip/public-api/v2/shipping-order/available-services";
+
+        return callExternalAPI(url, HttpMethod.POST, entity);
     }
 
     private CoreApiResponse callExternalAPI(String url, HttpMethod method, HttpEntity<?> entity) {

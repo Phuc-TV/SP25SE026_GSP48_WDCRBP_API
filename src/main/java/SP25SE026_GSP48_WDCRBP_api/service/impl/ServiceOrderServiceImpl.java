@@ -214,9 +214,9 @@ public class ServiceOrderServiceImpl implements ServiceOrderService {
 
         //Create ServiceOrder
         User user = userRepository.findById(createServiceOrderCusRequest.getUserId()).orElse(null);
-
         AvailableService availableService =
                 availableServiceRepository.findById(createServiceOrderCusRequest.getAvailableServiceId()).orElse(null);
+        WoodworkerProfile ww = availableService.getWoodworkerProfile();
 
         ServiceOrder serviceOrder = new ServiceOrder();
         serviceOrder.setDescription(createServiceOrderCusRequest.getDescription());
@@ -263,7 +263,7 @@ public class ServiceOrderServiceImpl implements ServiceOrderService {
             Shipment shipment = new Shipment();
             shipment.setServiceOrder(serviceOrder);
             shipment.setToAddress(createServiceOrderCusRequest.getAddress());
-            shipment.setFrom_address(availableService.getWoodworkerProfile().getAddress());
+            shipment.setFromAddress(availableService.getWoodworkerProfile().getAddress());
             shipment.setShippingUnit(availableService.getWoodworkerProfile().getBrandName());
             shipment.setShipType("Giao hàng và lắp đặt bởi xưởng mộc");
             shipmentRepository.save(shipment);
@@ -271,9 +271,14 @@ public class ServiceOrderServiceImpl implements ServiceOrderService {
             Shipment shipment = new Shipment();
             shipment.setServiceOrder(serviceOrder);
             shipment.setToAddress(createServiceOrderCusRequest.getAddress());
-            shipment.setFrom_address(availableService.getWoodworkerProfile().getAddress());
+            shipment.setFromAddress(availableService.getWoodworkerProfile().getAddress());
             shipment.setShippingUnit("Giao hàng nhanh (GHN)");
             shipment.setShipType("Giao hàng bởi bên thứ 3 (GHN)");
+            shipment.setToDistrictId(Integer.parseInt(createServiceOrderCusRequest.getToDistrictId()));
+            shipment.setToWardCode(createServiceOrderCusRequest.getToWardCode());
+            shipment.setFromDistrictId(Integer.parseInt(ww.getDistrictId()));
+            shipment.setFromWardCode(ww.getWardCode());
+            shipment.setFee(createServiceOrderCusRequest.getPriceShipping());
             shipmentRepository.save(shipment);
         }
 
@@ -370,9 +375,9 @@ public class ServiceOrderServiceImpl implements ServiceOrderService {
         //Create ServiceOrder
         User user = userRepository.findById(createServiceOrderPersonalizeRequest.getUserId()).orElse(null);
         short qty = 0;
-
         AvailableService availableService =
                 availableServiceRepository.findById(createServiceOrderPersonalizeRequest.getAvailableServiceId()).orElse(null);
+        WoodworkerProfile ww = availableService.getWoodworkerProfile();
 
         ServiceOrder serviceOrder = new ServiceOrder();
         serviceOrder.setAvailableService(availableService);
@@ -426,7 +431,7 @@ public class ServiceOrderServiceImpl implements ServiceOrderService {
             Shipment shipment = new Shipment();
             shipment.setServiceOrder(serviceOrder);
             shipment.setToAddress(createServiceOrderPersonalizeRequest.getAddress());
-            shipment.setFrom_address(availableService.getWoodworkerProfile().getAddress());
+            shipment.setFromAddress(availableService.getWoodworkerProfile().getAddress());
             shipment.setShippingUnit(availableService.getWoodworkerProfile().getBrandName());
             shipment.setShipType("Giao hàng và lắp đặt bởi xưởng mộc");
             shipmentRepository.save(shipment);
@@ -434,9 +439,13 @@ public class ServiceOrderServiceImpl implements ServiceOrderService {
             Shipment shipment = new Shipment();
             shipment.setServiceOrder(serviceOrder);
             shipment.setToAddress(createServiceOrderPersonalizeRequest.getAddress());
-            shipment.setFrom_address(availableService.getWoodworkerProfile().getAddress());
+            shipment.setFromAddress(availableService.getWoodworkerProfile().getAddress());
             shipment.setShippingUnit("Giao hàng nhanh (GHN)");
             shipment.setShipType("Giao hàng bởi bên thứ 3 (GHN)");
+            shipment.setToDistrictId(Integer.parseInt(createServiceOrderPersonalizeRequest.getToDistrictId()));
+            shipment.setToWardCode(createServiceOrderPersonalizeRequest.getToWardCode());
+            shipment.setFromDistrictId(Integer.parseInt(ww.getDistrictId()));
+            shipment.setFromWardCode(ww.getWardCode());
             shipmentRepository.save(shipment);
         }
 

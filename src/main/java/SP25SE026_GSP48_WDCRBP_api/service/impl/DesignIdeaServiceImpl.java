@@ -122,6 +122,7 @@ public class DesignIdeaServiceImpl implements DesignIdeaService {
         idea.setImg_urls(woodworkProductDto.getImg());
         idea.setDescription(woodworkProductDto.getDescription());
         idea.setWoodworkerProfile(woodworkerProfile);
+        idea.setIsInstall(woodworkProductDto.getIsInstall());
         ideaRepository.save(idea);
 
         //Save DesignIdeaConfig and DesignIdeaConfigValue
