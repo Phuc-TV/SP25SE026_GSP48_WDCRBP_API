@@ -17,6 +17,8 @@ public class DesignIdeaDetailRes {
 
     private String img_urls;
 
+    private Boolean isInstall;
+
     private String description;
 
     private Short totalStar;

@@ -12,19 +12,32 @@ import lombok.*;
 @Table(name = "Shipment ")
 public class Shipment {
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long shipmentId;
 
     @Column(nullable = true)
     private String toAddress;
 
     @Column(nullable = true)
-    private String from_address;
+    private int toDistrictId;
+
+    @Column(nullable = true)
+    private String toWardCode;
+
+    @Column(nullable = true)
+    private String fromAddress;
+
+    @Column(nullable = true)
+    private int fromDistrictId;
+
+    @Column(nullable = true)
+    private String fromWardCode;
 
     @Column(nullable = true)
     private String shippingUnit;
 
     @Column(nullable = true)
-    private float totalFee;
+    private float fee;
 
     @Column(nullable = true)
     private String orderCode;

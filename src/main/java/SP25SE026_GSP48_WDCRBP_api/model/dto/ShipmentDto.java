@@ -18,11 +18,11 @@ public class ShipmentDto {
 
     private String toAddress;
 
-    private String from_address;
+    private String fromAddress;
 
     private String shippingUnit;
 
-    private float totalFee;
+    private float fee;
 
     private String orderCode;
 

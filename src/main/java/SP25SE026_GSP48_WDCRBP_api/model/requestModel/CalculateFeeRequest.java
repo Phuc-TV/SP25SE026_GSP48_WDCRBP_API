@@ -13,14 +13,14 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 public class CalculateFeeRequest {
-    private Integer fromDistrictId;
-    private String fromWardCode;
-    private Integer serviceId;
-    private Integer serviceTypeId;
-    private Integer toDistrictId;
-    private String toWardCode;
-    private Integer insuranceValue;
-    private Integer codFailedAmount;
+    private Integer from_district_id;
+    private String from_ward_code;
+    private Integer service_id;
+    private Integer service_type_id;
+    private Integer to_district_id;
+    private String to_ward_code;
+    private Integer insurance_value;
+    private Integer cod_failed_amount;
     private String coupon;
     private Integer height;
     private Integer length;

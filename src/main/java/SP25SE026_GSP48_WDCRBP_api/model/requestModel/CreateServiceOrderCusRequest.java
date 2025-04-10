@@ -14,6 +14,8 @@ import java.util.List;
 @AllArgsConstructor
 public class CreateServiceOrderCusRequest {
     private Long availableServiceId;
+    private String toDistrictId;
+    private String toWardCode;
     private Long userId;
     private List<DesignIdeaVariantCusDto> designIdeaVariantIds;
     private String address;
