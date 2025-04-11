@@ -22,6 +22,7 @@ import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.*;
 
 @Service
@@ -142,44 +143,45 @@ public class VNPayServiceImp implements VNPayService {
     public PaymentRes processServicePackPayment(PaymentServicePackRequest request) {
         Long servicePackId = Long.parseLong(request.getServicePackId());
 
-        // Fetch the ServicePack (assuming the ServicePack is an entity already in your database)
-        ServicePack servicePack = servicePackRepository.findById(servicePackId)
+        ServicePack newPack = servicePackRepository.findById(servicePackId)
                 .orElseThrow(() -> new WDCRBPApiException(HttpStatus.NOT_FOUND, "Không tìm thấy gói dịch vụ."));
 
-        long amount = (long)servicePack.getPrice().floatValue();
+        long amount = (long) newPack.getPrice().floatValue();
         String email = request.getEmail();
         String userId = request.getUserId();
+
 
         try {
             Long parsedUserId = Long.parseLong(userId);
             Long parsedServicePackId = Long.parseLong(request.getServicePackId());
 
             User dbUser = userRepository.findById(parsedUserId)
-                    .orElseThrow(() -> new WDCRBPApiException(HttpStatus.NOT_FOUND, "không tìm thấy mã người dùng: " + userId));
-
+                    .orElseThrow(() -> new WDCRBPApiException(HttpStatus.NOT_FOUND, "Không tìm thấy người dùng: " + userId));
             verifyEmail(dbUser, email);
 
             if (!"Woodworker".equalsIgnoreCase(dbUser.getRole())) {
-                throw new WDCRBPApiException(HttpStatus.FORBIDDEN, "Chỉ có thợ mộc mới được phép mua gói dịch vụ.");
+                throw new WDCRBPApiException(HttpStatus.FORBIDDEN, "Chỉ thợ mộc mới có thể mua gói.");
             }
 
-            // use userId to get the woodworkerId
-            WoodworkerProfile woodworkerProfile = woodworkerProfileRepository.findByUser_UserId(dbUser.getUserId())
-                    .orElseThrow(() -> new WDCRBPApiException(HttpStatus.NOT_FOUND, "Không tìm thấy hồ sơ thợ mộc cho người dùng: " + userId));
+            WoodworkerProfile profile = woodworkerProfileRepository.findByUser_UserId(dbUser.getUserId())
+                    .orElseThrow(() -> new WDCRBPApiException(HttpStatus.NOT_FOUND, "Không tìm thấy hồ sơ thợ mộc."));
 
-            Long wwId = woodworkerProfile.getWoodworkerId();
+            LocalDateTime currentEndDate = profile.getServicePackEndDate();
+            ServicePack currentPack = profile.getServicePack();
+
+            long convertedDays = getConvertedDays(currentPack, newPack, currentEndDate);
 
             Transaction txn = Transaction.builder()
                     .transactionType(TransactionTypeConstant.THANH_TOAN_QUA_CONG)
                     .amount(amount)
-                    .description("Thanh toán gói dịch vụ: " + servicePack.getName())
+                    .description("Thanh toán gói dịch vụ: " + newPack.getName())
                     .status(false)
                     .createdAt(LocalDateTime.now())
                     .user(dbUser)
                     .build();
             transactionRepository.save(txn);
 
-            String encryptedWoodworkerId = AESUtil.encrypt(String.valueOf(wwId), AES_KEY);
+            String encryptedWoodworkerId = AESUtil.encrypt(String.valueOf(profile.getWoodworkerId()), AES_KEY);
             String encryptedServicePackId = AESUtil.encrypt(String.valueOf(parsedServicePackId), AES_KEY);
             String encryptedTransactionId = AESUtil.encrypt(String.valueOf(txn.getTransactionId()), AES_KEY);
 
@@ -189,10 +191,10 @@ public class VNPayServiceImp implements VNPayService {
                     "WoodworkerId=" + URLEncoder.encode(encryptedWoodworkerId, StandardCharsets.UTF_8) +
                     "&ServicePackId=" + URLEncoder.encode(encryptedServicePackId, StandardCharsets.UTF_8) +
                     "&TransactionId=" + URLEncoder.encode(encryptedTransactionId, StandardCharsets.UTF_8);
+
             vnp_Params.put("vnp_ReturnUrl", dynamicReturnUrl);
 
-            // VNPay URL creation
-            long vnpAmount = amount * 100 ;
+            long vnpAmount = amount * 100;
             String vnp_TxnRef = UUID.randomUUID().toString().replace("-", "").substring(0, 12);
             String vnp_IpAddr = "127.0.0.1";
 
@@ -206,6 +208,7 @@ public class VNPayServiceImp implements VNPayService {
             vnp_Params.put("vnp_Locale", "vn");
             vnp_Params.put("vnp_IpAddr", vnp_IpAddr);
             vnp_Params.put("vnp_OrderType", "other");
+
             TimeZone tz = TimeZone.getTimeZone("Asia/Ho_Chi_Minh");
             Calendar cal = Calendar.getInstance(tz);
             SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMddHHmmss");
@@ -222,12 +225,13 @@ public class VNPayServiceImp implements VNPayService {
             Collections.sort(fieldNames);
             StringBuilder hashData = new StringBuilder();
             StringBuilder query = new StringBuilder();
-            for (String fieldName : fieldNames) {
-                String fieldValue = vnp_Params.get(fieldName);
-                hashData.append(fieldName).append('=').append(URLEncoder.encode(fieldValue, StandardCharsets.UTF_8));
-                query.append(URLEncoder.encode(fieldName, StandardCharsets.UTF_8))
-                        .append('=').append(URLEncoder.encode(fieldValue, StandardCharsets.UTF_8));
-                if (!fieldName.equals(fieldNames.get(fieldNames.size() - 1))) {
+            for (int i = 0; i < fieldNames.size(); i++) {
+                String key = fieldNames.get(i);
+                String value = vnp_Params.get(key);
+                hashData.append(key).append('=').append(value);
+                query.append(URLEncoder.encode(key, StandardCharsets.UTF_8))
+                        .append('=').append(URLEncoder.encode(value, StandardCharsets.UTF_8));
+                if (i < fieldNames.size() - 1) {
                     hashData.append('&');
                     query.append('&');
                 }
@@ -235,6 +239,7 @@ public class VNPayServiceImp implements VNPayService {
 
             String vnp_SecureHash = VnPayConfig.hmacSHA512(VnPayConfig.secretKey, hashData.toString());
             query.append("&vnp_SecureHash=").append(vnp_SecureHash);
+
             String paymentUrl = VnPayConfig.vnp_PayUrl + "?" + query;
 
             mailServiceImpl.sendEmail(email, "VNPay Payment Link", "payment", paymentUrl);
@@ -248,8 +253,6 @@ public class VNPayServiceImp implements VNPayService {
                     .timeZone(tz.getID())
                     .build();
 
-        } catch (NumberFormatException e) {
-            throw new WDCRBPApiException(HttpStatus.BAD_REQUEST, "Không đúng định dạng mã : " + e.getMessage());
         } catch (Exception e) {
             throw new RuntimeException("Không xử lý được thanh toán VNPay: " + e.getMessage(), e);
         }
@@ -368,5 +371,31 @@ public class VNPayServiceImp implements VNPayService {
             throw new WDCRBPApiException(HttpStatus.BAD_REQUEST, "Email không khớp với email của người dùng đã đăng ký.");
         }
     }
-}
 
+    private long getConvertedDays(ServicePack currentPack, ServicePack newPack, LocalDateTime currentEndDate) {
+        Map<String, Double> packWeights = Map.of(
+                "Bronze", 1.0,
+                "Silver", 1.75,
+                "Gold", 2.5
+        );
+
+        if (currentPack == null || newPack == null || currentEndDate == null || currentEndDate.isBefore(LocalDateTime.now())) {
+            return 0;
+        }
+
+        double currentWeight = packWeights.getOrDefault(currentPack.getName(), 0.0);
+        double newWeight = packWeights.getOrDefault(newPack.getName(), 0.0);
+
+        if (newWeight < currentWeight) {
+            throw new WDCRBPApiException(HttpStatus.BAD_REQUEST, "Không thể mua gói thấp hơn gói hiện tại.");
+        }
+
+        if (newWeight > currentWeight) {
+            long remainingDays = ChronoUnit.DAYS.between(LocalDateTime.now(), currentEndDate);
+            return Math.round((remainingDays * currentWeight) / newWeight);
+        }
+
+        return 0;
+    }
+
+}
