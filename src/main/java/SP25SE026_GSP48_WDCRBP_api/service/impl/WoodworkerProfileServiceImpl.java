@@ -6,6 +6,7 @@ import SP25SE026_GSP48_WDCRBP_api.model.entity.User;
 import SP25SE026_GSP48_WDCRBP_api.model.entity.Wallet;
 import SP25SE026_GSP48_WDCRBP_api.model.entity.ServicePack;
 import SP25SE026_GSP48_WDCRBP_api.model.entity.WoodworkerProfile;
+import SP25SE026_GSP48_WDCRBP_api.model.exception.WDCRBPApiException;
 import SP25SE026_GSP48_WDCRBP_api.model.requestModel.UpdateStatusPublicRequest;
 import SP25SE026_GSP48_WDCRBP_api.model.requestModel.UpdateWoodworkerServicePackRequest;
 import SP25SE026_GSP48_WDCRBP_api.model.requestModel.WoodworkerRequest;
@@ -23,6 +24,7 @@ import org.apache.commons.lang3.RandomStringUtils;
 import org.modelmapper.ModelMapper;
 import org.modelmapper.PropertyMap;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import java.time.temporal.ChronoUnit;
 
@@ -30,6 +32,7 @@ import java.time.temporal.ChronoUnit;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 @Service
@@ -246,28 +249,57 @@ public class WoodworkerProfileServiceImpl implements WoodworkerProfileService {
     @Override
     public WoodworkerProfileListItemRes addServicePack(Long servicePackId, Long wwId) {
         WoodworkerProfile woodworker = wwRepository.findWoodworkerProfileByWoodworkerId(wwId);
-        ServicePack servicePack = servicePackRepository.findServicePackByServicePackId(servicePackId);
+        ServicePack newPack = servicePackRepository.findServicePackByServicePackId(servicePackId);
 
         LocalDateTime now = LocalDateTime.now();
         ServicePack currentPack = woodworker.getServicePack();
+        LocalDateTime currentEndDate = woodworker.getServicePackEndDate();
 
-        if (woodworker.getServicePackEndDate() != null &&
-                woodworker.getServicePackEndDate().isAfter(now) &&
-                currentPack != null &&
-                currentPack.getName().equals(servicePack.getName())) {
+        long convertedDays = getConvertedDays(currentPack, newPack, currentEndDate);
 
-            woodworker.setServicePackEndDate(woodworker.getServicePackEndDate().plus(servicePack.getDuration(), ChronoUnit.MONTHS));
+        if (currentPack != null &&
+                currentEndDate != null &&
+                currentEndDate.isAfter(now) &&
+                currentPack.getName().equals(newPack.getName())) {
+
+            woodworker.setServicePackEndDate(currentEndDate.plus(newPack.getDuration(), ChronoUnit.MONTHS));
 
         } else {
-            woodworker.setServicePack(servicePack);
+            woodworker.setServicePack(newPack);
             woodworker.setServicePackStartDate(now);
-            woodworker.setServicePackEndDate(now.plus(servicePack.getDuration(), ChronoUnit.MONTHS));
+            woodworker.setServicePackEndDate(now.plusDays(convertedDays).plusMonths(newPack.getDuration()));
         }
 
         wwRepository.save(woodworker);
-        availableServiceService.activateAvailableServicesByServicePack(woodworker, servicePack.getName());
+        availableServiceService.activateAvailableServicesByServicePack(woodworker, newPack.getName());
 
         return modelMapper.map(woodworker, WoodworkerProfileListItemRes.class);
+    }
+
+    private long getConvertedDays(ServicePack currentPack, ServicePack newPack, LocalDateTime currentEndDate) {
+        Map<String, Double> packWeights = Map.of(
+                "Bronze", 1.0,
+                "Silver", 1.75,
+                "Gold", 2.5
+        );
+
+        if (currentPack == null || newPack == null || currentEndDate == null || currentEndDate.isBefore(LocalDateTime.now())) {
+            return 0;
+        }
+
+        double currentWeight = packWeights.getOrDefault(currentPack.getName(), 0.0);
+        double newWeight = packWeights.getOrDefault(newPack.getName(), 0.0);
+
+        if (newWeight < currentWeight) {
+            throw new WDCRBPApiException(HttpStatus.BAD_REQUEST, "Không thể mua gói thấp hơn gói hiện tại.");
+        }
+
+        if (newWeight > currentWeight) {
+            long remainingDays = ChronoUnit.DAYS.between(LocalDateTime.now(), currentEndDate);
+            return Math.round((remainingDays * currentWeight) / newWeight);
+        }
+
+        return 0;
     }
 
     @Override
@@ -355,4 +387,6 @@ public class WoodworkerProfileServiceImpl implements WoodworkerProfileService {
                 .build();
     }
 }
+
+
 
