@@ -26,9 +26,6 @@ public class RequestedProduct {
     @Column(nullable = true)
     private float totalAmount;
 
-    @Column(nullable = true)
-    private Boolean hasDesign;
-
     @ManyToOne
     @JoinColumn(name = "categoryId", nullable = true)
     private Category category;
@@ -36,6 +33,10 @@ public class RequestedProduct {
     @ManyToOne
     @JoinColumn(name = "designIdeaVariantId", nullable = true)
     private DesignIdeaVariant designIdeaVariant;
+
+    @ManyToOne
+    @JoinColumn(name = "productId", nullable = true)
+    private Product product;
 
     @ManyToOne
     @JoinColumn(name = "orderId", nullable = true)

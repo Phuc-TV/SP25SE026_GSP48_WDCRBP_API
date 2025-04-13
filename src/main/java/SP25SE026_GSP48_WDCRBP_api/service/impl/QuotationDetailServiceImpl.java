@@ -78,7 +78,6 @@ public class QuotationDetailServiceImpl implements QuotationDetailService {
                             .quantity(rp.getQuantity())
                             .createdAt(rp.getCreatedAt())
                             .totalAmount(rp.getTotalAmount())
-                            .hasDesign(rp.getHasDesign())
                             .category(rp.getCategory() != null ? rp.getCategory().toString() : null)
                             .build();
 
@@ -118,7 +117,6 @@ public class QuotationDetailServiceImpl implements QuotationDetailService {
                     .quantity(rp.getQuantity())
                     .createdAt(rp.getCreatedAt())
                     .totalAmount(rp.getTotalAmount())
-                    .hasDesign(rp.getHasDesign())
                     .category(rp.getCategory() != null ? rp.getCategory().getCategoryName() : null)
                     .build();
 

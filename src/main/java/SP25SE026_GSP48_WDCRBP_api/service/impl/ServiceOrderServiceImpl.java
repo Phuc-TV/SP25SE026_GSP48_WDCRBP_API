@@ -150,7 +150,6 @@ public class ServiceOrderServiceImpl implements ServiceOrderService {
             requestedProductDetailRes.setTotalAmount(requestedProduct.getTotalAmount());
             requestedProductDetailRes.setCategory(requestedProduct.getCategory());
             requestedProductDetailRes.setCreatedAt(requestedProduct.getCreatedAt());
-            requestedProductDetailRes.setHasDesign(requestedProduct.getDesignIdeaVariant() != null);
             ProductImages finishImages =
                     productImagesRepository.findByRequestedProduct(requestedProduct).stream().filter(design -> design.getType().equals("finish")).findFirst().orElse(null);
             if (finishImages != null)
