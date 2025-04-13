@@ -11,16 +11,16 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @NoArgsConstructor
 @Entity
-@Table(name = "GuranteeOrder")
+@Table(name = "GuaranteeOrder")
 public class GuaranteeOrder {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long guranteeOrderId;
+    private Long guaranteeOrderId;
 
     @Column(nullable = true)
     private Float totalAmount;
 
-    @Column(nullable = true)
+    @Column(nullable = true, length = 2000)
     private String description;
 
     @Column(nullable = true)

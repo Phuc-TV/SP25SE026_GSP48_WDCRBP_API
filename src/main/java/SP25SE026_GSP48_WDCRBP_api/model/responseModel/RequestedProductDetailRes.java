@@ -24,8 +24,6 @@ public class RequestedProductDetailRes {
 
     private float totalAmount;
 
-    private Boolean hasDesign;
-
     private Category category;
 
     private String finishImgUrls;

@@ -24,7 +24,6 @@ public class QuotationDetailRes {
         private Byte quantity;
         private LocalDateTime createdAt;
         private float totalAmount;
-        private Boolean hasDesign;
         private String category; // Can be Category object or just name/ID
     }
 

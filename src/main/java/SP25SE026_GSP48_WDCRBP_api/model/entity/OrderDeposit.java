@@ -40,6 +40,6 @@ public class OrderDeposit {
     private ServiceOrder serviceOrder;
 
     @ManyToOne
-    @JoinColumn(name = "guranteeOrderId" ,nullable = true)
+    @JoinColumn(name = "guaranteeOrderId" ,nullable = true)
     private GuaranteeOrder guaranteeOrder;
 }
