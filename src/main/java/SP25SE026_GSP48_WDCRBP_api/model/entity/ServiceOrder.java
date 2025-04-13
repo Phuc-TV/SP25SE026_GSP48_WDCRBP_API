@@ -26,6 +26,9 @@ public class ServiceOrder {
     private Float totalAmount;
 
     @Column(nullable = true)
+    private Float shipFee;
+
+    @Column(nullable = true)
     private boolean isInstall;
 
     @Column(nullable = true)

@@ -13,6 +13,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class ContractServiceImpl implements ContractService {
@@ -89,6 +90,7 @@ public class ContractServiceImpl implements ContractService {
             {
                 i = i+ rp.getTotalAmount();
             }
+            i = i + Optional.ofNullable(serviceOrder.getShipFee()).orElse(0f);
 
             serviceOrder.setFeedback("");
             serviceOrder.setAmountPaid((float) 0);
@@ -122,6 +124,7 @@ public class ContractServiceImpl implements ContractService {
             {
                 i = i+ rp.getTotalAmount();
             }
+            i = i + Optional.ofNullable(serviceOrder.getShipFee()).orElse(0f);
             contract1.setContractTotalAmount(i);
             contractRepository.save(contract1);
 

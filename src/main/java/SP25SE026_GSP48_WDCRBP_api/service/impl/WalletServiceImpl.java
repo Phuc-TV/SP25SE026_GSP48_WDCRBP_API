@@ -38,6 +38,9 @@ public class WalletServiceImpl implements WalletService {
     private MailServiceImpl mailServiceImpl;
 
     @Autowired
+    private TransactionServiceImpl transactionService;
+
+    @Autowired
     private TransactionRepository transactionRepository;
 
     @Autowired
@@ -204,6 +207,8 @@ public class WalletServiceImpl implements WalletService {
             serviceOrder.setFeedback("");
             serviceOrder.setRole("");
             serviceOrderRepository.save(serviceOrder);
+
+            transactionService.addMoneyToWWWalletForServiceOrder(serviceOrder.getAvailableService().getWoodworkerProfile().getUser().getUserId(), serviceOrder);
         }
 
         return response;
