@@ -23,6 +23,7 @@ public class ServiceOrderMapper {
         dto.setAmountPaid(entity.getAmountPaid());
         dto.setAmountRemaining(entity.getAmountRemaining());
         dto.setStatus(entity.getStatus());
+        dto.setShipFee(entity.getShipFee());
         dto.setService(avaliableServiceDto);
         dto.setUser(userDetailRes);
         dto.setRole(entity.getRole());
@@ -40,6 +41,7 @@ public class ServiceOrderMapper {
         dto.setOrderId(serviceOrderDto.getOrderId());
         dto.setQuantity(serviceOrderDto.getQuantity());
         dto.setTotalAmount(serviceOrderDto.getTotalAmount());
+        dto.setShipFee(serviceOrderDto.getShipFee());
         dto.setInstall(serviceOrderDto.isInstall());
         dto.setDescription(serviceOrderDto.getDescription());
         dto.setStatus(serviceOrderDto.getStatus());

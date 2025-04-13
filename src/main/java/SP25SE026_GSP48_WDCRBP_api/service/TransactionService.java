@@ -1,5 +1,6 @@
 package SP25SE026_GSP48_WDCRBP_api.service;
 
+import SP25SE026_GSP48_WDCRBP_api.model.entity.ServiceOrder;
 import SP25SE026_GSP48_WDCRBP_api.model.requestModel.TransactionUpdateRequest;
 import SP25SE026_GSP48_WDCRBP_api.model.responseModel.ListTransactionRes;
 
@@ -11,4 +12,5 @@ public interface TransactionService {
     List<ListTransactionRes.Data> getTransactionsByStatus(boolean status);
     List<ListTransactionRes.Data> getTransactionById(Long transactionId);
     List<ListTransactionRes.Data> getTransactionsByUserId(Long userId);
+    void addMoneyToWWWalletForServiceOrder(Long userId, ServiceOrder serviceOrder);
 }

@@ -20,6 +20,7 @@ public class ServiceOrderDetailRes {
     private Long orderId;
     private Byte quantity;
     private Float totalAmount;
+    private Float shipFee;
     private boolean isInstall;
     private String description;
     private String status;

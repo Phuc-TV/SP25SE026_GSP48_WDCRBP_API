@@ -2,17 +2,12 @@ package SP25SE026_GSP48_WDCRBP_api.service.impl;
 
 import SP25SE026_GSP48_WDCRBP_api.constant.ServiceNameConstant;
 import SP25SE026_GSP48_WDCRBP_api.constant.ServiceOrderStatus;
-import SP25SE026_GSP48_WDCRBP_api.model.entity.OrderDeposit;
-import SP25SE026_GSP48_WDCRBP_api.model.entity.OrderProgress;
-import SP25SE026_GSP48_WDCRBP_api.model.entity.ServiceOrder;
-import SP25SE026_GSP48_WDCRBP_api.model.entity.Transaction;
+import SP25SE026_GSP48_WDCRBP_api.constant.TransactionTypeConstant;
+import SP25SE026_GSP48_WDCRBP_api.model.entity.*;
 import SP25SE026_GSP48_WDCRBP_api.model.exception.WDCRBPApiException;
 import SP25SE026_GSP48_WDCRBP_api.model.requestModel.TransactionUpdateRequest;
 import SP25SE026_GSP48_WDCRBP_api.model.responseModel.ListTransactionRes;
-import SP25SE026_GSP48_WDCRBP_api.repository.OrderDepositRepository;
-import SP25SE026_GSP48_WDCRBP_api.repository.OrderProgressRepository;
-import SP25SE026_GSP48_WDCRBP_api.repository.ServiceOrderRepository;
-import SP25SE026_GSP48_WDCRBP_api.repository.TransactionRepository;
+import SP25SE026_GSP48_WDCRBP_api.repository.*;
 import SP25SE026_GSP48_WDCRBP_api.service.TransactionService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,6 +27,12 @@ public class TransactionServiceImpl implements TransactionService {
 
     @Autowired
     private OrderDepositRepository orderDepositRepository;
+
+    @Autowired
+    private WalletRepository walletRepository;
+
+    @Autowired
+    private UserRepository userRepository;
 
     @Autowired
     private ServiceOrderRepository serviceOrderRepository;
@@ -96,6 +97,8 @@ public class TransactionServiceImpl implements TransactionService {
                 serviceOrder.setFeedback("");
                 serviceOrder.setRole("");
                 serviceOrderRepository.save(serviceOrder);
+
+                addMoneyToWWWalletForServiceOrder(serviceOrder.getAvailableService().getWoodworkerProfile().getUser().getUserId(), serviceOrder);
             }
         }
     }
@@ -130,6 +133,27 @@ public class TransactionServiceImpl implements TransactionService {
                 .filter(tx -> tx.getUser() != null && tx.getUser().getUserId().equals(userId))
                 .map(this::mapToDto)
                 .collect(Collectors.toList());
+    }
+
+    @Override
+    public void addMoneyToWWWalletForServiceOrder(Long userId, ServiceOrder serviceOrder) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new WDCRBPApiException(HttpStatus.NOT_FOUND, "User not found with ID: " + userId));
+        Wallet wallet = walletRepository.findByUser_UserId(userId).orElseThrow(() -> new WDCRBPApiException(HttpStatus.NOT_FOUND, "Wallet not found with ID: " + userId));
+
+        Transaction transaction = new Transaction();
+        transaction.setTransactionType(TransactionTypeConstant.NHAN_TIEN);
+        transaction.setDescription("Nhận tiền hoàn thành đơn hàng " + serviceOrder.getOrderId());
+        transaction.setAmount(serviceOrder.getTotalAmount());
+        transaction.setCreatedAt(LocalDateTime.now());
+        transaction.setStatus(true);
+        transaction.setUser(user);
+        transaction.setOrderDeposit(null);
+        transaction.setWallet(wallet);
+        transactionRepository.save(transaction);
+
+        wallet.setBalance(wallet.getBalance() + serviceOrder.getTotalAmount());
+        walletRepository.save(wallet);
     }
 
     private ListTransactionRes.Data mapToDto(Transaction tx) {
