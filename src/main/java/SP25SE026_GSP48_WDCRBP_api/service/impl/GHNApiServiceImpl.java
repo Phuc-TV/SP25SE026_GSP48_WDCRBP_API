@@ -4,8 +4,8 @@ import SP25SE026_GSP48_WDCRBP_api.components.CoreApiResponse;
 import SP25SE026_GSP48_WDCRBP_api.model.dto.ItemDTO;
 import SP25SE026_GSP48_WDCRBP_api.model.entity.Configuration;
 import SP25SE026_GSP48_WDCRBP_api.model.requestModel.CalculateFeeRequest;
+import SP25SE026_GSP48_WDCRBP_api.model.requestModel.CreateOrderGhnApiRequest;
 import SP25SE026_GSP48_WDCRBP_api.model.requestModel.GetGHNAvailableServiceRequest;
-import SP25SE026_GSP48_WDCRBP_api.model.responseModel.CalculateFeeResponse;
 import SP25SE026_GSP48_WDCRBP_api.service.ConfigurationService;
 import SP25SE026_GSP48_WDCRBP_api.service.GHNApiService;
 import com.fasterxml.jackson.core.type.TypeReference;
@@ -142,5 +142,16 @@ public class GHNApiServiceImpl implements GHNApiService {
         double density = 0.65; // g/cm³, gỗ đặc trung bình
         double volume = length * width * height; // cm³
         return (int) Math.round(volume * density); // gram
+    }
+
+    @Override
+    public CoreApiResponse createOrder(CreateOrderGhnApiRequest request) {
+        HttpHeaders headers = getDefaultHeaders();
+        headers.set("ShopId", "196376"); // Lưu ý: Bạn có thể lấy ShopId từ DB (ConfigurationService)
+
+        HttpEntity<CreateOrderGhnApiRequest> entity = new HttpEntity<>(request, headers);
+        String url = "https://dev-online-gateway.ghn.vn/shiip/public-api/v2/shipping-order/create";
+
+        return callExternalAPI(url, HttpMethod.POST, entity);
     }
 }

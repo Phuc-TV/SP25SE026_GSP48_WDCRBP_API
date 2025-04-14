@@ -2,8 +2,10 @@ package SP25SE026_GSP48_WDCRBP_api.controller;
 
 import SP25SE026_GSP48_WDCRBP_api.components.CoreApiResponse;
 import SP25SE026_GSP48_WDCRBP_api.model.requestModel.CalculateFeeRequest;
+import SP25SE026_GSP48_WDCRBP_api.model.requestModel.CreateOrderGhnApiRequest;
 import SP25SE026_GSP48_WDCRBP_api.model.requestModel.GetGHNAvailableServiceRequest;
 import SP25SE026_GSP48_WDCRBP_api.service.GHNApiService;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -30,13 +32,22 @@ public class GHNApiController {
         return ghnApiService.getWard(districtId);
     }
 
+    @SecurityRequirement(name = "Bear Authentication")
     @PostMapping("/calculate-fee")
     public CoreApiResponse calculateShippingFee(@RequestBody CalculateFeeRequest request) {
         return ghnApiService.calculateShippingFee(request);
     }
 
+    @SecurityRequirement(name = "Bear Authentication")
     @PostMapping("/services")
     public CoreApiResponse getWard(@RequestBody GetGHNAvailableServiceRequest request) {
         return ghnApiService.getAvailableService(request);
+    }
+
+    @SecurityRequirement(name = "Bear Authentication")
+    @PostMapping("/create-order")
+    public CoreApiResponse createOrder(@RequestBody CreateOrderGhnApiRequest request) {
+        CoreApiResponse response = ghnApiService.createOrder(request);
+        return CoreApiResponse.success(response);
     }
 }
