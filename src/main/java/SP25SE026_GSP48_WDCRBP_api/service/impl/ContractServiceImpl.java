@@ -4,6 +4,7 @@ import SP25SE026_GSP48_WDCRBP_api.constant.ServiceOrderStatus;
 import SP25SE026_GSP48_WDCRBP_api.model.entity.*;
 import SP25SE026_GSP48_WDCRBP_api.model.requestModel.WwCreateContractCustomizeRequest;
 import SP25SE026_GSP48_WDCRBP_api.model.responseModel.ContractDetailRes;
+import SP25SE026_GSP48_WDCRBP_api.model.responseModel.RequestedProductListItemRes;
 import SP25SE026_GSP48_WDCRBP_api.model.responseModel.UserDetailRes;
 import SP25SE026_GSP48_WDCRBP_api.repository.*;
 import SP25SE026_GSP48_WDCRBP_api.service.ContractService;
@@ -75,7 +76,13 @@ public class ContractServiceImpl implements ContractService {
         if (contract1 == null)
         {
             Contract contract = new Contract();
-            contract.setWarrantyPeriod(wwCreateContractCustomizeRequest.getWarrantyPeriod());
+            for (int i = 0; i < wwCreateContractCustomizeRequest.getWarrantyDurations().size(); i++)
+            {
+                Short warrantyDuration = wwCreateContractCustomizeRequest.getWarrantyDurations().get(i);
+                RequestedProduct requestedProduct =
+                        requestedProductRepository.findRequestedProductByRequestedProductId(wwCreateContractCustomizeRequest.getRequestedProductIds().get(i));
+                requestedProduct.setWarrantyDuration(warrantyDuration);
+            }
             contract.setWarrantyPolicy(wwCreateContractCustomizeRequest.getWarrantyPolicy());
             contract.setCompleteDate(wwCreateContractCustomizeRequest.getCompleteDate());
             contract.setWoodworkerSignature(wwCreateContractCustomizeRequest.getWoodworkerSignature());
@@ -113,8 +120,13 @@ public class ContractServiceImpl implements ContractService {
                 contract1.setWarrantyPolicy(wwCreateContractCustomizeRequest.getWarrantyPolicy());
             if (wwCreateContractCustomizeRequest.getCompleteDate() != null)
                 contract1.setCompleteDate(wwCreateContractCustomizeRequest.getCompleteDate());
-            if (wwCreateContractCustomizeRequest.getWarrantyPeriod() != null)
-                contract1.setWarrantyPeriod(wwCreateContractCustomizeRequest.getWarrantyPeriod());
+            for (int i = 0; i < wwCreateContractCustomizeRequest.getWarrantyDurations().size(); i++)
+            {
+                Short warrantyDuration = wwCreateContractCustomizeRequest.getWarrantyDurations().get(i);
+                RequestedProduct requestedProduct =
+                        requestedProductRepository.findRequestedProductByRequestedProductId(wwCreateContractCustomizeRequest.getRequestedProductIds().get(i));
+                requestedProduct.setWarrantyDuration(warrantyDuration);
+            }
             if (wwCreateContractCustomizeRequest.getWoodworkerTerms() != null)
                 contract1.setWoodworkerTerms(wwCreateContractCustomizeRequest.getWoodworkerTerms());
             List<RequestedProduct> requestedProduct =
@@ -197,10 +209,14 @@ public class ContractServiceImpl implements ContractService {
         }
 
         User woodworker = userRepository.findUserByUserId(serviceOrder.getAvailableService().getWoodworkerProfile().getUser().getUserId());
+        List<RequestedProduct> requestedProducts = requestedProductRepository.findRequestedProductByServiceOrder(serviceOrder);
 
         ContractDetailRes contractDetailRes = modelMapper.map(contract, ContractDetailRes.class);
         contractDetailRes.setCustomer(modelMapper.map(serviceOrder.getUser(), UserDetailRes.class));
         contractDetailRes.setWoodworker(modelMapper.map(woodworker, UserDetailRes.class));
+        contractDetailRes.setRequestedProducts(requestedProducts.stream()
+                .map(requestedProduct -> modelMapper.map(requestedProduct, RequestedProductListItemRes.class))
+                .toList());
 
         return contractDetailRes;
     }

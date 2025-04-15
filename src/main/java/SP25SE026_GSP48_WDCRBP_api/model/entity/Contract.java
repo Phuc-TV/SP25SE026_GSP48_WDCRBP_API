@@ -51,9 +51,6 @@ public class Contract {
     @Column(nullable = true)
     private LocalDateTime createdAt;
 
-    @Column(nullable = true)
-    private LocalDateTime warrantyPeriod;
-
     @OneToOne
     @JoinColumn(name = "orderId", nullable = true)
     private ServiceOrder serviceOrder;

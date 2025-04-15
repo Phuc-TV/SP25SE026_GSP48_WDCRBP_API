@@ -35,7 +35,7 @@ public class AvailableServiceController {
         }
     }
 
-    @PutMapping("/update")
+    @PutMapping
     public CoreApiResponse<AvailableServiceListItemRes> updateAvailableService(@RequestBody AvailableServiceUpdateReq updateReq)
     {
         try {

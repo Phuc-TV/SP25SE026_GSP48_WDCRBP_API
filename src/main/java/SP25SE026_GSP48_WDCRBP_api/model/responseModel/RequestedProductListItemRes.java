@@ -1,9 +1,6 @@
 package SP25SE026_GSP48_WDCRBP_api.model.responseModel;
 
-import SP25SE026_GSP48_WDCRBP_api.model.dto.DesignIdeaVariantDto;
 import SP25SE026_GSP48_WDCRBP_api.model.entity.Category;
-import SP25SE026_GSP48_WDCRBP_api.model.entity.DesignIdeaVariant;
-import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -15,7 +12,7 @@ import java.time.LocalDateTime;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class RequestedProductDetailRes {
+public class RequestedProductListItemRes {
     private Long requestedProductId;
 
     private Byte quantity;
@@ -27,10 +24,4 @@ public class RequestedProductDetailRes {
     private float totalAmount;
 
     private Category category;
-
-    private String finishImgUrls;
-
-    private DesignVariantDetailRes designIdeaVariantDetail;
-
-    private PersonalProductDetailRes personalProductDetail;
 }

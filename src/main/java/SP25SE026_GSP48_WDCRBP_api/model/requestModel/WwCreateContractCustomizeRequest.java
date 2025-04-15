@@ -6,6 +6,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Getter
 @Setter
@@ -20,7 +21,9 @@ public class WwCreateContractCustomizeRequest {
 
     private LocalDateTime completeDate;
 
-    private LocalDateTime warrantyPeriod;
-
     private Long serviceOrderId;
+
+    private List<Long> requestedProductIds;
+
+    private List<Short> warrantyDurations;
 }
