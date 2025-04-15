@@ -14,7 +14,7 @@ public class ProductRes {
     private String description;
     private float price;
     private short stock;
-    private short weight;
+    private short warrantyDuration;
     private short length;
     private short width;
     private short height;

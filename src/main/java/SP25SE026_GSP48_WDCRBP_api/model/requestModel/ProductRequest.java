@@ -17,8 +17,8 @@ public class ProductRequest {
     private float price;
     @Min(value = 0, message = "Stock must be at least 0")
     private short stock;
-    @Min(value = 0, message = "Weight must be at least 0")
-    private short weight;
+    @Min(value = 0, message = "Warranty duration must be at least 0")
+    private short warrantyDuration;
     @Min(value = 0, message = "Length must be at least 0")
     private short length;
     @Min(value = 0, message = "Width must be at least 0")

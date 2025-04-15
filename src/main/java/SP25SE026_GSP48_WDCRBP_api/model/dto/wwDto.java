@@ -13,5 +13,6 @@ public class wwDto {
     private Long woodworkerId;
     private String address;
     private String brandName;
+    private String phone;
     private String bio;
 }

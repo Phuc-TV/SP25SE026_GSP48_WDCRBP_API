@@ -43,7 +43,7 @@ public class ProductServiceImpl implements ProductService {
         product.setDescription(productRequest.getDescription());
         product.setPrice(productRequest.getPrice());
         product.setStock(productRequest.getStock());
-        product.setWeight(productRequest.getWeight());
+        product.setWarrantyDuration(productRequest.getWarrantyDuration());
         product.setLength(productRequest.getLength());
         product.setWidth(productRequest.getWidth());
         product.setHeight(productRequest.getHeight());
@@ -92,7 +92,7 @@ public class ProductServiceImpl implements ProductService {
         existingProduct.setDescription(productRequest.getDescription());
         existingProduct.setPrice(productRequest.getPrice());
         existingProduct.setStock(productRequest.getStock());
-        existingProduct.setWeight(productRequest.getWeight());
+        existingProduct.setWarrantyDuration(productRequest.getWarrantyDuration());
         existingProduct.setLength(productRequest.getLength());
         existingProduct.setWidth(productRequest.getWidth());
         existingProduct.setHeight(productRequest.getHeight());
@@ -125,7 +125,7 @@ public class ProductServiceImpl implements ProductService {
                 .description(product.getDescription())
                 .price(product.getPrice())
                 .stock(product.getStock())
-                .weight(product.getWeight())
+                .warrantyDuration(product.getWarrantyDuration())
                 .length(product.getLength())
                 .width(product.getWidth())
                 .height(product.getHeight())

@@ -28,7 +28,7 @@ public class Product {
     private short stock;
 
     @Column(nullable = true)
-    private short weight;
+    private short warrantyDuration;
 
     @Column(nullable = true)
     private short length;

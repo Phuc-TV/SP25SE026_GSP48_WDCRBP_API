@@ -3,6 +3,7 @@ package SP25SE026_GSP48_WDCRBP_api.model.responseModel;
 import lombok.*;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Getter
 @Setter
@@ -39,4 +40,6 @@ public class ContractDetailRes {
     private UserDetailRes woodworker;
 
     private UserDetailRes customer;
+
+    private List<RequestedProductListItemRes> requestedProducts;
 }

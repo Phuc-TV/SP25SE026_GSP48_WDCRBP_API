@@ -126,6 +126,7 @@ public class ServiceOrderServiceImpl implements ServiceOrderService {
         wwDto.setWoodworkerId(order.getAvailableService().getWoodworkerProfile().getWoodworkerId());
         wwDto.setAddress(order.getAvailableService().getWoodworkerProfile().getAddress());
         wwDto.setBio(order.getAvailableService().getWoodworkerProfile().getBio());
+        wwDto.setPhone(order.getAvailableService().getWoodworkerProfile().getUser().getPhone());
         avaliableServiceDto.setWwDto(wwDto);
 
         UserDetailRes userDetailRes = modelMapper.map(order.getUser(), UserDetailRes.class);
@@ -147,6 +148,7 @@ public class ServiceOrderServiceImpl implements ServiceOrderService {
 
             requestedProductDetailRes.setRequestedProductId(requestedProduct.getRequestedProductId());
             requestedProductDetailRes.setQuantity(requestedProduct.getQuantity());
+            requestedProductDetailRes.setWarrantyDuration(requestedProduct.getWarrantyDuration());
             requestedProductDetailRes.setTotalAmount(requestedProduct.getTotalAmount());
             requestedProductDetailRes.setCategory(requestedProduct.getCategory());
             requestedProductDetailRes.setCreatedAt(requestedProduct.getCreatedAt());
@@ -237,6 +239,7 @@ public class ServiceOrderServiceImpl implements ServiceOrderService {
             requestedProduct.setDesignIdeaVariant(designIdeaVariant);
             requestedProduct.setQuantity(Byte.parseByte(i.getQuantity() + ""));
             requestedProduct.setServiceOrder(serviceOrder);
+            requestedProduct.setCategory(designIdeaVariant.getDesignIdea().getCategory());
             requestedProduct.setTotalAmount(designIdeaVariant.getPrice() * i.getQuantity());
             totalAmount = totalAmount + requestedProduct.getTotalAmount();
             requestedProduct.setCreatedAt(LocalDateTime.now());

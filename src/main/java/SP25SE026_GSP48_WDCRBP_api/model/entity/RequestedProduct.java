@@ -26,6 +26,9 @@ public class RequestedProduct {
     @Column(nullable = true)
     private float totalAmount;
 
+    @Column(nullable = true)
+    private short warrantyDuration;
+
     @ManyToOne
     @JoinColumn(name = "categoryId", nullable = true)
     private Category category;
