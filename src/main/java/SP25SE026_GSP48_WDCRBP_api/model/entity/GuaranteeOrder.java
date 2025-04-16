@@ -30,6 +30,12 @@ public class GuaranteeOrder {
     private LocalDateTime updatedAt;
 
     @Column(nullable = true)
+    private String currentStatus;
+
+    @Column(nullable = true)
+    private String currentProductImgUrls;
+
+    @Column(nullable = true)
     private boolean status;
 
     @Column(nullable = true)

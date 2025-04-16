@@ -34,4 +34,16 @@ public class ShipmentServiceImpl implements ShipmentService {
 
         return shipment;
     }
+
+    @Override
+    public void updateServiceOrderShipmentOrderCode(Long serviceOrderId, String orderCode) {
+        ServiceOrder serviceOrder = serviceOrderRepository.findServiceOrderByOrderId(serviceOrderId);
+
+        List<Shipment> shipments = shipmentRepository.findShipmentByServiceOrder(serviceOrder);
+
+        for (Shipment shipment : shipments) {
+            shipment.setOrderCode(orderCode);
+            shipmentRepository.save(shipment);
+        }
+    }
 }

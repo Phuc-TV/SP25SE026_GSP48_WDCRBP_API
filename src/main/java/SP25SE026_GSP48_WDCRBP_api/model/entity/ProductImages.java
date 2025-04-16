@@ -9,12 +9,11 @@ import lombok.*;
 @AllArgsConstructor
 @NoArgsConstructor
 @Entity
-@Table(name = "DesignFile")
+@Table(name = "ProductImages")
 public class ProductImages {
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long designFileId;
+    private Long productImagesId;
 
     @Column(nullable = true,length = 2000)
     private String mediaUrls;

@@ -18,5 +18,5 @@ public interface GHNApiService {
 
     CoreApiResponse getAvailableService(GetGHNAvailableServiceRequest request);
 
-    CoreApiResponse createOrder(CreateOrderGhnApiRequest request);
+    CoreApiResponse createOrder(Long serviceOrderId, CreateOrderGhnApiRequest request);
 }

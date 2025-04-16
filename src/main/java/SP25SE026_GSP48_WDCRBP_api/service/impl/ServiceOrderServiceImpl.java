@@ -99,6 +99,8 @@ public class ServiceOrderServiceImpl implements ServiceOrderService {
             wwDto.setWoodworkerId(serviceOrder.getAvailableService().getWoodworkerProfile().getWoodworkerId());
             wwDto.setAddress(serviceOrder.getAvailableService().getWoodworkerProfile().getAddress());
             wwDto.setBio(serviceOrder.getAvailableService().getWoodworkerProfile().getBio());
+            wwDto.setPhone(serviceOrder.getAvailableService().getWoodworkerProfile().getUser().getPhone());
+            wwDto.setName(serviceOrder.getAvailableService().getWoodworkerProfile().getUser().getUsername());
             avaliableServiceDto.setWwDto(wwDto);
 
             UserDetailRes userDetailRes = modelMapper.map(serviceOrder.getUser(), UserDetailRes.class);
@@ -127,6 +129,7 @@ public class ServiceOrderServiceImpl implements ServiceOrderService {
         wwDto.setAddress(order.getAvailableService().getWoodworkerProfile().getAddress());
         wwDto.setBio(order.getAvailableService().getWoodworkerProfile().getBio());
         wwDto.setPhone(order.getAvailableService().getWoodworkerProfile().getUser().getPhone());
+        wwDto.setName(order.getAvailableService().getWoodworkerProfile().getUser().getUsername());
         avaliableServiceDto.setWwDto(wwDto);
 
         UserDetailRes userDetailRes = modelMapper.map(order.getUser(), UserDetailRes.class);
@@ -282,6 +285,8 @@ public class ServiceOrderServiceImpl implements ServiceOrderService {
             shipment.setFromDistrictId(Integer.parseInt(ww.getDistrictId()));
             shipment.setFromWardCode(ww.getWardCode());
             shipment.setFee(createServiceOrderCusRequest.getPriceShipping());
+            shipment.setGhnServiceId(createServiceOrderCusRequest.getGhnServiceId());
+            shipment.setGhnServiceTypeId(createServiceOrderCusRequest.getGhnServiceTypeId());
             shipmentRepository.save(shipment);
         }
 
@@ -449,6 +454,9 @@ public class ServiceOrderServiceImpl implements ServiceOrderService {
             shipment.setToWardCode(createServiceOrderPersonalizeRequest.getToWardCode());
             shipment.setFromDistrictId(Integer.parseInt(ww.getDistrictId()));
             shipment.setFromWardCode(ww.getWardCode());
+            shipment.setFee(createServiceOrderPersonalizeRequest.getPriceShipping());
+            shipment.setGhnServiceId(createServiceOrderPersonalizeRequest.getGhnServiceId());
+            shipment.setGhnServiceTypeId(createServiceOrderPersonalizeRequest.getGhnServiceTypeId());
             shipmentRepository.save(shipment);
         }
 
@@ -456,7 +464,7 @@ public class ServiceOrderServiceImpl implements ServiceOrderService {
     }
 
     @Override
-    public List<ProductImages> addProductImage(List<ProductImagesDto> productImagesDtos, Long serviceId)
+    public void addProductImage(List<ProductImagesDto> productImagesDtos, Long serviceId)
     {
         ServiceOrder serviceOrder = orderRepository.findById(serviceId).orElse(null);
 
@@ -477,8 +485,6 @@ public class ServiceOrderServiceImpl implements ServiceOrderService {
 
                 productImages.add(productImage);
             }
-
-            return productImages;
         } else {
             OrderProgress orderProgress = new OrderProgress();
             orderProgress.setServiceOrder(serviceOrder);
@@ -504,12 +510,11 @@ public class ServiceOrderServiceImpl implements ServiceOrderService {
 
                 productImages.add(productImage);
             }
-            return productImages;
         }
     }
 
     @Override
-    public List<ProductImagesDto> addProductFinishImage(List<ProductImagesDto> productImagesDtos, Long serviceId) {
+    public void addProductFinishImage(List<ProductImagesDto> productImagesDtos, Long serviceId) {
         ServiceOrder serviceOrder = orderRepository.findById(serviceId).orElse(null);
         List<ProductImages> productImages = new ArrayList<>();
         for (ProductImagesDto productImagesDto : productImagesDtos)
@@ -535,9 +540,5 @@ public class ServiceOrderServiceImpl implements ServiceOrderService {
         serviceOrder.setFeedback("");
         serviceOrder.setStatus(ServiceOrderStatus.DANG_GIAO_HANG_LAP_DAT);
         orderRepository.save(serviceOrder);
-
-        return productImages.stream()
-                .map(productImage -> modelMapper.map(productImage, ProductImagesDto.class))
-                .collect(Collectors.toList());
     }
 }

@@ -6,4 +6,5 @@ import java.util.List;
 
 public interface ShipmentService {
     List<Shipment> getAllShipmentByServiceOrderId(Long serviceOrderId);
+    void updateServiceOrderShipmentOrderCode(Long serviceOrderId, String orderCode);
 }
