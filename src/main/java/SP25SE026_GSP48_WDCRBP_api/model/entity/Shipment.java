@@ -34,6 +34,12 @@ public class Shipment {
     private String fromWardCode;
 
     @Column(nullable = true)
+    private Integer ghnServiceId;
+
+    @Column(nullable = true)
+    private Integer ghnServiceTypeId;
+
+    @Column(nullable = true)
     private String shippingUnit;
 
     @Column(nullable = true)

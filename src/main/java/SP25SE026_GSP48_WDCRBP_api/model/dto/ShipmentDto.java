@@ -18,7 +18,19 @@ public class ShipmentDto {
 
     private String toAddress;
 
+    private int toDistrictId;
+
+    private String toWardCode;
+
     private String fromAddress;
+
+    private int fromDistrictId;
+
+    private String fromWardCode;
+
+    private Integer ghnServiceId;
+
+    private Integer ghnServiceTypeId;
 
     private String shippingUnit;
 

@@ -16,9 +16,12 @@ public class CreateServiceOrderPersonalizeRequest {
     private Long availableServiceId;
     private String toDistrictId;
     private String toWardCode;
+    private int ghnServiceId;
+    private int ghnServiceTypeId;
     private String note;
     private Long userId;
     private String address;
     private List<RequestedProductPersonalizeDto> requestedProducts;
     private Boolean isInstall;
+    private int priceShipping;
 }

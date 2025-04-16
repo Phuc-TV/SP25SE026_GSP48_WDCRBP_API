@@ -45,9 +45,9 @@ public class GHNApiController {
     }
 
     @SecurityRequirement(name = "Bear Authentication")
-    @PostMapping("/create-order")
-    public CoreApiResponse createOrder(@RequestBody CreateOrderGhnApiRequest request) {
-        CoreApiResponse response = ghnApiService.createOrder(request);
+    @PostMapping("/service-order/{serviceOrderId}")
+    public CoreApiResponse createOrder(@PathVariable Long serviceOrderId ,@RequestBody CreateOrderGhnApiRequest request) {
+        CoreApiResponse response = ghnApiService.createOrder(serviceOrderId, request);
         return CoreApiResponse.success(response);
     }
 }

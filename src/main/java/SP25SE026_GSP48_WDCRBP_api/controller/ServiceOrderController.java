@@ -99,21 +99,17 @@ public class ServiceOrderController {
     public CoreApiResponse addProductImage(@RequestBody List<ProductImagesDto> request,
                                            @RequestParam Long serviceId)
     {
-        List<ProductImages> productImages = serviceOrderService.addProductImage(request, serviceId);
+        serviceOrderService.addProductImage(request, serviceId);
 
-        List<ProductImagesDto> productImagesDtos = productImages.stream()
-                .map(productImage -> modelMapper.map(productImage, ProductImagesDto.class))
-                .toList();
-
-        return CoreApiResponse.success(productImagesDtos);
+        return CoreApiResponse.success("Success");
     }
 
     @SecurityRequirement(name = "Bear Authentication")
     @PostMapping("/finish-product-image")
     public CoreApiResponse addFinishProductImage(@RequestBody List<ProductImagesDto> request, @RequestParam Long serviceId)
     {
-        List<ProductImagesDto> productImages = serviceOrderService.addProductFinishImage(request,serviceId);
+        serviceOrderService.addProductFinishImage(request,serviceId);
 
-        return CoreApiResponse.success(productImages);
+        return CoreApiResponse.success("Success");
     }
 }

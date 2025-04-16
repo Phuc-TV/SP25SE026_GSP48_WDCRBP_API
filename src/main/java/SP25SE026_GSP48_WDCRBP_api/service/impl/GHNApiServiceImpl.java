@@ -3,9 +3,13 @@ package SP25SE026_GSP48_WDCRBP_api.service.impl;
 import SP25SE026_GSP48_WDCRBP_api.components.CoreApiResponse;
 import SP25SE026_GSP48_WDCRBP_api.model.dto.ItemDTO;
 import SP25SE026_GSP48_WDCRBP_api.model.entity.Configuration;
+import SP25SE026_GSP48_WDCRBP_api.model.entity.ServiceOrder;
+import SP25SE026_GSP48_WDCRBP_api.model.entity.Shipment;
 import SP25SE026_GSP48_WDCRBP_api.model.requestModel.CalculateFeeRequest;
 import SP25SE026_GSP48_WDCRBP_api.model.requestModel.CreateOrderGhnApiRequest;
 import SP25SE026_GSP48_WDCRBP_api.model.requestModel.GetGHNAvailableServiceRequest;
+import SP25SE026_GSP48_WDCRBP_api.repository.ServiceOrderRepository;
+import SP25SE026_GSP48_WDCRBP_api.repository.ShipmentRepository;
 import SP25SE026_GSP48_WDCRBP_api.service.ConfigurationService;
 import SP25SE026_GSP48_WDCRBP_api.service.GHNApiService;
 import com.fasterxml.jackson.core.type.TypeReference;
@@ -22,10 +26,14 @@ import java.util.*;
 public class GHNApiServiceImpl implements GHNApiService {
 
     private final ConfigurationService configurationService;
+    private final ShipmentRepository shipmentRepository;
+    private final ServiceOrderRepository serviceOrderRepository;
 
     @Autowired
-    public GHNApiServiceImpl(ConfigurationService configurationService) {
+    public GHNApiServiceImpl(ConfigurationService configurationService, ShipmentRepository shipmentRepository, ServiceOrderRepository serviceOrderRepository) {
         this.configurationService = configurationService;
+        this.shipmentRepository = shipmentRepository;
+        this.serviceOrderRepository = serviceOrderRepository;
     }
 
     private String getTokenFromConfig() {
@@ -88,7 +96,10 @@ public class GHNApiServiceImpl implements GHNApiService {
         for (ItemDTO item : request.getItems()) {
             if (item.getWeight() == 0) {
                 int estimatedWeight = estimateWeight(item.getLength(), item.getWidth(), item.getHeight());
-                item.setWeight(estimatedWeight);
+                item.setWeight(Math.min(estimatedWeight, 50000));
+                item.setHeight(Math.min(item.getHeight(), 200));
+                item.setWidth(Math.min(item.getWidth(), 200));
+                item.setLength(Math.min(item.getLength(), 200));
             }
 
             totalLength += item.getLength();
@@ -97,10 +108,10 @@ public class GHNApiServiceImpl implements GHNApiService {
             totalWeight += item.getWeight() * item.getQuantity();
         }
 
-        request.setLength(totalLength);
-        request.setWidth(maxWidth);
-        request.setHeight(maxHeight);
-        request.setWeight(totalWeight);
+        request.setLength(Math.min(totalLength, 200));
+        request.setWidth(Math.min(maxWidth, 200));
+        request.setHeight(Math.min(maxHeight, 200));
+        request.setWeight(Math.min(totalWeight, 50000));
 
         HttpHeaders headers = getDefaultHeaders();
         headers.set("ShopId", "196376"); // có thể cho vào config DB nếu muốn linh hoạt
@@ -145,9 +156,40 @@ public class GHNApiServiceImpl implements GHNApiService {
     }
 
     @Override
-    public CoreApiResponse createOrder(CreateOrderGhnApiRequest request) {
+    public CoreApiResponse createOrder(Long serviceOrderId, CreateOrderGhnApiRequest request) {
         HttpHeaders headers = getDefaultHeaders();
         headers.set("ShopId", "196376"); // Lưu ý: Bạn có thể lấy ShopId từ DB (ConfigurationService)
+
+        // Tính toán từ danh sách items
+        if (request.getItems() == null || request.getItems().isEmpty()) {
+            return CoreApiResponse.error("Danh sách sản phẩm không được để trống");
+        }
+
+        int totalLength = 0;
+        int maxWidth = 0;
+        int maxHeight = 0;
+        int totalWeight = 0;
+
+        for (CreateOrderGhnApiRequest.OrderItem item : request.getItems()) {
+            if (item.getWeight() == 0) {
+                int estimatedWeight = estimateWeight(item.getLength(), item.getWidth(), item.getHeight());
+                item.setWeight(Math.min(estimatedWeight, 50000));
+                item.setHeight(Math.min(item.getHeight(), 200));
+                item.setWidth(Math.min(item.getWidth(), 200));
+                item.setLength(Math.min(item.getLength(), 200));
+            }
+
+            totalLength += item.getLength();
+            maxWidth = Math.max(maxWidth, item.getWidth());
+            maxHeight = Math.max(maxHeight, item.getHeight());
+            totalWeight += item.getWeight() * item.getQuantity();
+        }
+
+        request.setRequired_note("CHOXEMHANGKHONGTHU");
+        request.setLength(Math.min(totalLength, 200));
+        request.setWidth(Math.min(maxWidth, 200));
+        request.setHeight(Math.min(maxHeight, 200));
+        request.setWeight(Math.min(totalWeight, 50000));
 
         HttpEntity<CreateOrderGhnApiRequest> entity = new HttpEntity<>(request, headers);
         String url = "https://dev-online-gateway.ghn.vn/shiip/public-api/v2/shipping-order/create";

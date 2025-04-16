@@ -16,6 +16,8 @@ public class CreateServiceOrderCusRequest {
     private Long availableServiceId;
     private String toDistrictId;
     private String toWardCode;
+    private int ghnServiceId;
+    private int ghnServiceTypeId;
     private Long userId;
     private List<DesignIdeaVariantCusDto> designIdeaVariantIds;
     private String address;
