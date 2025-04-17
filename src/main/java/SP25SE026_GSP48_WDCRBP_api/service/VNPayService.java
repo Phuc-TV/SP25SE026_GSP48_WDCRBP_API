@@ -9,4 +9,7 @@ public interface VNPayService {
     PaymentRes processOrderPayment(PaymentOrderRequest request);
     PaymentRes processServicePackPayment(PaymentServicePackRequest request);
     PaymentRes processWalletPayment(PaymentWalletRequest request);
+    PaymentRes processOrderPaymentMobile(PaymentOrderRequest request);
+    PaymentRes processServicePackPaymentMobile(PaymentServicePackRequest request);
+    PaymentRes processWalletPaymentMobile(PaymentWalletRequest request);
 }

@@ -22,6 +22,7 @@ public class PaymentController {
         this.vnPayService = vnPayService;
     }
 
+    // WEB ENDPOINTS
     @PostMapping("/create-payment")
     public CoreApiResponse<PaymentRes> pay(@Valid @RequestBody PaymentOrderRequest request) {
         try {
@@ -30,7 +31,7 @@ public class PaymentController {
         } catch (WDCRBPApiException e) {
             return CoreApiResponse.error(e.getStatus(), e.getMessage(), null);
         } catch (Exception e) {
-            return CoreApiResponse.error(HttpStatus.BAD_REQUEST,"Lỗi không xác định khi xử lý thanh toán đơn hàng." + e.getMessage());
+            return CoreApiResponse.error(HttpStatus.BAD_REQUEST, "Lỗi không xác định khi xử lý thanh toán đơn hàng. " + e.getMessage());
         }
     }
 
@@ -42,7 +43,7 @@ public class PaymentController {
         } catch (WDCRBPApiException e) {
             return CoreApiResponse.error(e.getStatus(), e.getMessage(), null);
         } catch (Exception e) {
-            return CoreApiResponse.error(HttpStatus.BAD_REQUEST,"Lỗi không xác định khi xử lý thanh toán gói dịch vụ."+ e.getMessage());
+            return CoreApiResponse.error(HttpStatus.BAD_REQUEST, "Lỗi không xác định khi xử lý thanh toán gói dịch vụ. " + e.getMessage());
         }
     }
 
@@ -54,7 +55,44 @@ public class PaymentController {
         } catch (WDCRBPApiException e) {
             return CoreApiResponse.error(e.getStatus(), e.getMessage(), null);
         } catch (Exception e) {
-            return CoreApiResponse.error(HttpStatus.BAD_REQUEST,"Lỗi không xác định khi xử lý nạp tiền vào ví."+ e.getMessage());
+            return CoreApiResponse.error(HttpStatus.BAD_REQUEST, "Lỗi không xác định khi xử lý nạp tiền vào ví. " + e.getMessage());
+        }
+    }
+
+    // MOBILE ENDPOINTS
+    @PostMapping("/mobile/create-payment")
+    public CoreApiResponse<PaymentRes> payMobile(@Valid @RequestBody PaymentOrderRequest request) {
+        try {
+            PaymentRes paymentResponse = vnPayService.processOrderPaymentMobile(request);
+            return CoreApiResponse.success(paymentResponse, "Tạo liên kết thanh toán (mobile) thành công.");
+        } catch (WDCRBPApiException e) {
+            return CoreApiResponse.error(e.getStatus(), e.getMessage(), null);
+        } catch (Exception e) {
+            return CoreApiResponse.error(HttpStatus.BAD_REQUEST, "Lỗi mobile - đơn hàng: " + e.getMessage());
+        }
+    }
+
+    @PostMapping("/mobile/pay-service-pack")
+    public CoreApiResponse<PaymentRes> payServicePackMobile(@Valid @RequestBody PaymentServicePackRequest request) {
+        try {
+            PaymentRes paymentResponse = vnPayService.processServicePackPaymentMobile(request);
+            return CoreApiResponse.success(paymentResponse, "Tạo liên kết thanh toán gói dịch vụ (mobile) thành công.");
+        } catch (WDCRBPApiException e) {
+            return CoreApiResponse.error(e.getStatus(), e.getMessage(), null);
+        } catch (Exception e) {
+            return CoreApiResponse.error(HttpStatus.BAD_REQUEST, "Lỗi mobile - gói dịch vụ: " + e.getMessage());
+        }
+    }
+
+    @PostMapping("/mobile/top-up-wallet")
+    public CoreApiResponse<PaymentRes> payWalletMobile(@Valid @RequestBody PaymentWalletRequest request) {
+        try {
+            PaymentRes paymentResponse = vnPayService.processWalletPaymentMobile(request);
+            return CoreApiResponse.success(paymentResponse, "Tạo liên kết nạp ví (mobile) thành công.");
+        } catch (WDCRBPApiException e) {
+            return CoreApiResponse.error(e.getStatus(), e.getMessage(), null);
+        } catch (Exception e) {
+            return CoreApiResponse.error(HttpStatus.BAD_REQUEST, "Lỗi mobile - nạp ví: " + e.getMessage());
         }
     }
 }

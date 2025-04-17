@@ -398,4 +398,334 @@ public class VNPayServiceImp implements VNPayService {
         return 0;
     }
 
+    @Override
+    public PaymentRes processOrderPaymentMobile(PaymentOrderRequest request) {
+        String email = request.getEmail();
+        String userId = request.getUserId();
+        String orderDepositId = request.getOrderDepositId();
+        String transactionType = request.getTransactionType();
+        if (transactionType == null || transactionType.isBlank()) {
+            transactionType = "pay_online";
+        }
+        String returnUrl = request.getReturnUrl();
+
+        try {
+            Long parsedUserId = Long.parseLong(userId);
+            Long parsedOrderDepositId = Long.parseLong(orderDepositId);
+
+            User dbUser = userRepository.findById(parsedUserId)
+                    .orElseThrow(() -> new WDCRBPApiException(HttpStatus.NOT_FOUND, "không tìm thấy mã người dùng: " + userId));
+
+            verifyEmail(dbUser, email);
+
+            if (!"Customer".equalsIgnoreCase(dbUser.getRole())) {
+                throw new WDCRBPApiException(HttpStatus.FORBIDDEN, "chỉ khách hàng mới được sài dịch vụ này..");
+            }
+
+            var orderDeposit = orderDepositRepository.findById(parsedOrderDepositId)
+                    .orElseThrow(() -> new WDCRBPApiException(HttpStatus.NOT_FOUND, "không tìm thấy mã cọc đơn hàng: " + orderDepositId));
+
+
+            Transaction txn = Transaction.builder()
+                    .transactionType(transactionType)
+                    .amount(orderDeposit.getAmount())
+                    .description("Thanh toán cọc đơn hàng")
+                    .status(false)
+                    .createdAt(LocalDateTime.now())
+                    .user(dbUser)
+                    .orderDeposit(orderDeposit)
+                    .build();
+            transactionRepository.save(txn);
+            // Create a payment URL
+            String transactionID = String.valueOf(txn.getTransactionId());
+            String orderDepositID = String.valueOf(request.getOrderDepositId());
+            Map<String, String> vnp_Params = new HashMap<>();
+            String dynamicReturnUrl = returnUrl + "?" +
+                    "TransactionId=" + URLEncoder.encode(transactionID, StandardCharsets.UTF_8) +
+                    "&OrderDepositId=" + URLEncoder.encode(orderDepositID, StandardCharsets.UTF_8);
+            long vnpAmount = (long) (Math.ceil(orderDeposit.getAmount() * 100)) ;
+            String vnp_TxnRef = UUID.randomUUID().toString().replace("-", "").substring(0, 12);
+            String vnp_IpAddr = "127.0.0.1";
+            vnp_Params.put("vnp_Version", VnPayConfig.vnp_Version);
+            vnp_Params.put("vnp_Command", VnPayConfig.vnp_Command);
+            vnp_Params.put("vnp_TmnCode", VnPayConfig.vnp_TmnCode);
+            vnp_Params.put("vnp_Amount", String.valueOf(vnpAmount));
+            vnp_Params.put("vnp_CurrCode", "VND");
+            vnp_Params.put("vnp_TxnRef", vnp_TxnRef);
+            vnp_Params.put("vnp_OrderInfo", "Thanh toan don hang: " + vnp_TxnRef);
+            vnp_Params.put("vnp_Locale", "vn");
+            vnp_Params.put("vnp_IpAddr", vnp_IpAddr);
+            vnp_Params.put("vnp_OrderType", "other");
+            vnp_Params.put("vnp_ReturnUrl", dynamicReturnUrl);
+            TimeZone tz = TimeZone.getTimeZone("Asia/Ho_Chi_Minh");
+            Calendar cal = Calendar.getInstance(tz);
+            SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMddHHmmss");
+            sdf.setTimeZone(tz);
+            String vnp_CreateDate = sdf.format(cal.getTime());
+            vnp_Params.put("vnp_CreateDate", vnp_CreateDate);
+            cal.add(Calendar.MINUTE, 30);
+            String vnp_ExpireDate = sdf.format(cal.getTime());
+            vnp_Params.put("vnp_ExpireDate", vnp_ExpireDate);
+            List<String> fieldNames = new ArrayList<>(vnp_Params.keySet());
+            Collections.sort(fieldNames);
+            StringBuilder hashData = new StringBuilder();
+            StringBuilder query = new StringBuilder();
+            for (String fieldName : fieldNames) {
+                String fieldValue = vnp_Params.get(fieldName);
+                hashData.append(fieldName).append('=').append(URLEncoder.encode(fieldValue, StandardCharsets.UTF_8));
+                query.append(URLEncoder.encode(fieldName, StandardCharsets.UTF_8))
+                        .append('=')
+                        .append(URLEncoder.encode(fieldValue, StandardCharsets.UTF_8));
+                if (!fieldName.equals(fieldNames.get(fieldNames.size() - 1))) {
+                    hashData.append('&');
+                    query.append('&');
+                }
+            }
+            String vnp_SecureHash = VnPayConfig.hmacSHA512(VnPayConfig.secretKey, hashData.toString());
+            query.append("&vnp_SecureHash=").append(vnp_SecureHash);
+            String paymentUrl = VnPayConfig.vnp_PayUrl + "?" + query;
+            mailServiceImpl.sendEmail(email, "VNPay Payment Link", "payment", paymentUrl);
+            return PaymentRes.builder()
+                    .status("ok")
+                    .message("Payment URL đã được tạo thành công và gửi đến email của bạn.")
+                    .URL(paymentUrl)
+                    .expirationDate(vnp_ExpireDate.substring(0, 8))
+                    .expirationTime(vnp_ExpireDate.substring(8))
+                    .timeZone(tz.getID())
+                    .build();
+
+        } catch (NumberFormatException e) {
+            throw new WDCRBPApiException(HttpStatus.BAD_REQUEST, "Không đúng định dạng mã: " + e.getMessage());
+        } catch (Exception e) {
+            throw new RuntimeException("Không xử lý được thanh toán VNPay: " + e.getMessage(), e);
+        }
+    }
+
+    @Override
+    public PaymentRes processServicePackPaymentMobile(PaymentServicePackRequest request) {
+        Long servicePackId = Long.parseLong(request.getServicePackId());
+
+        ServicePack newPack = servicePackRepository.findById(servicePackId)
+                .orElseThrow(() -> new WDCRBPApiException(HttpStatus.NOT_FOUND, "Không tìm thấy gói dịch vụ."));
+
+        long amount = (long) newPack.getPrice().floatValue();
+        String email = request.getEmail();
+        String userId = request.getUserId();
+
+
+        try {
+            Long parsedUserId = Long.parseLong(userId);
+            Long parsedServicePackId = Long.parseLong(request.getServicePackId());
+
+            User dbUser = userRepository.findById(parsedUserId)
+                    .orElseThrow(() -> new WDCRBPApiException(HttpStatus.NOT_FOUND, "Không tìm thấy người dùng: " + userId));
+            verifyEmail(dbUser, email);
+
+            if (!"Woodworker".equalsIgnoreCase(dbUser.getRole())) {
+                throw new WDCRBPApiException(HttpStatus.FORBIDDEN, "Chỉ thợ mộc mới có thể mua gói.");
+            }
+
+            WoodworkerProfile profile = woodworkerProfileRepository.findByUser_UserId(dbUser.getUserId())
+                    .orElseThrow(() -> new WDCRBPApiException(HttpStatus.NOT_FOUND, "Không tìm thấy hồ sơ thợ mộc."));
+
+            LocalDateTime currentEndDate = profile.getServicePackEndDate();
+            ServicePack currentPack = profile.getServicePack();
+
+            long convertedDays = getConvertedDays(currentPack, newPack, currentEndDate);
+
+            Transaction txn = Transaction.builder()
+                    .transactionType(TransactionTypeConstant.THANH_TOAN_QUA_CONG)
+                    .amount(amount)
+                    .description("Thanh toán gói dịch vụ: " + newPack.getName())
+                    .status(false)
+                    .createdAt(LocalDateTime.now())
+                    .user(dbUser)
+                    .build();
+            transactionRepository.save(txn);
+
+            String woodworkerID = String.valueOf(profile.getWoodworkerId());
+            String servicePackID = String.valueOf(parsedServicePackId);
+            String transactionID = String.valueOf(txn.getTransactionId());
+
+            Map<String, String> vnp_Params = new HashMap<>();
+
+            String dynamicReturnUrl = request.getReturnUrl() + "?" +
+                    "WoodworkerId=" + URLEncoder.encode(woodworkerID, StandardCharsets.UTF_8) +
+                    "&ServicePackId=" + URLEncoder.encode(servicePackID, StandardCharsets.UTF_8) +
+                    "&TransactionId=" + URLEncoder.encode(transactionID, StandardCharsets.UTF_8);
+
+            vnp_Params.put("vnp_ReturnUrl", dynamicReturnUrl);
+
+            long vnpAmount = amount * 100;
+            String vnp_TxnRef = UUID.randomUUID().toString().replace("-", "").substring(0, 12);
+            String vnp_IpAddr = "127.0.0.1";
+
+            vnp_Params.put("vnp_Version", VnPayConfig.vnp_Version);
+            vnp_Params.put("vnp_Command", VnPayConfig.vnp_Command);
+            vnp_Params.put("vnp_TmnCode", VnPayConfig.vnp_TmnCode);
+            vnp_Params.put("vnp_Amount", String.valueOf(vnpAmount));
+            vnp_Params.put("vnp_CurrCode", "VND");
+            vnp_Params.put("vnp_TxnRef", vnp_TxnRef);
+            vnp_Params.put("vnp_OrderInfo", "Thanh toan don hang: " + vnp_TxnRef);
+            vnp_Params.put("vnp_Locale", "vn");
+            vnp_Params.put("vnp_IpAddr", vnp_IpAddr);
+            vnp_Params.put("vnp_OrderType", "other");
+
+            TimeZone tz = TimeZone.getTimeZone("Asia/Ho_Chi_Minh");
+            Calendar cal = Calendar.getInstance(tz);
+            SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMddHHmmss");
+            sdf.setTimeZone(tz);
+
+            String vnp_CreateDate = sdf.format(cal.getTime());
+            vnp_Params.put("vnp_CreateDate", vnp_CreateDate);
+
+            cal.add(Calendar.MINUTE, 30);
+            String vnp_ExpireDate = sdf.format(cal.getTime());
+            vnp_Params.put("vnp_ExpireDate", vnp_ExpireDate);
+
+            List<String> fieldNames = new ArrayList<>(vnp_Params.keySet());
+            Collections.sort(fieldNames);
+            StringBuilder hashData = new StringBuilder();
+            StringBuilder query = new StringBuilder();
+            for (int i = 0; i < fieldNames.size(); i++) {
+                String key = fieldNames.get(i);
+                String value = vnp_Params.get(key);
+                hashData.append(key).append('=').append(value);
+                query.append(URLEncoder.encode(key, StandardCharsets.UTF_8))
+                        .append('=').append(URLEncoder.encode(value, StandardCharsets.UTF_8));
+                if (i < fieldNames.size() - 1) {
+                    hashData.append('&');
+                    query.append('&');
+                }
+            }
+
+            String vnp_SecureHash = VnPayConfig.hmacSHA512(VnPayConfig.secretKey, hashData.toString());
+            query.append("&vnp_SecureHash=").append(vnp_SecureHash);
+
+            String paymentUrl = VnPayConfig.vnp_PayUrl + "?" + query;
+
+            mailServiceImpl.sendEmail(email, "VNPay Payment Link", "payment", paymentUrl);
+
+            return PaymentRes.builder()
+                    .status("ok")
+                    .message("Payment URL đã được tạo thành công và gửi đến email của bạn.")
+                    .URL(paymentUrl)
+                    .expirationDate(vnp_ExpireDate.substring(0, 8))
+                    .expirationTime(vnp_ExpireDate.substring(8))
+                    .timeZone(tz.getID())
+                    .build();
+
+        } catch (Exception e) {
+            throw new RuntimeException("Không xử lý được thanh toán VNPay: " + e.getMessage(), e);
+        }
+    }
+
+    @Override
+    public PaymentRes processWalletPaymentMobile(PaymentWalletRequest request) {
+        long amount = request.getAmount();
+        String email = request.getEmail();
+        String userId = request.getUserId();
+        String walletId = request.getWalletId();
+        String transactionType = request.getTransactionType();
+        if (transactionType == null || transactionType.isBlank()) {
+            transactionType = "pay_online";
+        }
+
+        try {
+            Long parsedUserId = Long.parseLong(userId);
+            Long parsedWalletId = Long.parseLong(walletId);
+
+            User dbUser = userRepository.findById(parsedUserId)
+                    .orElseThrow(() -> new WDCRBPApiException(HttpStatus.NOT_FOUND, "User not found with ID: " + userId));
+
+            verifyEmail(dbUser, email);
+
+            if (!"Customer".equalsIgnoreCase(dbUser.getRole()) && !"Woodworker".equalsIgnoreCase(dbUser.getRole())) {
+                throw new WDCRBPApiException(HttpStatus.FORBIDDEN, "chỉ có thợ mộc và khách hàng mới được sài dịch vụ này.");
+            }
+
+            var wallet = walletRepository.findById(parsedWalletId)
+                    .orElseThrow(() -> new WDCRBPApiException(HttpStatus.NOT_FOUND, "Wallet not found for ID: " + walletId));
+
+
+            Transaction txn = Transaction.builder()
+                    .transactionType(transactionType)
+                    .amount(amount)
+                    .description("Nạp tiền vào ví")
+                    .status(false)
+                    .createdAt(LocalDateTime.now())
+                    .user(dbUser)
+                    .wallet(wallet)
+                    .build();
+            transactionRepository.save(txn);
+
+            String walletID = String.valueOf(txn.getWallet().getWalletId());
+            String transactionID = String.valueOf(txn.getTransactionId());
+
+            Map<String, String> vnp_Params = new HashMap<>();
+            String dynamicReturnUrl = request.getReturnUrl() + "?" +
+                    "WalletId=" + URLEncoder.encode(walletID, StandardCharsets.UTF_8) +
+                    "&TransactionId=" + URLEncoder.encode(transactionID, StandardCharsets.UTF_8);
+            vnp_Params.put("vnp_ReturnUrl", dynamicReturnUrl);
+            long vnpAmount = amount * 100 ;
+            String vnp_TxnRef = UUID.randomUUID().toString().replace("-", "").substring(0, 12);
+            String vnp_IpAddr = "127.0.0.1";
+            vnp_Params.put("vnp_Version", VnPayConfig.vnp_Version);
+            vnp_Params.put("vnp_Command", VnPayConfig.vnp_Command);
+            vnp_Params.put("vnp_TmnCode", VnPayConfig.vnp_TmnCode);
+            vnp_Params.put("vnp_Amount", String.valueOf(vnpAmount));
+            vnp_Params.put("vnp_CurrCode", "VND");
+            vnp_Params.put("vnp_TxnRef", vnp_TxnRef);
+            vnp_Params.put("vnp_OrderInfo", "Thanh toan don hang: " + vnp_TxnRef);
+            vnp_Params.put("vnp_Locale", "vn");
+            vnp_Params.put("vnp_IpAddr", vnp_IpAddr);
+            vnp_Params.put("vnp_OrderType", "other");
+            TimeZone tz = TimeZone.getTimeZone("Asia/Ho_Chi_Minh");
+            Calendar cal = Calendar.getInstance(tz);
+            SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMddHHmmss");
+            sdf.setTimeZone(tz);
+
+            String vnp_CreateDate = sdf.format(cal.getTime());
+            vnp_Params.put("vnp_CreateDate", vnp_CreateDate);
+
+            cal.add(Calendar.MINUTE, 30);
+            String vnp_ExpireDate = sdf.format(cal.getTime());
+            vnp_Params.put("vnp_ExpireDate", vnp_ExpireDate);
+
+            List<String> fieldNames = new ArrayList<>(vnp_Params.keySet());
+            Collections.sort(fieldNames);
+            StringBuilder hashData = new StringBuilder();
+            StringBuilder query = new StringBuilder();
+            for (String fieldName : fieldNames) {
+                String fieldValue = vnp_Params.get(fieldName);
+                hashData.append(fieldName).append('=').append(URLEncoder.encode(fieldValue, StandardCharsets.UTF_8));
+                query.append(URLEncoder.encode(fieldName, StandardCharsets.UTF_8))
+                        .append('=').append(URLEncoder.encode(fieldValue, StandardCharsets.UTF_8));
+                if (!fieldName.equals(fieldNames.get(fieldNames.size() - 1))) {
+                    hashData.append('&');
+                    query.append('&');
+                }
+            }
+
+            String vnp_SecureHash = VnPayConfig.hmacSHA512(VnPayConfig.secretKey, hashData.toString());
+            query.append("&vnp_SecureHash=").append(vnp_SecureHash);
+            String paymentUrl = VnPayConfig.vnp_PayUrl + "?" + query;
+
+            mailServiceImpl.sendEmail(email, "VNPay Payment Link", "payment", paymentUrl);
+
+            return PaymentRes.builder()
+                    .status("ok")
+                    .message("Payment URL đã được tạo thành công và gửi đến email của bạn.")
+                    .URL(paymentUrl)
+                    .expirationDate(vnp_ExpireDate.substring(0, 8))
+                    .expirationTime(vnp_ExpireDate.substring(8))
+                    .timeZone(tz.getID())
+                    .build();
+
+        } catch (NumberFormatException e) {
+            throw new WDCRBPApiException(HttpStatus.BAD_REQUEST, "Không đúng định dạng mã : " + e.getMessage());
+        } catch (Exception e) {
+            throw new RuntimeException("Không xử lý được thanh toán VNPay: " + e.getMessage(), e);
+        }
+    }
 }
