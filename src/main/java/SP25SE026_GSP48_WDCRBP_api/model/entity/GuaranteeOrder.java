@@ -30,19 +30,35 @@ public class GuaranteeOrder {
     private LocalDateTime updatedAt;
 
     @Column(nullable = true)
-    private String currentStatus;
+    private String productCurrentStatus;
 
-    @Column(nullable = true)
+    @Column(nullable = true, length = 2000)
     private String currentProductImgUrls;
 
     @Column(nullable = true)
-    private boolean status;
+    private String status;
+
+    @Column(nullable = true)
+    private Float shipFee;
+
+    @Column(nullable = true)
+    private boolean isInstall;
 
     @Column(nullable = true)
     private Float amountPaid;
 
     @Column(nullable = true)
     private Float amountRemaining;
+
+    @Column(nullable = true)
+    private String role;
+
+    @Column(nullable = true)
+    private String feedback;
+
+    @ManyToOne
+    @JoinColumn(name = "userId", nullable = true)
+    private User user;
 
     @ManyToOne
     @JoinColumn(name = "availableServiceId", nullable = true)
@@ -51,6 +67,10 @@ public class GuaranteeOrder {
     @OneToOne
     @JoinColumn(name = "appointmentId" ,nullable = true)
     private ConsultantAppointment consultantAppointment;
+
+    @OneToOne
+    @JoinColumn(name = "reviewId" ,nullable = true)
+    private Review review;
 
     @ManyToOne
     @JoinColumn(name = "requestedProductId" ,nullable = true)

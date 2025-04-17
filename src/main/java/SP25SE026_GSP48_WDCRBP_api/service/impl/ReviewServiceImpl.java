@@ -2,11 +2,13 @@ package SP25SE026_GSP48_WDCRBP_api.service.impl;
 
 import SP25SE026_GSP48_WDCRBP_api.constant.ServiceNameConstant;
 import SP25SE026_GSP48_WDCRBP_api.model.entity.*;
+import SP25SE026_GSP48_WDCRBP_api.model.requestModel.GuaranteeReviewRequest;
 import SP25SE026_GSP48_WDCRBP_api.model.requestModel.ReviewRequest;
 import SP25SE026_GSP48_WDCRBP_api.model.requestModel.UpdateReviewStatusRequest;
 import SP25SE026_GSP48_WDCRBP_api.model.requestModel.UpdateWoodworkerResponseStatusRequest;
 import SP25SE026_GSP48_WDCRBP_api.model.responseModel.ReviewRes;
 import SP25SE026_GSP48_WDCRBP_api.repository.*;
+import SP25SE026_GSP48_WDCRBP_api.service.GuaranteeOrderService;
 import SP25SE026_GSP48_WDCRBP_api.service.ReviewService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -29,6 +31,7 @@ public class ReviewServiceImpl implements ReviewService {
     private final DesignIdeaRepository designIdeaRepository;
     private final ReviewRepository reviewRepository;
     private final UserRepository userRepository;
+    private final GuaranteeOrderRepository guaranteeOrderRepository;
 
     @Override
     public List<ReviewRes> getReviewsByWoodworkerId(Long woodworkerId) {
@@ -49,7 +52,7 @@ public class ReviewServiceImpl implements ReviewService {
         return orders.stream()
                 .map(order -> {
                     Review review = order.getReview();
-                    if (review != null && review.isStatus()) {
+                    if (review != null && review.getStatus()) {
                         String serviceName = order.getAvailableService().getService().getServiceName();
                         return toReviewRes(review, serviceName);
                     }
@@ -85,7 +88,7 @@ public class ReviewServiceImpl implements ReviewService {
                         designIdea.getWoodworkerProfile().getWoodworkerId()
                 ))
                 .map(ServiceOrder::getReview)
-                .filter(review -> review != null && review.isStatus())
+                .filter(review -> review != null && review.getStatus())
                 .map(review -> toReviewRes(review,""))
                 .collect(Collectors.toList());
     }
@@ -108,7 +111,7 @@ public class ReviewServiceImpl implements ReviewService {
                 .createdAt(review.getCreatedAt())
                 .updatedAt(review.getUpdatedAt())
                 .woodworkerResponse(review.getWoodworkerResponse())
-                .woodworkerResponseStatus(review.isWoodworkerResponseStatus())
+                .woodworkerResponseStatus(review.getWoodworkerResponseStatus())
                 .responseAt(review.getResponseAt())
                 .serviceName(serviceName)
                 .build();
@@ -140,13 +143,31 @@ public class ReviewServiceImpl implements ReviewService {
     }
 
     @Override
-    public ReviewRes updateReviewStatus(Long reviewId, UpdateReviewStatusRequest dto) {
-        Review review = reviewRepository.findById(reviewId)
-                .orElseThrow(() -> new RuntimeException("Review not found"));
-        review.setStatus(dto.getStatus());
-        review.setUpdatedAt(LocalDateTime.now());
+    public ReviewRes createReviewForGuaranteeOrder(GuaranteeReviewRequest request) {
+        User user = userRepository.findById(request.getUserId())
+                .orElseThrow(() -> new RuntimeException("User not found"));
+        GuaranteeOrder guaranteeOrder = guaranteeOrderRepository.findGuaranteeOrderByGuaranteeOrderId(request.getGuaranteeOrderId());
 
-        ServiceOrder serviceOrder = serviceOrderRepository.findServiceOrderByReview(review);
+        Review review = Review.builder()
+                .user(user)
+                .rating(request.getRating())
+                .comment(request.getComment())
+                .createdAt(LocalDateTime.now())
+                .updatedAt(LocalDateTime.now())
+                .status(false)
+                .woodworkerResponseStatus(false)
+                .responseAt(LocalDateTime.now())
+                .build();
+
+        Review saved = reviewRepository.save(review);
+
+        guaranteeOrder.setReview(saved);
+        guaranteeOrderRepository.save(guaranteeOrder);
+
+        return toReviewRes(saved, "");
+    }
+
+    private void updateTotalStarForServiceOrder(ServiceOrder serviceOrder, Review review) {
         WoodworkerProfile woodworker = serviceOrder.getAvailableService().getWoodworkerProfile();
 
         woodworker.setTotalStar((short) (
@@ -173,6 +194,39 @@ public class ReviewServiceImpl implements ReviewService {
         } else if (serviceOrder.getAvailableService().getService().getServiceName().equals(ServiceNameConstant.SALE)) {
 
         }
+    }
+
+    private void updateTotalStarForGuaranteeOrder(GuaranteeOrder guaranteeOrder, Review review) {
+        WoodworkerProfile woodworker = guaranteeOrder.getAvailableService().getWoodworkerProfile();
+
+        woodworker.setTotalStar((short) (
+                Optional.ofNullable(woodworker.getTotalStar()).orElse((short) 0) + review.getRating()
+        ));
+        woodworker.setTotalReviews((short) (
+                Optional.ofNullable(woodworker.getTotalReviews()).orElse((short) 0) + 1
+        ));
+        woodworkerProfileRepository.save(woodworker);
+    }
+
+    @Override
+    public ReviewRes updateReviewStatus(Long reviewId, UpdateReviewStatusRequest dto) {
+        Review review = reviewRepository.findById(reviewId)
+                .orElseThrow(() -> new RuntimeException("Review not found"));
+        if (!dto.getStatus()) {
+            review.setStatus(null);
+        } else {
+            review.setStatus(true);
+        }
+        review.setUpdatedAt(LocalDateTime.now());
+
+        ServiceOrder serviceOrder = serviceOrderRepository.findServiceOrderByReview(review);
+        GuaranteeOrder guaranteeOrder = guaranteeOrderRepository.findGuaranteeOrderByReview(review);
+        if (serviceOrder != null) {
+            updateTotalStarForServiceOrder(serviceOrder, review);
+        }
+        if (guaranteeOrder != null) {
+            updateTotalStarForGuaranteeOrder(guaranteeOrder, review);
+        }
 
         return toReviewRes(reviewRepository.save(review), "");
     }
@@ -181,7 +235,11 @@ public class ReviewServiceImpl implements ReviewService {
     public ReviewRes updateWoodworkerResponseStatus(Long reviewId, UpdateWoodworkerResponseStatusRequest dto) {
         Review review = reviewRepository.findById(reviewId)
                 .orElseThrow(() -> new RuntimeException("Review not found"));
-        review.setWoodworkerResponseStatus(dto.getWoodworkerResponseStatus());
+        if (!dto.getWoodworkerResponseStatus()) {
+            review.setWoodworkerResponseStatus(null);
+        } else {
+            review.setWoodworkerResponseStatus(true);
+        }
         review.setResponseAt(LocalDateTime.now());
         return toReviewRes(reviewRepository.save(review), "");
     }

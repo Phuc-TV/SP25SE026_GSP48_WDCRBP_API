@@ -8,6 +8,7 @@ import SP25SE026_GSP48_WDCRBP_api.model.entity.Shipment;
 import SP25SE026_GSP48_WDCRBP_api.model.requestModel.CalculateFeeRequest;
 import SP25SE026_GSP48_WDCRBP_api.model.requestModel.CreateOrderGhnApiRequest;
 import SP25SE026_GSP48_WDCRBP_api.model.requestModel.GetGHNAvailableServiceRequest;
+import SP25SE026_GSP48_WDCRBP_api.model.requestModel.GetOrderInfoGhnApiRequest;
 import SP25SE026_GSP48_WDCRBP_api.repository.ServiceOrderRepository;
 import SP25SE026_GSP48_WDCRBP_api.repository.ShipmentRepository;
 import SP25SE026_GSP48_WDCRBP_api.service.ConfigurationService;
@@ -193,6 +194,16 @@ public class GHNApiServiceImpl implements GHNApiService {
 
         HttpEntity<CreateOrderGhnApiRequest> entity = new HttpEntity<>(request, headers);
         String url = "https://dev-online-gateway.ghn.vn/shiip/public-api/v2/shipping-order/create";
+
+        return callExternalAPI(url, HttpMethod.POST, entity);
+    }
+
+    @Override
+    public CoreApiResponse getOrderInfo(GetOrderInfoGhnApiRequest request) {
+        HttpHeaders headers = getDefaultHeaders();
+
+        HttpEntity<GetOrderInfoGhnApiRequest> entity = new HttpEntity<>(request, headers);
+        String url = "https://dev-online-gateway.ghn.vn/shiip/public-api/v2/shipping-order/detail";
 
         return callExternalAPI(url, HttpMethod.POST, entity);
     }

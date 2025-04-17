@@ -23,10 +23,21 @@ public class ShipmentController {
     @Autowired
     private ModelMapper modelMapper;
 
-    @GetMapping("/getAllShipmentByServiceOrderId/{serviceOrderId}")
+    @GetMapping("/service-order/{serviceOrderId}")
     public CoreApiResponse getAllShipmentByServiceOrderId(@PathVariable Long serviceOrderId)
     {
         List<Shipment> shipments = shipmentService.getAllShipmentByServiceOrderId(serviceOrderId);
+
+        List<ShipmentDto> shipmentDtos = shipments.
+                stream().map(shipment -> modelMapper.map(shipment, ShipmentDto.class)).collect(Collectors.toList());
+
+        return CoreApiResponse.success(shipmentDtos);
+    }
+
+    @GetMapping("/guarantee-order/{id}")
+    public CoreApiResponse getAllShipmentByGuaranteeOrderId(@PathVariable Long id)
+    {
+        List<Shipment> shipments = shipmentService.getAllShipmentByGuaranteeOrderId(id);
 
         List<ShipmentDto> shipmentDtos = shipments.
                 stream().map(shipment -> modelMapper.map(shipment, ShipmentDto.class)).collect(Collectors.toList());
@@ -38,6 +49,17 @@ public class ShipmentController {
     public CoreApiResponse updateServiceOrderShipmentOrderCode(@PathVariable Long serviceOrderId, @RequestBody ShipmentUpdateOrderCodeReq request) {
         try {
             shipmentService.updateServiceOrderShipmentOrderCode(serviceOrderId, request.getOrderCode());
+
+            return CoreApiResponse.success("Success");
+        } catch (Exception e) {
+            return CoreApiResponse.error("Lỗi xảy ra trong quá trình cập nhật mã đơn hàng");
+        }
+    }
+
+    @PutMapping("/guarantee-order/{id}")
+    public CoreApiResponse updateGuaranteeShipmentOrderCode(@PathVariable Long id, @RequestBody ShipmentUpdateOrderCodeReq request) {
+        try {
+            shipmentService.updateGuaranteeOrderShipmentOrderCode(id, request.getOrderCode(), request.getType());
 
             return CoreApiResponse.success("Success");
         } catch (Exception e) {

@@ -1,7 +1,9 @@
 package SP25SE026_GSP48_WDCRBP_api.service.impl;
 
+import SP25SE026_GSP48_WDCRBP_api.model.entity.GuaranteeOrder;
 import SP25SE026_GSP48_WDCRBP_api.model.entity.OrderDeposit;
 import SP25SE026_GSP48_WDCRBP_api.model.entity.ServiceOrder;
+import SP25SE026_GSP48_WDCRBP_api.repository.GuaranteeOrderRepository;
 import SP25SE026_GSP48_WDCRBP_api.repository.OrderDepositRepository;
 import SP25SE026_GSP48_WDCRBP_api.repository.ServiceOrderRepository;
 import SP25SE026_GSP48_WDCRBP_api.service.OrderDepositService;
@@ -17,6 +19,8 @@ public class OrderDepositServiceImpl implements OrderDepositService {
 
     @Autowired
     private ServiceOrderRepository serviceOrderRepository;
+    @Autowired
+    private GuaranteeOrderRepository guaranteeOrderRepository;
 
     public OrderDepositServiceImpl(OrderDepositRepository orderDepositRepository,
                                    ServiceOrderRepository serviceOrderRepository)
@@ -30,6 +34,15 @@ public class OrderDepositServiceImpl implements OrderDepositService {
         ServiceOrder serviceOrder = serviceOrderRepository.findServiceOrderByOrderId(orderId);
 
         List<OrderDeposit> orderDeposits = orderDepositRepository.findOrderDepositByServiceOrder(serviceOrder);
+
+        return orderDeposits;
+    }
+
+    @Override
+    public List<OrderDeposit> getAllOrderDepositByGuaranteeOrderId(Long id) {
+        GuaranteeOrder guaranteeOrder = guaranteeOrderRepository.findGuaranteeOrderByGuaranteeOrderId(id);
+
+        List<OrderDeposit> orderDeposits = orderDepositRepository.findOrderDepositsByGuaranteeOrder(guaranteeOrder);
 
         return orderDeposits;
     }

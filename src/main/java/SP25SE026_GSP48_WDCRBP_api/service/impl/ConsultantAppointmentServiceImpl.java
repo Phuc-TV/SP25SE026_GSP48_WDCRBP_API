@@ -25,8 +25,7 @@ public class ConsultantAppointmentServiceImpl implements ConsultantAppointmentSe
     public ConsultantAppointment getAppoimentByOrderId(Long orderId)
     {
         ServiceOrder serviceOrder = serviceOrderRepository.findServiceOrderByOrderId(orderId);
-        ConsultantAppointment consultantAppointment =
-                consultantAppointmentRepository.findConsultantAppointmentByServiceOrder(serviceOrder);
+        ConsultantAppointment consultantAppointment = serviceOrder.getConsultantAppointment();
 
         return consultantAppointment;
     }

@@ -15,16 +15,20 @@ public class QuotationDetail {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long quotationDetailId;
 
-    @Column(nullable = false)
+    @Column(nullable = true)
     private String costType;
 
-    @Column(nullable = false)
+    @Column(nullable = true)
     private float costAmount;
 
-    @Column(nullable = false)
+    @Column(nullable = true)
     private String quantityRequired;
 
     @ManyToOne
-    @JoinColumn(name = "requested_product_id", nullable = false)
+    @JoinColumn(name = "requested_product_id", nullable = true)
     private RequestedProduct requestedProduct;
+
+    @ManyToOne
+    @JoinColumn(name = "guarantee_order_id", nullable = true)
+    private GuaranteeOrder guaranteeOrder;
 }

@@ -4,6 +4,7 @@ import SP25SE026_GSP48_WDCRBP_api.components.CoreApiResponse;
 import SP25SE026_GSP48_WDCRBP_api.model.requestModel.CalculateFeeRequest;
 import SP25SE026_GSP48_WDCRBP_api.model.requestModel.CreateOrderGhnApiRequest;
 import SP25SE026_GSP48_WDCRBP_api.model.requestModel.GetGHNAvailableServiceRequest;
+import SP25SE026_GSP48_WDCRBP_api.model.requestModel.GetOrderInfoGhnApiRequest;
 import SP25SE026_GSP48_WDCRBP_api.service.GHNApiService;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -46,8 +47,12 @@ public class GHNApiController {
 
     @SecurityRequirement(name = "Bear Authentication")
     @PostMapping("/service-order/{serviceOrderId}")
-    public CoreApiResponse createOrder(@PathVariable Long serviceOrderId ,@RequestBody CreateOrderGhnApiRequest request) {
-        CoreApiResponse response = ghnApiService.createOrder(serviceOrderId, request);
-        return CoreApiResponse.success(response);
+    public CoreApiResponse createServiceOrderShipmentGhnOrder(@PathVariable Long serviceOrderId ,@RequestBody CreateOrderGhnApiRequest request) {
+        return ghnApiService.createOrder(serviceOrderId, request);
+    }
+
+    @PostMapping("/order-code")
+    public CoreApiResponse createOrder(@RequestBody GetOrderInfoGhnApiRequest request) {
+        return ghnApiService.getOrderInfo(request);
     }
 }

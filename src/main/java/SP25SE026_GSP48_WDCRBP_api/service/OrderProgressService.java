@@ -6,4 +6,5 @@ import java.util.List;
 
 public interface OrderProgressService {
     List<OrderProgress> getAllOrderProgressByOrderId(Long orderId);
+    List<OrderProgress> getAllOrderProgressByGuaranteeId(Long orderId);
 }

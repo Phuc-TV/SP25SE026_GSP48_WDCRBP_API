@@ -6,4 +6,6 @@ import java.util.List;
 
 public interface OrderDepositService {
     List<OrderDeposit> getAllOrderDepositByOrderId(Long orderId);
+
+    List<OrderDeposit> getAllOrderDepositByGuaranteeOrderId(Long id);
 }

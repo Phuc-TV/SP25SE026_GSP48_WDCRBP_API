@@ -1,6 +1,6 @@
 package SP25SE026_GSP48_WDCRBP_api.service.impl;
 
-import SP25SE026_GSP48_WDCRBP_api.constant.ServiceOrderStatus;
+import SP25SE026_GSP48_WDCRBP_api.constant.ServiceOrderStatusConstant;
 import SP25SE026_GSP48_WDCRBP_api.model.entity.*;
 import SP25SE026_GSP48_WDCRBP_api.model.requestModel.WwCreateContractCustomizeRequest;
 import SP25SE026_GSP48_WDCRBP_api.model.responseModel.ContractDetailRes;
@@ -63,11 +63,11 @@ public class ContractServiceImpl implements ContractService {
         ServiceOrder serviceOrder =
                 serviceRepository.findServiceOrderByOrderId(wwCreateContractCustomizeRequest.getServiceOrderId());
 
-        if (serviceOrder.getStatus().equals(ServiceOrderStatus.DA_DUYET_LICH_HEN)) {
+        if (serviceOrder.getStatus().equals(ServiceOrderStatusConstant.DA_DUYET_LICH_HEN)) {
             OrderProgress newOrderProgress = new OrderProgress();
             newOrderProgress.setServiceOrder(serviceOrder);
             newOrderProgress.setCreatedTime(LocalDateTime.now());
-            newOrderProgress.setStatus(ServiceOrderStatus.DANG_CHO_KHACH_DUYET_HOP_DONG);
+            newOrderProgress.setStatus(ServiceOrderStatusConstant.DANG_CHO_KHACH_DUYET_HOP_DONG);
             orderProgressRepository.save(newOrderProgress);
         }
 
@@ -104,7 +104,7 @@ public class ContractServiceImpl implements ContractService {
             serviceOrder.setTotalAmount(i);
             serviceOrder.setAmountRemaining(i);
             serviceOrder.setRole("Customer");
-            serviceOrder.setStatus(ServiceOrderStatus.DANG_CHO_KHACH_DUYET_HOP_DONG);
+            serviceOrder.setStatus(ServiceOrderStatusConstant.DANG_CHO_KHACH_DUYET_HOP_DONG);
             serviceRepository.save(serviceOrder);
 
             contract.setContractTotalAmount(i);
@@ -155,12 +155,12 @@ public class ContractServiceImpl implements ContractService {
     public Contract customerSignContract(Long serviceOrderId, String customerSign, Long cusId)
     {
         ServiceOrder serviceOrder = serviceRepository.findServiceOrderByOrderId(serviceOrderId);
-        serviceOrder.setStatus(ServiceOrderStatus.DA_DUYET_HOP_DONG);
+        serviceOrder.setStatus(ServiceOrderStatusConstant.DA_DUYET_HOP_DONG);
 
         OrderProgress newOrderProgress = new OrderProgress();
         newOrderProgress.setServiceOrder(serviceOrder);
         newOrderProgress.setCreatedTime(LocalDateTime.now());
-        newOrderProgress.setStatus(ServiceOrderStatus.DA_DUYET_HOP_DONG);
+        newOrderProgress.setStatus(ServiceOrderStatusConstant.DA_DUYET_HOP_DONG);
 
         Contract contract = contractRepository.findContractByServiceOrder(serviceOrder);
         contract.setCustomerSignature(customerSign);
