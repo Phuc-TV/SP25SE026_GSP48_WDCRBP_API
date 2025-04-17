@@ -28,10 +28,21 @@ public class OrderDepositController {
         this.modelMapper = modelMapper;
     }
 
-    @GetMapping("/getAllOrderDepositByOrderId/{id}")
+    @GetMapping("/service-order/{id}")
     public CoreApiResponse<List<ServiceDepositDto>> getAllOrderDepositByOrderId(@PathVariable Long id)
     {
         List<OrderDeposit> orderDeposits = orderDepositService.getAllOrderDepositByOrderId(id);
+
+        List<ServiceDepositDto> serviceDepositDtos = orderDeposits.
+                stream().map(orderDeposit -> modelMapper.map(orderDeposit, ServiceDepositDto.class)).toList();
+
+        return CoreApiResponse.success(serviceDepositDtos);
+    }
+
+    @GetMapping("/guarantee-order/{id}")
+    public CoreApiResponse<List<ServiceDepositDto>> getAllOrderDepositByGuaranteeOrderId(@PathVariable Long id)
+    {
+        List<OrderDeposit> orderDeposits = orderDepositService.getAllOrderDepositByGuaranteeOrderId(id);
 
         List<ServiceDepositDto> serviceDepositDtos = orderDeposits.
                 stream().map(orderDeposit -> modelMapper.map(orderDeposit, ServiceDepositDto.class)).toList();

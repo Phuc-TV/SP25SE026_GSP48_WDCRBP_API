@@ -27,10 +27,21 @@ public class OderProgressController {
         this.modelMapper = modelMapper;
     }
 
-    @GetMapping("/getAllOrderProgressByOrderId/{id}")
+    @GetMapping("/service-order/{id}")
     public CoreApiResponse getAllOrderProgressByOrderId(@PathVariable Long id)
     {
         List<OrderProgress> orderProgressList = orderProgressService.getAllOrderProgressByOrderId(id);
+        List<OrderProgressDto> orderProgressDtos =
+                orderProgressList.stream().map(
+                        orderProgress -> modelMapper.map(orderProgress, OrderProgressDto.class)).toList();
+
+        return CoreApiResponse.success(orderProgressDtos);
+    }
+
+    @GetMapping("/guarantee-order/{id}")
+    public CoreApiResponse getAllOrderProgressByGuaranteeId(@PathVariable Long id)
+    {
+        List<OrderProgress> orderProgressList = orderProgressService.getAllOrderProgressByGuaranteeId(id);
         List<OrderProgressDto> orderProgressDtos =
                 orderProgressList.stream().map(
                         orderProgress -> modelMapper.map(orderProgress, OrderProgressDto.class)).toList();

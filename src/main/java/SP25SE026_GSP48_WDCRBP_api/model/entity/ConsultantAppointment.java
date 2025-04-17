@@ -34,8 +34,4 @@ public class ConsultantAppointment {
 
     @Column(nullable = true)
     private boolean status;
-
-    @ManyToOne
-    @JoinColumn(name = "orderId", nullable = true)
-    private ServiceOrder serviceOrder;
 }

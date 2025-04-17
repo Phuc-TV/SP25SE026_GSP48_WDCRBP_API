@@ -1,7 +1,8 @@
 package SP25SE026_GSP48_WDCRBP_api.service.impl;
 
+import SP25SE026_GSP48_WDCRBP_api.constant.GuaranteeOrderStatusConstant;
 import SP25SE026_GSP48_WDCRBP_api.constant.ServiceNameConstant;
-import SP25SE026_GSP48_WDCRBP_api.constant.ServiceOrderStatus;
+import SP25SE026_GSP48_WDCRBP_api.constant.ServiceOrderStatusConstant;
 import SP25SE026_GSP48_WDCRBP_api.constant.TransactionTypeConstant;
 import SP25SE026_GSP48_WDCRBP_api.model.entity.*;
 import SP25SE026_GSP48_WDCRBP_api.model.exception.WDCRBPApiException;
@@ -57,6 +58,9 @@ public class WalletServiceImpl implements WalletService {
 
     @Autowired
     private WoodworkerProfileRepository woodworkerProfileRepository;
+    @Autowired
+    private GuaranteeOrderRepository guaranteeOrderRepository;
+
     @Override
     public WalletRes getWalletByUserId(Long userId) {
         User user = userRepository.findById(userId)
@@ -112,6 +116,82 @@ public class WalletServiceImpl implements WalletService {
         return walletRes;
     }
 
+    private void updateServiceOrderProgress(OrderDeposit orderDeposit) {
+        ServiceOrder serviceOrder = orderDeposit.getServiceOrder();
+        serviceOrder.setAmountPaid(serviceOrder.getAmountPaid() + orderDeposit.getAmount());
+        serviceOrder.setAmountRemaining(serviceOrder.getAmountRemaining() - orderDeposit.getAmount());
+
+        OrderProgress newOrderProgress = new OrderProgress();
+        newOrderProgress.setServiceOrder(serviceOrder);
+        newOrderProgress.setCreatedTime(LocalDateTime.now());
+
+        if (Objects.equals(serviceOrder.getStatus(), ServiceOrderStatusConstant.DA_DUYET_HOP_DONG)) {
+            if (serviceOrder.getAvailableService().getService().getServiceName().equals(ServiceNameConstant.CUSTOMIZATION)) {
+                newOrderProgress.setStatus(ServiceOrderStatusConstant.DANG_GIA_CONG);
+                orderProgressRepository.save(newOrderProgress);
+
+                serviceOrder.setStatus(ServiceOrderStatusConstant.DANG_GIA_CONG);
+                serviceOrder.setFeedback("");
+                serviceOrder.setRole("Woodworker");
+                serviceOrderRepository.save(serviceOrder);
+            } else if (serviceOrder.getAvailableService().getService().getServiceName().equals(ServiceNameConstant.PERSONALIZATION)) {
+                serviceOrder.setFeedback("");
+                serviceOrder.setRole("Woodworker");
+                serviceOrderRepository.save(serviceOrder);
+            }
+        } else if (Objects.equals(serviceOrder.getStatus(), ServiceOrderStatusConstant.DA_DUYET_THIET_KE)) {
+            newOrderProgress.setStatus(ServiceOrderStatusConstant.DANG_GIA_CONG);
+            orderProgressRepository.save(newOrderProgress);
+
+            serviceOrder.setStatus(ServiceOrderStatusConstant.DANG_GIA_CONG);
+            serviceOrder.setFeedback("");
+            serviceOrder.setRole("Woodworker");
+            serviceOrderRepository.save(serviceOrder);
+        } else if (Objects.equals(serviceOrder.getStatus(), ServiceOrderStatusConstant.DANG_GIAO_HANG_LAP_DAT)) {
+            newOrderProgress.setStatus(ServiceOrderStatusConstant.DA_HOAN_TAT);
+            orderProgressRepository.save(newOrderProgress);
+
+            serviceOrder.setStatus(ServiceOrderStatusConstant.DA_HOAN_TAT);
+            serviceOrder.setUpdatedAt(LocalDateTime.now());
+            serviceOrder.setFeedback("");
+            serviceOrder.setRole("");
+            serviceOrderRepository.save(serviceOrder);
+
+            transactionService.addMoneyToWWWalletForServiceOrder(serviceOrder.getAvailableService().getWoodworkerProfile().getUser().getUserId(), serviceOrder);
+        }
+    }
+
+    private void updateGuaranteeOrderProgress(OrderDeposit orderDeposit) {
+        GuaranteeOrder guaranteeOrder = orderDeposit.getGuaranteeOrder();
+        guaranteeOrder.setAmountPaid(guaranteeOrder.getAmountPaid() + orderDeposit.getAmount());
+        guaranteeOrder.setAmountRemaining(guaranteeOrder.getAmountRemaining() - orderDeposit.getAmount());
+
+        OrderProgress newOrderProgress = new OrderProgress();
+        newOrderProgress.setGuaranteeOrder(guaranteeOrder);
+        newOrderProgress.setCreatedTime(LocalDateTime.now());
+
+        if (Objects.equals(guaranteeOrder.getStatus(), GuaranteeOrderStatusConstant.DA_DUYET_BAO_GIA)) {
+            newOrderProgress.setStatus(GuaranteeOrderStatusConstant.DANG_CHO_NHAN_HANG);
+            orderProgressRepository.save(newOrderProgress);
+
+            guaranteeOrder.setStatus(GuaranteeOrderStatusConstant.DANG_CHO_NHAN_HANG);
+            guaranteeOrder.setFeedback("");
+            guaranteeOrder.setRole("Woodworker");
+            guaranteeOrderRepository.save(guaranteeOrder);
+        } else if (Objects.equals(guaranteeOrder.getStatus(), GuaranteeOrderStatusConstant.DANG_GIAO_HANG_LAP_DAT)) {
+            newOrderProgress.setStatus(ServiceOrderStatusConstant.DA_HOAN_TAT);
+            orderProgressRepository.save(newOrderProgress);
+
+            guaranteeOrder.setStatus(ServiceOrderStatusConstant.DA_HOAN_TAT);
+            guaranteeOrder.setFeedback("");
+            guaranteeOrder.setRole("");
+            guaranteeOrder.setUpdatedAt(LocalDateTime.now());
+            guaranteeOrderRepository.save(guaranteeOrder);
+
+            transactionService.addMoneyToWWWalletForGuaranteeOrder(guaranteeOrder.getAvailableService().getWoodworkerProfile().getUser().getUserId(), guaranteeOrder);
+        }
+    }
+
     @Override
     public ListTransactionRes createWalletOrderPayment(PaymentOrderRequest request) {
         Long userId = Long.parseLong(request.getUserId());
@@ -119,7 +199,6 @@ public class WalletServiceImpl implements WalletService {
         String email = request.getEmail();
 
         OrderDeposit orderDeposit = orderDepositRepository.findById(orderDepositId).get();
-        ServiceOrder serviceOrder = orderDeposit.getServiceOrder();
 
         User dbUser = userRepository.findById(userId)
                 .orElseThrow(() -> new WDCRBPApiException(HttpStatus.NOT_FOUND, "Không tìm thấy người dùng với ID: " + userId));
@@ -155,9 +234,6 @@ public class WalletServiceImpl implements WalletService {
         txn.setWallet(wallet);
         transactionRepository.save(txn);
 
-        serviceOrder.setAmountPaid(serviceOrder.getAmountPaid() + orderDeposit.getAmount());
-        serviceOrder.setAmountRemaining(serviceOrder.getAmountRemaining() - orderDeposit.getAmount());
-
         String successMessage = "Thanh toán của bạn đã thành công!";
         mailServiceImpl.sendEmail(email, "Thanh toán thành công", "payment", successMessage);
         ListTransactionRes.Data transactionData = new ListTransactionRes.Data();
@@ -173,42 +249,10 @@ public class WalletServiceImpl implements WalletService {
         ListTransactionRes response = new ListTransactionRes();
         response.setData(Collections.singletonList(transactionData));
 
-        OrderProgress newOrderProgress = new OrderProgress();
-        newOrderProgress.setServiceOrder(serviceOrder);
-        newOrderProgress.setCreatedTime(LocalDateTime.now());
-
-        if (Objects.equals(serviceOrder.getStatus(), ServiceOrderStatus.DA_DUYET_HOP_DONG)) {
-            if (serviceOrder.getAvailableService().getService().getServiceName().equals(ServiceNameConstant.CUSTOMIZATION)) {
-                newOrderProgress.setStatus(ServiceOrderStatus.DANG_GIA_CONG);
-                orderProgressRepository.save(newOrderProgress);
-
-                serviceOrder.setStatus(ServiceOrderStatus.DANG_GIA_CONG);
-                serviceOrder.setFeedback("");
-                serviceOrder.setRole("Woodworker");
-                serviceOrderRepository.save(serviceOrder);
-            } else if (serviceOrder.getAvailableService().getService().getServiceName().equals(ServiceNameConstant.PERSONALIZATION)) {
-                serviceOrder.setFeedback("");
-                serviceOrder.setRole("Woodworker");
-                serviceOrderRepository.save(serviceOrder);
-            }
-        } else if (Objects.equals(serviceOrder.getStatus(), ServiceOrderStatus.DA_DUYET_THIET_KE)) {
-            newOrderProgress.setStatus(ServiceOrderStatus.DANG_GIA_CONG);
-            orderProgressRepository.save(newOrderProgress);
-
-            serviceOrder.setStatus(ServiceOrderStatus.DANG_GIA_CONG);
-            serviceOrder.setFeedback("");
-            serviceOrder.setRole("Woodworker");
-            serviceOrderRepository.save(serviceOrder);
-        } else if (Objects.equals(serviceOrder.getStatus(), ServiceOrderStatus.DANG_GIAO_HANG_LAP_DAT)) {
-            newOrderProgress.setStatus(ServiceOrderStatus.DA_HOAN_TAT);
-            orderProgressRepository.save(newOrderProgress);
-
-            serviceOrder.setStatus(ServiceOrderStatus.DA_HOAN_TAT);
-            serviceOrder.setFeedback("");
-            serviceOrder.setRole("");
-            serviceOrderRepository.save(serviceOrder);
-
-            transactionService.addMoneyToWWWalletForServiceOrder(serviceOrder.getAvailableService().getWoodworkerProfile().getUser().getUserId(), serviceOrder);
+        if (orderDeposit.getServiceOrder() != null) {
+            updateServiceOrderProgress(orderDeposit);
+        } else if (orderDeposit.getGuaranteeOrder() != null) {
+            updateGuaranteeOrderProgress(orderDeposit);
         }
 
         return response;

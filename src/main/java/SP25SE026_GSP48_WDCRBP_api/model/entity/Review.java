@@ -38,10 +38,10 @@ public class Review {
     private String woodworkerResponse;
 
     @Column(nullable = true)
-    private boolean woodworkerResponseStatus;
+    private Boolean woodworkerResponseStatus;
 
     @Column(nullable = true)
-    private boolean status;
+    private Boolean status;
 
     @Column(nullable = true)
     private LocalDateTime responseAt;

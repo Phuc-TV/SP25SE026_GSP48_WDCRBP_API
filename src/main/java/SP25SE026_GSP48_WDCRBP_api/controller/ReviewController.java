@@ -1,6 +1,7 @@
 package SP25SE026_GSP48_WDCRBP_api.controller;
 
 import SP25SE026_GSP48_WDCRBP_api.components.CoreApiResponse;
+import SP25SE026_GSP48_WDCRBP_api.model.requestModel.GuaranteeReviewRequest;
 import SP25SE026_GSP48_WDCRBP_api.model.requestModel.ReviewRequest;
 import SP25SE026_GSP48_WDCRBP_api.model.requestModel.UpdateReviewStatusRequest;
 import SP25SE026_GSP48_WDCRBP_api.model.requestModel.UpdateWoodworkerResponseStatusRequest;
@@ -64,6 +65,16 @@ public class ReviewController {
     public CoreApiResponse<ReviewRes> createReview(@RequestBody @Valid ReviewRequest request) {
         try {
             ReviewRes res = reviewService.createReview(request);
+            return CoreApiResponse.success(res, "Tạo đánh giá thành công");
+        } catch (Exception e) {
+            return CoreApiResponse.error(HttpStatus.BAD_REQUEST, "Tạo đánh giá thất bại: " + e.getMessage());
+        }
+    }
+
+    @PostMapping("/guarantee-order")
+    public CoreApiResponse<ReviewRes> createReviewForGuaranteeOrder(@RequestBody @Valid GuaranteeReviewRequest request) {
+        try {
+            ReviewRes res = reviewService.createReviewForGuaranteeOrder(request);
             return CoreApiResponse.success(res, "Tạo đánh giá thành công");
         } catch (Exception e) {
             return CoreApiResponse.error(HttpStatus.BAD_REQUEST, "Tạo đánh giá thất bại: " + e.getMessage());

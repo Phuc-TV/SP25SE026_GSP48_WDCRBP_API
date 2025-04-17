@@ -4,6 +4,7 @@ import SP25SE026_GSP48_WDCRBP_api.components.CoreApiResponse;
 import SP25SE026_GSP48_WDCRBP_api.model.requestModel.CalculateFeeRequest;
 import SP25SE026_GSP48_WDCRBP_api.model.requestModel.CreateOrderGhnApiRequest;
 import SP25SE026_GSP48_WDCRBP_api.model.requestModel.GetGHNAvailableServiceRequest;
+import SP25SE026_GSP48_WDCRBP_api.model.requestModel.GetOrderInfoGhnApiRequest;
 
 public interface GHNApiService {
     CoreApiResponse getProvinces();
@@ -19,4 +20,6 @@ public interface GHNApiService {
     CoreApiResponse getAvailableService(GetGHNAvailableServiceRequest request);
 
     CoreApiResponse createOrder(Long serviceOrderId, CreateOrderGhnApiRequest request);
+
+    CoreApiResponse getOrderInfo(GetOrderInfoGhnApiRequest request);
 }

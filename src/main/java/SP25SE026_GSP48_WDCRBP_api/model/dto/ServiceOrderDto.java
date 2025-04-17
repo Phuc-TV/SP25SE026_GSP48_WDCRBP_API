@@ -27,6 +27,7 @@ public class ServiceOrderDto {
     private Float amountPaid;
     private Float amountRemaining;
     private LocalDateTime createdAt;
+    private LocalDateTime updatedAt;
     private String role;
     private AvaliableServiceDto service;
     private UserDetailRes user;

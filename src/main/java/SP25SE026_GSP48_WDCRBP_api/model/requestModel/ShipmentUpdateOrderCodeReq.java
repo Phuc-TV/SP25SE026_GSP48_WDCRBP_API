@@ -9,4 +9,5 @@ import lombok.*;
 @Builder
 public class ShipmentUpdateOrderCodeReq {
     private String orderCode;
+    private String type;
 }

@@ -1,8 +1,7 @@
 package SP25SE026_GSP48_WDCRBP_api.service.impl;
 
 import SP25SE026_GSP48_WDCRBP_api.components.CoreApiResponse;
-import SP25SE026_GSP48_WDCRBP_api.constant.ServiceNameConstant;
-import SP25SE026_GSP48_WDCRBP_api.constant.ServiceOrderStatus;
+import SP25SE026_GSP48_WDCRBP_api.constant.ServiceOrderStatusConstant;
 import SP25SE026_GSP48_WDCRBP_api.mapper.DesignIdeaVariantMapper;
 import SP25SE026_GSP48_WDCRBP_api.mapper.ServiceOrderMapper;
 import SP25SE026_GSP48_WDCRBP_api.model.dto.*;
@@ -19,8 +18,6 @@ import org.springframework.stereotype.Service;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
-import java.util.stream.Collectors;
 
 @Service
 public class ServiceOrderServiceImpl implements ServiceOrderService {
@@ -214,7 +211,7 @@ public class ServiceOrderServiceImpl implements ServiceOrderService {
         }
 
         if (quantity > 4)
-            return CoreApiResponse.error(ServiceOrderStatus.CHI_DUOC_TOI_DA_4_SAN_PHAM);
+            return CoreApiResponse.error(ServiceOrderStatusConstant.CHI_DUOC_TOI_DA_4_SAN_PHAM);
 
         //Create ServiceOrder
         User user = userRepository.findById(createServiceOrderCusRequest.getUserId()).orElse(null);
@@ -226,7 +223,7 @@ public class ServiceOrderServiceImpl implements ServiceOrderService {
         serviceOrder.setDescription(createServiceOrderCusRequest.getDescription());
         serviceOrder.setAvailableService(availableService);
         serviceOrder.setUser(user);
-        serviceOrder.setStatus(ServiceOrderStatus.DANG_CHO_THO_MOC_XAC_NHAN);
+        serviceOrder.setStatus(ServiceOrderStatusConstant.DANG_CHO_THO_MOC_XAC_NHAN);
         serviceOrder.setCreatedAt(LocalDateTime.now());
         serviceOrder.setQuantity(quantity);
         serviceOrder.setInstall(createServiceOrderCusRequest.getIsInstall());
@@ -261,7 +258,7 @@ public class ServiceOrderServiceImpl implements ServiceOrderService {
         orderProgress.setServiceOrder(serviceOrder);
         orderProgress.setCreatedTime(LocalDateTime.now());
 
-        orderProgress.setStatus(ServiceOrderStatus.DANG_CHO_THO_MOC_XAC_NHAN);
+        orderProgress.setStatus(ServiceOrderStatusConstant.DANG_CHO_THO_MOC_XAC_NHAN);
 
         orderProgressRepository.save(orderProgress);
 
@@ -309,14 +306,13 @@ public class ServiceOrderServiceImpl implements ServiceOrderService {
 
         switch (serviceOrder.getRole()) {
             case "Woodworker":
-                if (currentStatus == null || currentStatus.equals(ServiceOrderStatus.DANG_CHO_THO_MOC_XAC_NHAN) || currentStatus.equals(ServiceOrderStatus.DANG_CHO_KHACH_DUYET_LICH_HEN)) {
+                if (currentStatus == null || currentStatus.equals(ServiceOrderStatusConstant.DANG_CHO_THO_MOC_XAC_NHAN) || currentStatus.equals(ServiceOrderStatusConstant.DANG_CHO_KHACH_DUYET_LICH_HEN)) {
                     // Woodworker accepting initial order, setting appointment
                     ConsultantAppointment consultantAppointment = new ConsultantAppointment();
-                    if (consultantAppointmentRepository.findConsultantAppointmentByServiceOrder(serviceOrder) != null) {
-                        consultantAppointment = consultantAppointmentRepository.findConsultantAppointmentByServiceOrder(serviceOrder);
+                    if (serviceOrder.getConsultantAppointment() != null) {
+                        consultantAppointment = serviceOrder.getConsultantAppointment();
                     }
 
-                    consultantAppointment.setServiceOrder(serviceOrder);
                     consultantAppointment.setCreatedAt(LocalDateTime.now());
                     consultantAppointment.setDateTime(timeMeeting);
                     consultantAppointment.setMeetAddress(linkMeeting);
@@ -325,35 +321,35 @@ public class ServiceOrderServiceImpl implements ServiceOrderService {
                     consultantAppointmentRepository.save(consultantAppointment);
 
                     serviceOrder.setConsultantAppointment(consultantAppointment);
-                    serviceOrder.setStatus(ServiceOrderStatus.DANG_CHO_KHACH_DUYET_LICH_HEN);
-                    newOrderProgress.setStatus(ServiceOrderStatus.DANG_CHO_KHACH_DUYET_LICH_HEN);
+                    serviceOrder.setStatus(ServiceOrderStatusConstant.DANG_CHO_KHACH_DUYET_LICH_HEN);
+                    newOrderProgress.setStatus(ServiceOrderStatusConstant.DANG_CHO_KHACH_DUYET_LICH_HEN);
                 }
 
                 break;
             case "Customer":
-                if (currentStatus.equals(ServiceOrderStatus.DANG_CHO_KHACH_DUYET_LICH_HEN)) {
+                if (currentStatus.equals(ServiceOrderStatusConstant.DANG_CHO_KHACH_DUYET_LICH_HEN)) {
                     // Customer approving appointment
-                    newOrderProgress.setStatus(ServiceOrderStatus.DA_DUYET_LICH_HEN);
-                    serviceOrder.setStatus(ServiceOrderStatus.DA_DUYET_LICH_HEN);
-                } else if (currentStatus.equals(ServiceOrderStatus.DANG_CHO_KHACH_DUYET_HOP_DONG)) {
+                    newOrderProgress.setStatus(ServiceOrderStatusConstant.DA_DUYET_LICH_HEN);
+                    serviceOrder.setStatus(ServiceOrderStatusConstant.DA_DUYET_LICH_HEN);
+                } else if (currentStatus.equals(ServiceOrderStatusConstant.DANG_CHO_KHACH_DUYET_HOP_DONG)) {
                     // Customer approving contract
-                    newOrderProgress.setStatus(ServiceOrderStatus.DA_DUYET_HOP_DONG);
-                    serviceOrder.setStatus(ServiceOrderStatus.DA_DUYET_HOP_DONG);
-                } else if (currentStatus.equals(ServiceOrderStatus.DANG_CHO_KHACH_DUYET_THIET_KE)) {
+                    newOrderProgress.setStatus(ServiceOrderStatusConstant.DA_DUYET_HOP_DONG);
+                    serviceOrder.setStatus(ServiceOrderStatusConstant.DA_DUYET_HOP_DONG);
+                } else if (currentStatus.equals(ServiceOrderStatusConstant.DANG_CHO_KHACH_DUYET_THIET_KE)) {
                     // Customer apporoving design
-                    newOrderProgress.setStatus(ServiceOrderStatus.DA_DUYET_THIET_KE);
-                    serviceOrder.setStatus(ServiceOrderStatus.DA_DUYET_THIET_KE);
+                    newOrderProgress.setStatus(ServiceOrderStatusConstant.DA_DUYET_THIET_KE);
+                    serviceOrder.setStatus(ServiceOrderStatusConstant.DA_DUYET_THIET_KE);
                 }
                 break;
         }
 
-        if (currentStatus.equals(ServiceOrderStatus.DANG_CHO_KHACH_DUYET_LICH_HEN) && serviceOrder.getRole().equals("Woodworker")) {
+        if (currentStatus.equals(ServiceOrderStatusConstant.DANG_CHO_KHACH_DUYET_LICH_HEN) && serviceOrder.getRole().equals("Woodworker")) {
             // Empty
         } else {
             orderProgressRepository.save(newOrderProgress);
         }
 
-        if (serviceOrder.getStatus().equals(ServiceOrderStatus.DA_DUYET_THIET_KE)) {
+        if (serviceOrder.getStatus().equals(ServiceOrderStatusConstant.DA_DUYET_THIET_KE)) {
             serviceOrder.setRole("Customer");
         } else {
             serviceOrder.setRole(serviceOrder.getRole().equals("Woodworker") ? "Customer" : "Woodworker");
@@ -389,7 +385,7 @@ public class ServiceOrderServiceImpl implements ServiceOrderService {
 
         ServiceOrder serviceOrder = new ServiceOrder();
         serviceOrder.setAvailableService(availableService);
-        serviceOrder.setStatus(ServiceOrderStatus.DANG_CHO_THO_MOC_XAC_NHAN);
+        serviceOrder.setStatus(ServiceOrderStatusConstant.DANG_CHO_THO_MOC_XAC_NHAN);
         serviceOrder.setUser(user);
         serviceOrder.setDescription(createServiceOrderPersonalizeRequest.getNote());
         serviceOrder.setCreatedAt(LocalDateTime.now());
@@ -432,7 +428,7 @@ public class ServiceOrderServiceImpl implements ServiceOrderService {
         OrderProgress orderProgress = new OrderProgress();
         orderProgress.setServiceOrder(serviceOrder);
         orderProgress.setCreatedTime(LocalDateTime.now());
-        orderProgress.setStatus(ServiceOrderStatus.DANG_CHO_THO_MOC_XAC_NHAN);
+        orderProgress.setStatus(ServiceOrderStatusConstant.DANG_CHO_THO_MOC_XAC_NHAN);
         orderProgressRepository.save(orderProgress);
 
         if (createServiceOrderPersonalizeRequest.getIsInstall()) {
@@ -468,7 +464,7 @@ public class ServiceOrderServiceImpl implements ServiceOrderService {
     {
         ServiceOrder serviceOrder = orderRepository.findById(serviceId).orElse(null);
 
-        if (serviceOrder.getStatus().equals(ServiceOrderStatus.DANG_CHO_KHACH_DUYET_THIET_KE)) {
+        if (serviceOrder.getStatus().equals(ServiceOrderStatusConstant.DANG_CHO_KHACH_DUYET_THIET_KE)) {
             serviceOrder.setRole("Customer");
             serviceOrder.setFeedback("");
             orderRepository.save(serviceOrder);
@@ -489,12 +485,12 @@ public class ServiceOrderServiceImpl implements ServiceOrderService {
             OrderProgress orderProgress = new OrderProgress();
             orderProgress.setServiceOrder(serviceOrder);
             orderProgress.setCreatedTime(LocalDateTime.now());
-            orderProgress.setStatus(ServiceOrderStatus.DANG_CHO_KHACH_DUYET_THIET_KE);
+            orderProgress.setStatus(ServiceOrderStatusConstant.DANG_CHO_KHACH_DUYET_THIET_KE);
             orderProgressRepository.save(orderProgress);
 
             serviceOrder.setRole("Customer");
             serviceOrder.setFeedback("");
-            serviceOrder.setStatus(ServiceOrderStatus.DANG_CHO_KHACH_DUYET_THIET_KE);
+            serviceOrder.setStatus(ServiceOrderStatusConstant.DANG_CHO_KHACH_DUYET_THIET_KE);
             orderRepository.save(serviceOrder);
 
             List<ProductImages> productImages = new ArrayList<>();
@@ -533,12 +529,12 @@ public class ServiceOrderServiceImpl implements ServiceOrderService {
         OrderProgress orderProgress = new OrderProgress();
         orderProgress.setServiceOrder(serviceOrder);
         orderProgress.setCreatedTime(LocalDateTime.now());
-        orderProgress.setStatus(ServiceOrderStatus.DANG_GIAO_HANG_LAP_DAT);
+        orderProgress.setStatus(ServiceOrderStatusConstant.DANG_GIAO_HANG_LAP_DAT);
         orderProgressRepository.save(orderProgress);
 
         serviceOrder.setRole("Customer");
         serviceOrder.setFeedback("");
-        serviceOrder.setStatus(ServiceOrderStatus.DANG_GIAO_HANG_LAP_DAT);
+        serviceOrder.setStatus(ServiceOrderStatusConstant.DANG_GIAO_HANG_LAP_DAT);
         orderRepository.save(serviceOrder);
     }
 }
