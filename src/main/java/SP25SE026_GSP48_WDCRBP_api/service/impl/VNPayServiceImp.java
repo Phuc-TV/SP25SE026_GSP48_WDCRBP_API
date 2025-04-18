@@ -193,11 +193,9 @@ public class VNPayServiceImp implements VNPayService {
                     "&TransactionId=" + URLEncoder.encode(encryptedTransactionId, StandardCharsets.UTF_8);
 
             vnp_Params.put("vnp_ReturnUrl", dynamicReturnUrl);
-
-            long vnpAmount = amount * 100;
+            long vnpAmount = amount * 100 ;
             String vnp_TxnRef = UUID.randomUUID().toString().replace("-", "").substring(0, 12);
             String vnp_IpAddr = "127.0.0.1";
-
             vnp_Params.put("vnp_Version", VnPayConfig.vnp_Version);
             vnp_Params.put("vnp_Command", VnPayConfig.vnp_Command);
             vnp_Params.put("vnp_TmnCode", VnPayConfig.vnp_TmnCode);
@@ -208,7 +206,6 @@ public class VNPayServiceImp implements VNPayService {
             vnp_Params.put("vnp_Locale", "vn");
             vnp_Params.put("vnp_IpAddr", vnp_IpAddr);
             vnp_Params.put("vnp_OrderType", "other");
-
             TimeZone tz = TimeZone.getTimeZone("Asia/Ho_Chi_Minh");
             Calendar cal = Calendar.getInstance(tz);
             SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMddHHmmss");
@@ -225,13 +222,12 @@ public class VNPayServiceImp implements VNPayService {
             Collections.sort(fieldNames);
             StringBuilder hashData = new StringBuilder();
             StringBuilder query = new StringBuilder();
-            for (int i = 0; i < fieldNames.size(); i++) {
-                String key = fieldNames.get(i);
-                String value = vnp_Params.get(key);
-                hashData.append(key).append('=').append(value);
-                query.append(URLEncoder.encode(key, StandardCharsets.UTF_8))
-                        .append('=').append(URLEncoder.encode(value, StandardCharsets.UTF_8));
-                if (i < fieldNames.size() - 1) {
+            for (String fieldName : fieldNames) {
+                String fieldValue = vnp_Params.get(fieldName);
+                hashData.append(fieldName).append('=').append(URLEncoder.encode(fieldValue, StandardCharsets.UTF_8));
+                query.append(URLEncoder.encode(fieldName, StandardCharsets.UTF_8))
+                        .append('=').append(URLEncoder.encode(fieldValue, StandardCharsets.UTF_8));
+                if (!fieldName.equals(fieldNames.get(fieldNames.size() - 1))) {
                     hashData.append('&');
                     query.append('&');
                 }
@@ -239,7 +235,6 @@ public class VNPayServiceImp implements VNPayService {
 
             String vnp_SecureHash = VnPayConfig.hmacSHA512(VnPayConfig.secretKey, hashData.toString());
             query.append("&vnp_SecureHash=").append(vnp_SecureHash);
-
             String paymentUrl = VnPayConfig.vnp_PayUrl + "?" + query;
 
             mailServiceImpl.sendEmail(email, "VNPay Payment Link", "payment", paymentUrl);
@@ -253,6 +248,8 @@ public class VNPayServiceImp implements VNPayService {
                     .timeZone(tz.getID())
                     .build();
 
+        } catch (NumberFormatException e) {
+            throw new WDCRBPApiException(HttpStatus.BAD_REQUEST, "Không đúng định dạng mã : " + e.getMessage());
         } catch (Exception e) {
             throw new RuntimeException("Không xử lý được thanh toán VNPay: " + e.getMessage(), e);
         }
