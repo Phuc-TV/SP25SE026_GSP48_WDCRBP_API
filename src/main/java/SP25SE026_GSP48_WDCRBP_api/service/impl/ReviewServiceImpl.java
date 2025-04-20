@@ -47,12 +47,13 @@ public class ReviewServiceImpl implements ReviewService {
                 .toList();
 
         List<ServiceOrder> orders = serviceOrderRepository.findAllByAvailableService_AvailableServiceIdIn(serviceIds);
+        List<GuaranteeOrder> guaranteeOrders = guaranteeOrderRepository.findGuaranteeOrderByAvailableService_WoodworkerProfile(woodworker);
 
-        // Step 3: Extract and map non-null reviews
-        return orders.stream()
+        // Step 3: Extract and map non-null reviews from both ServiceOrder and GuaranteeOrder
+        List<ReviewRes> serviceOrderReviews = orders.stream()
                 .map(order -> {
                     Review review = order.getReview();
-                    if (review != null && review.getStatus()) {
+                    if (review != null && review.getStatus() != null) {
                         String serviceName = order.getAvailableService().getService().getServiceName();
                         return toReviewRes(review, serviceName);
                     }
@@ -60,6 +61,75 @@ public class ReviewServiceImpl implements ReviewService {
                 })
                 .filter(Objects::nonNull)
                 .collect(Collectors.toList());
+
+        List<ReviewRes> guaranteeOrderReviews = guaranteeOrders.stream()
+                .map(order -> {
+                    Review review = order.getReview();
+                    if (review != null && review.getStatus() != null) {
+                        String serviceName = order.getAvailableService().getService().getServiceName();
+                        return toReviewRes(review, serviceName);
+                    }
+                    return null;
+                })
+                .filter(Objects::nonNull)
+                .collect(Collectors.toList());
+
+        // Step 4: Combine both lists
+        List<ReviewRes> allReviews = new ArrayList<>();
+        allReviews.addAll(serviceOrderReviews);
+        allReviews.addAll(guaranteeOrderReviews);
+
+        return allReviews;
+    }
+
+    @Override
+    public List<ReviewRes> getReviewsNeedResponseByWoodworkerId(Long woodworkerId) {
+        WoodworkerProfile woodworker = woodworkerProfileRepository.findWoodworkerProfileByWoodworkerId(woodworkerId);
+        if (woodworker == null) return new ArrayList<>();
+
+        // Step 1: Get all available services by woodworker
+        List<AvailableService> services = availableServiceRepository.findAvailableServicesByWoodworkerProfile(woodworker);
+
+        // Step 2: Get all service orders tied to those services
+        List<Long> serviceIds = services.stream()
+                .map(AvailableService::getAvailableServiceId)
+                .toList();
+
+        List<ServiceOrder> orders = serviceOrderRepository.findAllByAvailableService_AvailableServiceIdIn(serviceIds);
+        List<GuaranteeOrder> guaranteeOrders = guaranteeOrderRepository.findGuaranteeOrderByAvailableService_WoodworkerProfile(woodworker);
+
+        // Step 3: Lấy review chưa được phản hồi từ ServiceOrder
+        List<ReviewRes> serviceOrderReviews = orders.stream()
+                .map(order -> {
+                    Review review = order.getReview();
+                    if (review != null && review.getStatus() != null && review.getWoodworkerResponse() == null) {
+                        String serviceName = order.getAvailableService().getService().getServiceName();
+                        return toReviewRes(review, serviceName);
+                    }
+                    return null;
+                })
+                .filter(Objects::nonNull)
+                .collect(Collectors.toList());
+
+        // Step 4: Lấy review chưa được phản hồi từ GuaranteeOrder
+        List<ReviewRes> guaranteeOrderReviews = guaranteeOrders.stream()
+                .map(order -> {
+                    Review review = order.getReview();
+                    if (review != null && review.getStatus() != null && review.getWoodworkerResponse() == null) {
+                        String serviceName = order.getAvailableService().getService().getServiceName();
+                        return toReviewRes(review, serviceName);
+                    }
+                    return null;
+                })
+                .filter(Objects::nonNull)
+                .collect(Collectors.toList());
+
+        // Step 5: Gộp cả hai list lại
+        List<ReviewRes> allReviews = new ArrayList<>();
+        allReviews.addAll(serviceOrderReviews);
+        allReviews.addAll(guaranteeOrderReviews);
+
+        return allReviews;
     }
 
     @Override
@@ -88,7 +158,7 @@ public class ReviewServiceImpl implements ReviewService {
                         designIdea.getWoodworkerProfile().getWoodworkerId()
                 ))
                 .map(ServiceOrder::getReview)
-                .filter(review -> review != null && review.getStatus())
+                .filter(review -> review != null && review.getStatus() != null)
                 .map(review -> toReviewRes(review,""))
                 .collect(Collectors.toList());
     }
@@ -101,7 +171,22 @@ public class ReviewServiceImpl implements ReviewService {
         return toReviewRes(review, "");
     }
 
+    @Override
+    public void createReviewResponse(Long reviewId, String woodworkerResponse) {
+        Review review = reviewRepository.findById(reviewId)
+                .orElseThrow(() -> new RuntimeException("Review not found"));
+
+        review.setWoodworkerResponse(woodworkerResponse);
+        review.setWoodworkerResponseStatus(false);
+        review.setResponseAt(LocalDateTime.now());
+
+        reviewRepository.save(review);
+    }
+
     private ReviewRes toReviewRes(Review review, String serviceName) {
+        ServiceOrder serviceOrder = serviceOrderRepository.findServiceOrderByReview(review);
+        GuaranteeOrder guaranteeOrder = guaranteeOrderRepository.findGuaranteeOrderByReview(review);
+
         return ReviewRes.builder()
                 .reviewId(review.getReviewId())
                 .userId(review.getUser().getUserId())
@@ -114,6 +199,8 @@ public class ReviewServiceImpl implements ReviewService {
                 .woodworkerResponseStatus(review.getWoodworkerResponseStatus())
                 .responseAt(review.getResponseAt())
                 .serviceName(serviceName)
+                .serviceOrderId(serviceOrder != null ? serviceOrder.getOrderId() : null)
+                .guaranteeOrderId(guaranteeOrder != null ? guaranteeOrder.getGuaranteeOrderId() : null)
                 .build();
     }
 
@@ -221,10 +308,10 @@ public class ReviewServiceImpl implements ReviewService {
 
         ServiceOrder serviceOrder = serviceOrderRepository.findServiceOrderByReview(review);
         GuaranteeOrder guaranteeOrder = guaranteeOrderRepository.findGuaranteeOrderByReview(review);
-        if (serviceOrder != null) {
+        if (serviceOrder != null && review.getStatus() != null && review.getStatus()) {
             updateTotalStarForServiceOrder(serviceOrder, review);
         }
-        if (guaranteeOrder != null) {
+        if (guaranteeOrder != null && review.getStatus() != null && review.getStatus()) {
             updateTotalStarForGuaranteeOrder(guaranteeOrder, review);
         }
 

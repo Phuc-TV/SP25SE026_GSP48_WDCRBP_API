@@ -1,10 +1,7 @@
 package SP25SE026_GSP48_WDCRBP_api.controller;
 
 import SP25SE026_GSP48_WDCRBP_api.components.CoreApiResponse;
-import SP25SE026_GSP48_WDCRBP_api.model.requestModel.GuaranteeReviewRequest;
-import SP25SE026_GSP48_WDCRBP_api.model.requestModel.ReviewRequest;
-import SP25SE026_GSP48_WDCRBP_api.model.requestModel.UpdateReviewStatusRequest;
-import SP25SE026_GSP48_WDCRBP_api.model.requestModel.UpdateWoodworkerResponseStatusRequest;
+import SP25SE026_GSP48_WDCRBP_api.model.requestModel.*;
 import SP25SE026_GSP48_WDCRBP_api.model.responseModel.ReviewRes;
 import SP25SE026_GSP48_WDCRBP_api.service.ReviewService;
 import jakarta.validation.Valid;
@@ -26,6 +23,19 @@ public class ReviewController {
     public CoreApiResponse<List<ReviewRes>> getReviewsByWoodworkerId(@PathVariable Long woodworkerId) {
         try {
             List<ReviewRes> reviews = reviewService.getReviewsByWoodworkerId(woodworkerId);
+            if (reviews.isEmpty()) {
+                return CoreApiResponse.success(null, "Không tìm thấy đánh giá cho thợ mộc này.");
+            }
+            return CoreApiResponse.success(reviews, "Lấy đánh giá theo thợ mộc thành công.");
+        } catch (Exception e) {
+            return CoreApiResponse.error(HttpStatus.INTERNAL_SERVER_ERROR, "Lỗi khi lấy đánh giá theo thợ mộc: " + e.getMessage());
+        }
+    }
+
+    @GetMapping("/woodworker/response/{woodworkerId}")
+    public CoreApiResponse<List<ReviewRes>> getReviewsNeedResponseByWoodworkerId(@PathVariable Long woodworkerId) {
+        try {
+            List<ReviewRes> reviews = reviewService.getReviewsNeedResponseByWoodworkerId(woodworkerId);
             if (reviews.isEmpty()) {
                 return CoreApiResponse.success(null, "Không tìm thấy đánh giá cho thợ mộc này.");
             }
@@ -66,6 +76,16 @@ public class ReviewController {
         try {
             ReviewRes res = reviewService.createReview(request);
             return CoreApiResponse.success(res, "Tạo đánh giá thành công");
+        } catch (Exception e) {
+            return CoreApiResponse.error(HttpStatus.BAD_REQUEST, "Tạo đánh giá thất bại: " + e.getMessage());
+        }
+    }
+
+    @PostMapping("/response")
+    public CoreApiResponse<ReviewRes> createResponse(@RequestBody @Valid ReviewResponseRequest request) {
+        try {
+            reviewService.createReviewResponse(request.getReviewId(), request.getWoodworkerResponse());
+            return CoreApiResponse.success("Tạo đánh giá thành công");
         } catch (Exception e) {
             return CoreApiResponse.error(HttpStatus.BAD_REQUEST, "Tạo đánh giá thất bại: " + e.getMessage());
         }

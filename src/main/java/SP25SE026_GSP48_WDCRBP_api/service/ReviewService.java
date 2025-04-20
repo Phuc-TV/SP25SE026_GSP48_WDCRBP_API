@@ -10,9 +10,11 @@ import java.util.List;
 
 public interface ReviewService {
     List<ReviewRes> getReviewsByWoodworkerId(Long woodworkerId);
+    List<ReviewRes> getReviewsNeedResponseByWoodworkerId(Long woodworkerId);
     List<ReviewRes> getReviewsByProductId(Long productId);
     List<ReviewRes> getReviewsByDesignIdeaId(Long designId);
     ReviewRes getReviewById(Long reviewId);
+    void createReviewResponse(Long reviewId, String woodworkerResponse);
     ReviewRes createReview(ReviewRequest request);
     ReviewRes createReviewForGuaranteeOrder(GuaranteeReviewRequest request);
     ReviewRes updateReviewStatus(Long reviewId, UpdateReviewStatusRequest updateReviewStatusRequest);
