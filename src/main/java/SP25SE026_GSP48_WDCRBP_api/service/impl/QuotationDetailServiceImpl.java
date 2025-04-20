@@ -31,7 +31,7 @@ public class QuotationDetailServiceImpl implements QuotationDetailService {
 
     @Override
     @Transactional
-    public List<QuotationDetailRes> saveQuotationDetail(QuotationDetailRequest requestDTO) {
+    public void saveQuotationDetail(QuotationDetailRequest requestDTO) {
         RequestedProduct requestedProduct = requestedProductRepository.findById(requestDTO.getRequestedProductId())
                 .orElseThrow(() -> new RuntimeException("RequestedProduct not found"));
 
@@ -65,42 +65,6 @@ public class QuotationDetailServiceImpl implements QuotationDetailService {
             serviceOrder.setTotalAmount(orderTotal);
             serviceOrderRepository.save(serviceOrder);
         }
-
-        // Prepare response (same as before)
-        Map<Long, List<QuotationDetail>> groupedByProductId =
-                quotationDetailRepository.findAll().stream()
-                        .collect(Collectors.groupingBy(q -> q.getRequestedProduct().getRequestedProductId()));
-
-        List<QuotationDetailRes> responseList = new ArrayList<>();
-
-        for (Map.Entry<Long, List<QuotationDetail>> entry : groupedByProductId.entrySet()) {
-            RequestedProduct rp = entry.getValue().get(0).getRequestedProduct();
-
-            QuotationDetailRes.RequestedProductInfo productInfo =
-                    QuotationDetailRes.RequestedProductInfo.builder()
-                            .requestedProductId(rp.getRequestedProductId())
-                            .quantity(rp.getQuantity())
-                            .createdAt(rp.getCreatedAt())
-                            .totalAmount(rp.getTotalAmount())
-                            .category(rp.getCategory() != null ? rp.getCategory().toString() : null)
-                            .build();
-
-            List<QuotationDetailRes.QuotationInfo> detailList = entry.getValue().stream()
-                    .map(q -> QuotationDetailRes.QuotationInfo.builder()
-                            .quotId(q.getQuotationDetailId())
-                            .costType(q.getCostType())
-                            .costAmount(q.getCostAmount())
-                            .quantityRequired(q.getQuantityRequired())
-                            .build())
-                    .collect(Collectors.toList());
-
-            responseList.add(QuotationDetailRes.builder()
-                    .requestedProduct(productInfo)
-                    .quotationDetails(detailList)
-                    .build());
-        }
-
-        return responseList;
     }
 
     @Override

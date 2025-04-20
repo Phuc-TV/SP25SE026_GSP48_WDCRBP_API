@@ -19,8 +19,10 @@ public class ReviewRes {
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
     private String woodworkerResponse;
-    private boolean woodworkerResponseStatus;
-    private boolean status;
+    private Boolean woodworkerResponseStatus;
+    private Boolean status;
     private LocalDateTime responseAt;
     private String serviceName;
+    private Long serviceOrderId;
+    private Long guaranteeOrderId;
 }

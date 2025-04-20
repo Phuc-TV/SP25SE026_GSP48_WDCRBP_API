@@ -23,6 +23,7 @@ public class GuaranteeOrderListItemRes {
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
     private String productCurrentStatus;
+    private boolean isInstall;
     private String currentProductImgUrls;
     private String status;
     private Float amountPaid;

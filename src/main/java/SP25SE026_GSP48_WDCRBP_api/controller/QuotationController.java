@@ -27,8 +27,8 @@ public class QuotationController {
             @Valid @RequestBody QuotationDetailRequest request) {
 
         try{
-        List<QuotationDetailRes> response = quotationService.saveQuotationDetail(request);
-        return CoreApiResponse.success(response, "Quotation details processed successfully");
+        quotationService.saveQuotationDetail(request);
+        return CoreApiResponse.success("Quotation details processed successfully");
         } catch (Exception e) {
             return CoreApiResponse.error(HttpStatus.BAD_REQUEST, "Lỗi khi cố gắng thêm: " + e.getMessage());
         }

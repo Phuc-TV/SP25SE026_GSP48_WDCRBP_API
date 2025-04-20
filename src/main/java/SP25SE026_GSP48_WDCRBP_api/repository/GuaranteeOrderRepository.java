@@ -16,4 +16,6 @@ public interface GuaranteeOrderRepository extends JpaRepository<GuaranteeOrder, 
     List<GuaranteeOrder> findByAvailableService(AvailableService availableService);
 
     GuaranteeOrder findGuaranteeOrderByReview(Review review);
+
+    List<GuaranteeOrder> findGuaranteeOrderByAvailableService_WoodworkerProfile(WoodworkerProfile availableServiceWoodworkerProfile);
 }

@@ -8,7 +8,7 @@ import SP25SE026_GSP48_WDCRBP_api.model.responseModel.QuotationDetailRes;
 import java.util.List;
 
 public interface QuotationDetailService {
-    List<QuotationDetailRes> saveQuotationDetail(QuotationDetailRequest requestDTO);
+    void saveQuotationDetail(QuotationDetailRequest requestDTO);
     List<QuotationDetailRes> getAllByServiceOrderId(Long serviceOrderId);
     void saveQuotationDetailForGuarantee(GuaranteeQuotationDetailRequest requestDTO);
     QuotationDetailRes getAllByGuaranteeOrderId(Long guaranteeServiceId);
