@@ -273,7 +273,7 @@ public class WalletServiceImpl implements WalletService {
                 .orElseThrow(() -> new WDCRBPApiException(HttpStatus.NOT_FOUND, "Không tìm thấy người dùng với ID: " + userId));
 
         if (!"Woodworker".equalsIgnoreCase(dbUser.getRole())) {
-            throw new WDCRBPApiException(HttpStatus.FORBIDDEN, "Chỉ thợ mộc mới được phép mua gói dịch vụ.");
+            throw new WDCRBPApiException(HttpStatus.FORBIDDEN, "Chỉ xưởng mộc mới được phép mua gói dịch vụ.");
         }
 
         // Step 2: Find the wallet of the user
@@ -308,7 +308,7 @@ public class WalletServiceImpl implements WalletService {
 
         // Step 6: Retrieve the WoodworkerProfile from the WoodworkerProfileRepository and update service pack information
         WoodworkerProfile woodworkerProfile = woodworkerProfileRepository.findByUser_UserId(userId)
-                .orElseThrow(() -> new WDCRBPApiException(HttpStatus.NOT_FOUND, "Không tìm thấy hồ sơ thợ mộc cho người dùng ID: " + userId));
+                .orElseThrow(() -> new WDCRBPApiException(HttpStatus.NOT_FOUND, "Không tìm thấy hồ sơ xưởng mộc cho người dùng ID: " + userId));
 
         // Update WoodworkerProfile with ServicePack details
         woodworkerProfileService.addServicePack(servicePack.getServicePackId(), woodworkerProfile.getWoodworkerId());

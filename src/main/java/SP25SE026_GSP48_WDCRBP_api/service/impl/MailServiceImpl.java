@@ -57,13 +57,13 @@ public class MailServiceImpl {
                 break;
             case "status-rejection":
                 title = "Cập nhật trạng thái bị từ chối";
-                recipientName = "thợ mộc";
+                recipientName = "xưởng mộc";
                 messageBody = "Yêu cầu cập nhật trạng thái của bạn đã bị từ chối.<br><br><strong>Lý do:</strong> " + data;
                 coreContent = "";
                 break;
             case "buy-pack-success":
                 title = "Gói dịch vụ đã được kích hoạt";
-                recipientName = "thợ mộc";
+                recipientName = "xưởng mộc";
                 messageBody = "Cảm ơn bạn đã mua gói dịch vụ. Gói của bạn là:";
                 coreContent = "<p style='margin-top: 40px; font-size: 20px; font-weight: bold; color: #1f1f1f;'>"
                         + data + "</p>";

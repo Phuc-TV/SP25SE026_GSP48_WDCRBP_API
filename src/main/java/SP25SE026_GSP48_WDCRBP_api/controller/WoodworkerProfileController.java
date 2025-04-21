@@ -33,7 +33,7 @@ public class WoodworkerProfileController {
 
             return CoreApiResponse.success(wwList);
         } catch (Exception e) {
-            return CoreApiResponse.error(HttpStatus.BAD_REQUEST, "Lỗi khi lấy danh sách thợ mộc");
+            return CoreApiResponse.error(HttpStatus.BAD_REQUEST, "Lỗi khi lấy danh sách xưởng mộc");
         }
     }
 
@@ -43,7 +43,7 @@ public class WoodworkerProfileController {
         try {
             return CoreApiResponse.success(woodworkerProfileService.getWoodworkerById(wwId));
         } catch (Exception e) {
-            return CoreApiResponse.error(HttpStatus.BAD_REQUEST, "Lỗi khi lấy thông tin thợ mộc");
+            return CoreApiResponse.error(HttpStatus.BAD_REQUEST, "Lỗi khi lấy thông tin xưởng mộc");
         }
     }
 
@@ -52,7 +52,7 @@ public class WoodworkerProfileController {
         try {
             return CoreApiResponse.success(woodworkerProfileService.getWoodworkerByUserId(userId));
         } catch (Exception e) {
-            return CoreApiResponse.error(HttpStatus.BAD_REQUEST, "Lỗi khi lấy thông tin thợ mộc theo userId");
+            return CoreApiResponse.error(HttpStatus.BAD_REQUEST, "Lỗi khi lấy thông tin xưởng mộc theo userId");
         }
     }
 
@@ -93,9 +93,9 @@ public class WoodworkerProfileController {
     public CoreApiResponse<List<ListRegisterRes.Data>> getInactiveWoodworkers() {
         List<ListRegisterRes.Data> result = woodworkerProfileService.getAllInactiveWoodworkers();
        try{
-            return CoreApiResponse.success(result, "Danh sách thợ mộc chưa kích hoạt tài khoản");
+            return CoreApiResponse.success(result, "Danh sách xưởng mộc chưa kích hoạt tài khoản");
         } catch (Exception e) {
-            return CoreApiResponse.error(HttpStatus.BAD_REQUEST, "Không thể lấy danh sách thợ mộc chưa kích hoạt tài khoản: " + e.getMessage());
+            return CoreApiResponse.error(HttpStatus.BAD_REQUEST, "Không thể lấy danh sách xưởng mộc chưa kích hoạt tài khoản: " + e.getMessage());
         }
     }
 
