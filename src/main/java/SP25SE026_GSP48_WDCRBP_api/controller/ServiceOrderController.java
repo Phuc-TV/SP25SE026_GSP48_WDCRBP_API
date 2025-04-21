@@ -6,10 +6,7 @@ import SP25SE026_GSP48_WDCRBP_api.model.dto.ServiceDepositDto;
 import SP25SE026_GSP48_WDCRBP_api.model.dto.ServiceOrderDto;
 import SP25SE026_GSP48_WDCRBP_api.model.entity.ProductImages;
 import SP25SE026_GSP48_WDCRBP_api.model.entity.ServiceOrder;
-import SP25SE026_GSP48_WDCRBP_api.model.requestModel.CreateServiceOrderPersonalizeRequest;
-import SP25SE026_GSP48_WDCRBP_api.model.requestModel.CreateServiceOrderCusRequest;
-import SP25SE026_GSP48_WDCRBP_api.model.requestModel.CusFeedbackCreateRequest;
-import SP25SE026_GSP48_WDCRBP_api.model.requestModel.WwAppointmentCreateRequest;
+import SP25SE026_GSP48_WDCRBP_api.model.requestModel.*;
 import SP25SE026_GSP48_WDCRBP_api.model.responseModel.ServiceOrderDetailRes;
 import SP25SE026_GSP48_WDCRBP_api.service.ServiceOrderService;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
@@ -59,6 +56,14 @@ public class ServiceOrderController {
     @PostMapping("/createCustomizeOrder")
     public CoreApiResponse createCustomizeOrder(@RequestBody CreateServiceOrderCusRequest request) {
         return serviceOrderService.addServiceOrderCustomize(request);
+    }
+
+    @SecurityRequirement(name = "Bear Authentication")
+    @PostMapping("/createSaleOrder")
+    public CoreApiResponse createSaleOrder(@RequestBody CreateServiceOrderSaleRequest request) {
+        serviceOrderService.addSaleOrder(request);
+
+        return CoreApiResponse.success("Success");
     }
 
     // 3. xưởng mộc hoặc khách hàng chấp nhận đơn và thiết lập lịch hẹn

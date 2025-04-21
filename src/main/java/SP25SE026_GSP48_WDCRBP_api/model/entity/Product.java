@@ -31,6 +31,9 @@ public class Product {
     private short warrantyDuration;
 
     @Column(nullable = true)
+    private Boolean isInstall;
+
+    @Column(nullable = true)
     private short length;
 
     @Column(nullable = true)

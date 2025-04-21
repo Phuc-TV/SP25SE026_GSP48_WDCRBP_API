@@ -13,13 +13,12 @@ import java.time.LocalDateTime;
 @Entity
 @Table(name = "Complaint")
 public class Complaint {
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long complaintId;
 
     @ManyToOne
-    @JoinColumn(name = "user_id", nullable = false)
+    @JoinColumn(name = "user_id", nullable = true)
     private User user;
 
     @Column(nullable = true,length = 2000)

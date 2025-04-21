@@ -45,4 +45,5 @@ public class ProductRequest {
     private Long woodworkerId;
     @NotNull(message = "Category ID is required")
     private Long categoryId;
+    private Boolean isInstall;
 }

@@ -142,9 +142,7 @@ public class TransactionServiceImpl implements TransactionService {
         if (request.getStatus() != null) {
             transaction.setStatus(request.getStatus());
         }
-        if (request.getCanceledAt() != null) {
-            transaction.setCanceledAt(request.getCanceledAt());
-        }
+
         transactionRepository.save(transaction);
 
         if (transaction.getOrderDeposit() != null && transaction.getOrderDeposit().getServiceOrder() != null) {
@@ -236,7 +234,6 @@ public class TransactionServiceImpl implements TransactionService {
         dto.setDescription(tx.getDescription());
         dto.setAmount(tx.getAmount());
         dto.setCreatedAt(tx.getCreatedAt());
-        dto.setCanceledAt(tx.getCanceledAt());
         dto.setStatus(tx.isStatus());
         dto.setUserId(tx.getUser() != null ? tx.getUser().getUserId() : null);
         dto.setOrderDepositId(tx.getOrderDeposit() != null ? tx.getOrderDeposit().getOrderDepositId() : null);

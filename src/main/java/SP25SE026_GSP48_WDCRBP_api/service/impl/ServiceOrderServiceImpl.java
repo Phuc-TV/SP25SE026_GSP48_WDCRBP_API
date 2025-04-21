@@ -1,6 +1,7 @@
 package SP25SE026_GSP48_WDCRBP_api.service.impl;
 
 import SP25SE026_GSP48_WDCRBP_api.components.CoreApiResponse;
+import SP25SE026_GSP48_WDCRBP_api.constant.ServiceNameConstant;
 import SP25SE026_GSP48_WDCRBP_api.constant.ServiceOrderStatusConstant;
 import SP25SE026_GSP48_WDCRBP_api.mapper.DesignIdeaVariantMapper;
 import SP25SE026_GSP48_WDCRBP_api.mapper.ServiceOrderMapper;
@@ -8,8 +9,10 @@ import SP25SE026_GSP48_WDCRBP_api.model.dto.*;
 import SP25SE026_GSP48_WDCRBP_api.model.entity.*;
 import SP25SE026_GSP48_WDCRBP_api.model.requestModel.CreateServiceOrderPersonalizeRequest;
 import SP25SE026_GSP48_WDCRBP_api.model.requestModel.CreateServiceOrderCusRequest;
+import SP25SE026_GSP48_WDCRBP_api.model.requestModel.CreateServiceOrderSaleRequest;
 import SP25SE026_GSP48_WDCRBP_api.model.responseModel.*;
 import SP25SE026_GSP48_WDCRBP_api.repository.*;
+import SP25SE026_GSP48_WDCRBP_api.service.ContractService;
 import SP25SE026_GSP48_WDCRBP_api.service.ServiceOrderService;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -65,6 +68,12 @@ public class ServiceOrderServiceImpl implements ServiceOrderService {
 
     @Autowired
     private ProductImagesRepository productImagesRepository;
+
+    @Autowired
+    private ProductRepository productRepository;
+
+    @Autowired
+    private ContractServiceImpl contractServiceImpl;
 
     @Override
     public List<ServiceOrderDto> listServiceOrderByUserIdOrWwId(Long id, String role) {
@@ -167,6 +176,10 @@ public class ServiceOrderServiceImpl implements ServiceOrderService {
                 DesignVariantDetailRes designIdeaDetailRes = DesignIdeaVariantMapper.toDto(variant, configs, idea);
 
                 requestedProductDetailRes.setDesignIdeaVariantDetail(designIdeaDetailRes);
+            } else if (requestedProduct.getProduct() != null) {
+                ProductListItemRes productListItemRes = modelMapper.map(requestedProduct.getProduct(), ProductListItemRes.class);
+
+                requestedProductDetailRes.setProduct(productListItemRes);
             } else {
                 PersonalProductDetailRes personalProductDetailRes = new PersonalProductDetailRes();
                 List<CustomerSelection> customerSelections =
@@ -291,9 +304,98 @@ public class ServiceOrderServiceImpl implements ServiceOrderService {
     }
 
     @Override
+    public void addSaleOrder(CreateServiceOrderSaleRequest request) {
+        Float totalAmount = 0f;
+        List<ProductSaleDto> productIds = request.getProductIds();
+        short quantity = 0;
+
+        for (ProductSaleDto t : productIds) {
+            quantity = (short) (quantity + t.getQuantity());
+        }
+
+        //Create ServiceOrder
+        User user = userRepository.findById(request.getUserId()).orElse(null);
+        AvailableService availableService =
+                availableServiceRepository.findById(request.getAvailableServiceId()).orElse(null);
+        WoodworkerProfile ww = availableService.getWoodworkerProfile();
+
+        ServiceOrder serviceOrder = new ServiceOrder();
+        serviceOrder.setDescription(request.getDescription());
+        serviceOrder.setAvailableService(availableService);
+        serviceOrder.setUser(user);
+        serviceOrder.setStatus(ServiceOrderStatusConstant.DANG_CHO_THO_MOC_XAC_NHAN);
+        serviceOrder.setCreatedAt(LocalDateTime.now());
+        serviceOrder.setQuantity(quantity);
+        serviceOrder.setInstall(request.getIsInstall());
+        serviceOrder.setRole("Woodworker");
+
+        orderRepository.save(serviceOrder);
+
+        for (ProductSaleDto i : productIds) {
+            Product product =
+                    productRepository.findProductByProductId(i.getProductId());
+
+            RequestedProduct requestedProduct = new RequestedProduct();
+            requestedProduct.setProduct(product);
+            requestedProduct.setQuantity(Byte.parseByte(i.getQuantity() + ""));
+            requestedProduct.setServiceOrder(serviceOrder);
+            requestedProduct.setCategory(product.getCategory());
+            requestedProduct.setTotalAmount(product.getPrice() * i.getQuantity());
+            requestedProduct.setWarrantyDuration(product.getWarrantyDuration());
+            totalAmount = totalAmount + requestedProduct.getTotalAmount();
+            requestedProduct.setCreatedAt(LocalDateTime.now());
+
+            requestedProductRepository.save(requestedProduct);
+        }
+
+        serviceOrder.setTotalAmount(totalAmount + request.getPriceShipping());
+        serviceOrder.setAmountRemaining(totalAmount);
+        serviceOrder.setShipFee((float)request.getPriceShipping());
+        serviceOrder.setAmountPaid(0.f);
+        orderRepository.save(serviceOrder);
+
+        //Create OrderProgress
+        OrderProgress orderProgress = new OrderProgress();
+        orderProgress.setServiceOrder(serviceOrder);
+        orderProgress.setCreatedTime(LocalDateTime.now());
+
+        orderProgress.setStatus(ServiceOrderStatusConstant.DANG_CHO_THO_MOC_XAC_NHAN);
+
+        orderProgressRepository.save(orderProgress);
+
+        if (request.getIsInstall()) {
+            Shipment shipment = new Shipment();
+            shipment.setServiceOrder(serviceOrder);
+            shipment.setToAddress(request.getAddress());
+            shipment.setFromAddress(availableService.getWoodworkerProfile().getAddress());
+            shipment.setShippingUnit(availableService.getWoodworkerProfile().getBrandName());
+            shipment.setShipType("Giao hàng và lắp đặt bởi xưởng mộc");
+            shipmentRepository.save(shipment);
+        } else {
+            Shipment shipment = new Shipment();
+            shipment.setServiceOrder(serviceOrder);
+            shipment.setToAddress(request.getAddress());
+            shipment.setFromAddress(availableService.getWoodworkerProfile().getAddress());
+            shipment.setShippingUnit("Giao hàng nhanh (GHN)");
+            shipment.setShipType("Giao hàng bởi bên thứ 3 (GHN)");
+            shipment.setToDistrictId(Integer.parseInt(request.getToDistrictId()));
+            shipment.setToWardCode(request.getToWardCode());
+            shipment.setFromDistrictId(Integer.parseInt(ww.getDistrictId()));
+            shipment.setFromWardCode(ww.getWardCode());
+            shipment.setFee(request.getPriceShipping());
+            shipment.setGhnServiceId(request.getGhnServiceId());
+            shipment.setGhnServiceTypeId(request.getGhnServiceTypeId());
+            shipmentRepository.save(shipment);
+        }
+
+        contractServiceImpl.createOrderDeposit(serviceOrder);
+    }
+
+    @Override
     public ServiceOrder acceptServiceOrder(Long serviceOrderId, LocalDateTime timeMeeting, String linkMeeting, String form, String desc) {
         ServiceOrder serviceOrder = orderRepository.findById(serviceOrderId).orElse(null);
         String currentStatus = serviceOrder.getStatus();
+        String serviceName = serviceOrder.getAvailableService().getService().getServiceName();
 
         if (serviceOrder == null) {
             return null;
@@ -306,8 +408,12 @@ public class ServiceOrderServiceImpl implements ServiceOrderService {
 
         switch (serviceOrder.getRole()) {
             case "Woodworker":
+                if (serviceName.equals(ServiceNameConstant.SALE)) {
+                    serviceOrder.setStatus(ServiceOrderStatusConstant.DANG_GIAO_HANG_LAP_DAT);
+                    newOrderProgress.setStatus(ServiceOrderStatusConstant.DANG_GIAO_HANG_LAP_DAT);
+                }
+
                 if (currentStatus == null || currentStatus.equals(ServiceOrderStatusConstant.DANG_CHO_THO_MOC_XAC_NHAN) || currentStatus.equals(ServiceOrderStatusConstant.DANG_CHO_KHACH_DUYET_LICH_HEN)) {
-                    // Woodworker accepting initial order, setting appointment
                     ConsultantAppointment consultantAppointment = new ConsultantAppointment();
                     if (serviceOrder.getConsultantAppointment() != null) {
                         consultantAppointment = serviceOrder.getConsultantAppointment();
@@ -336,7 +442,7 @@ public class ServiceOrderServiceImpl implements ServiceOrderService {
                     newOrderProgress.setStatus(ServiceOrderStatusConstant.DA_DUYET_HOP_DONG);
                     serviceOrder.setStatus(ServiceOrderStatusConstant.DA_DUYET_HOP_DONG);
                 } else if (currentStatus.equals(ServiceOrderStatusConstant.DANG_CHO_KHACH_DUYET_THIET_KE)) {
-                    // Customer apporoving design
+                    // Customer approving design
                     newOrderProgress.setStatus(ServiceOrderStatusConstant.DA_DUYET_THIET_KE);
                     serviceOrder.setStatus(ServiceOrderStatusConstant.DA_DUYET_THIET_KE);
                 }

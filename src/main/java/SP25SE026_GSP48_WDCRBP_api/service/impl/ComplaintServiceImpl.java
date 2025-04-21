@@ -41,7 +41,6 @@ public class ComplaintServiceImpl implements ComplaintService {
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
         Complaint complaint = Complaint.builder()
-                .user(user)
                 .serviceOrder(order)
                 .description(request.getDescription())
                 .status(false)

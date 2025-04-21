@@ -1,6 +1,7 @@
 package SP25SE026_GSP48_WDCRBP_api.service.impl;
 
 import SP25SE026_GSP48_WDCRBP_api.config.VnPayConfig;
+import SP25SE026_GSP48_WDCRBP_api.constant.PaymentForConstant;
 import SP25SE026_GSP48_WDCRBP_api.constant.TransactionTypeConstant;
 import SP25SE026_GSP48_WDCRBP_api.model.entity.ServicePack;
 import SP25SE026_GSP48_WDCRBP_api.model.entity.Transaction;
@@ -70,6 +71,7 @@ public class VNPayServiceImp implements VNPayService {
                     .transactionType(transactionType)
                     .amount(orderDeposit.getAmount())
                     .description("Thanh toán cọc đơn hàng")
+                    .paymentFor(PaymentForConstant.ORDER_PAYMENT)
                     .status(false)
                     .createdAt(LocalDateTime.now())
                     .user(dbUser)
@@ -175,6 +177,7 @@ public class VNPayServiceImp implements VNPayService {
                     .transactionType(TransactionTypeConstant.THANH_TOAN_QUA_CONG)
                     .amount(amount)
                     .description("Thanh toán gói dịch vụ: " + newPack.getName())
+                    .paymentFor(PaymentForConstant.SERVICE_PACK_PAYMENT)
                     .status(false)
                     .createdAt(LocalDateTime.now())
                     .user(dbUser)
@@ -287,6 +290,7 @@ public class VNPayServiceImp implements VNPayService {
                     .transactionType(transactionType)
                     .amount(amount)
                     .description("Nạp tiền vào ví")
+                    .paymentFor(PaymentForConstant.WALLET_PAYMENT)
                     .status(false)
                     .createdAt(LocalDateTime.now())
                     .user(dbUser)
@@ -427,6 +431,7 @@ public class VNPayServiceImp implements VNPayService {
                     .transactionType(transactionType)
                     .amount(orderDeposit.getAmount())
                     .description("Thanh toán cọc đơn hàng")
+                    .paymentFor(PaymentForConstant.ORDER_PAYMENT)
                     .status(false)
                     .createdAt(LocalDateTime.now())
                     .user(dbUser)
@@ -534,6 +539,7 @@ public class VNPayServiceImp implements VNPayService {
                     .transactionType(TransactionTypeConstant.THANH_TOAN_QUA_CONG)
                     .amount(amount)
                     .description("Thanh toán gói dịch vụ: " + newPack.getName())
+                    .paymentFor(PaymentForConstant.SERVICE_PACK_PAYMENT)
                     .status(false)
                     .createdAt(LocalDateTime.now())
                     .user(dbUser)
@@ -649,6 +655,7 @@ public class VNPayServiceImp implements VNPayService {
                     .transactionType(transactionType)
                     .amount(amount)
                     .description("Nạp tiền vào ví")
+                    .paymentFor(PaymentForConstant.WALLET_PAYMENT)
                     .status(false)
                     .createdAt(LocalDateTime.now())
                     .user(dbUser)

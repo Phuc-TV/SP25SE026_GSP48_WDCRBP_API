@@ -44,6 +44,7 @@ public class ProductServiceImpl implements ProductService {
         product.setPrice(productRequest.getPrice());
         product.setStock(productRequest.getStock());
         product.setWarrantyDuration(productRequest.getWarrantyDuration());
+        product.setIsInstall(productRequest.getIsInstall());
         product.setLength(productRequest.getLength());
         product.setWidth(productRequest.getWidth());
         product.setHeight(productRequest.getHeight());
@@ -93,6 +94,7 @@ public class ProductServiceImpl implements ProductService {
         existingProduct.setPrice(productRequest.getPrice());
         existingProduct.setStock(productRequest.getStock());
         existingProduct.setWarrantyDuration(productRequest.getWarrantyDuration());
+        existingProduct.setIsInstall(productRequest.getIsInstall());
         existingProduct.setLength(productRequest.getLength());
         existingProduct.setWidth(productRequest.getWidth());
         existingProduct.setHeight(productRequest.getHeight());
@@ -126,6 +128,7 @@ public class ProductServiceImpl implements ProductService {
                 .price(product.getPrice())
                 .stock(product.getStock())
                 .warrantyDuration(product.getWarrantyDuration())
+                .isInstall(product.getIsInstall())
                 .length(product.getLength())
                 .width(product.getWidth())
                 .height(product.getHeight())
@@ -149,6 +152,8 @@ public class ProductServiceImpl implements ProductService {
                 .woodworkerImgUrl(product.getWoodworkerProfile().getImgUrl())
                 .servicePackEndDate(product.getWoodworkerProfile().getServicePackEndDate())
                 .isWoodworkerProfilePublic(product.getWoodworkerProfile().getPublicStatus())
+                .wardCode(product.getWoodworkerProfile().getWardCode())
+                .districtId(product.getWoodworkerProfile().getDistrictId())
                 .build();
     }
 
