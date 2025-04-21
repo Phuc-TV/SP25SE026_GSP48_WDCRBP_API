@@ -24,11 +24,11 @@ public class ReviewController {
         try {
             List<ReviewRes> reviews = reviewService.getReviewsByWoodworkerId(woodworkerId);
             if (reviews.isEmpty()) {
-                return CoreApiResponse.success(null, "Không tìm thấy đánh giá cho thợ mộc này.");
+                return CoreApiResponse.success(null, "Không tìm thấy đánh giá cho xưởng mộc này.");
             }
-            return CoreApiResponse.success(reviews, "Lấy đánh giá theo thợ mộc thành công.");
+            return CoreApiResponse.success(reviews, "Lấy đánh giá theo xưởng mộc thành công.");
         } catch (Exception e) {
-            return CoreApiResponse.error(HttpStatus.INTERNAL_SERVER_ERROR, "Lỗi khi lấy đánh giá theo thợ mộc: " + e.getMessage());
+            return CoreApiResponse.error(HttpStatus.INTERNAL_SERVER_ERROR, "Lỗi khi lấy đánh giá theo xưởng mộc: " + e.getMessage());
         }
     }
 
@@ -37,11 +37,11 @@ public class ReviewController {
         try {
             List<ReviewRes> reviews = reviewService.getReviewsNeedResponseByWoodworkerId(woodworkerId);
             if (reviews.isEmpty()) {
-                return CoreApiResponse.success(null, "Không tìm thấy đánh giá cho thợ mộc này.");
+                return CoreApiResponse.success(null, "Không tìm thấy đánh giá cho xưởng mộc này.");
             }
-            return CoreApiResponse.success(reviews, "Lấy đánh giá theo thợ mộc thành công.");
+            return CoreApiResponse.success(reviews, "Lấy đánh giá theo xưởng mộc thành công.");
         } catch (Exception e) {
-            return CoreApiResponse.error(HttpStatus.INTERNAL_SERVER_ERROR, "Lỗi khi lấy đánh giá theo thợ mộc: " + e.getMessage());
+            return CoreApiResponse.error(HttpStatus.INTERNAL_SERVER_ERROR, "Lỗi khi lấy đánh giá theo xưởng mộc: " + e.getMessage());
         }
     }
 
@@ -139,9 +139,9 @@ public class ReviewController {
     public CoreApiResponse<List<ReviewRes>> getPendingReviewsWithWWResponse() {
         try {
             List<ReviewRes> reviews = reviewService.getPendingReviewsWithWoodworkerResponse();
-            return CoreApiResponse.success(reviews, "Lấy đánh giá có phản hồi của thợ mộc thành công");
+            return CoreApiResponse.success(reviews, "Lấy đánh giá có phản hồi của xưởng mộc thành công");
         } catch (Exception e) {
-            return CoreApiResponse.error(HttpStatus.INTERNAL_SERVER_ERROR, "Lỗi khi lấy đánh giá có phản hồi của thợ mộc: " + e.getMessage());
+            return CoreApiResponse.error(HttpStatus.INTERNAL_SERVER_ERROR, "Lỗi khi lấy đánh giá có phản hồi của xưởng mộc: " + e.getMessage());
         }
     }
 }

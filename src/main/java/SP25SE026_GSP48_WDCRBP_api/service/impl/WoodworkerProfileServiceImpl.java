@@ -335,7 +335,7 @@ public class WoodworkerProfileServiceImpl implements WoodworkerProfileService {
                 .orElseThrow(() -> new RuntimeException("Woodworker not found"));
 
         if (!profile.isStatus()) {
-            throw new RuntimeException("Không thể cập nhật Service Pack vì thợ mộc chưa được kích hoạt.");
+            throw new RuntimeException("Không thể cập nhật Service Pack vì xưởng mộc chưa được kích hoạt.");
         }
 
         ServicePack servicePack = servicePackRepository.findById(request.getServicePackId())
@@ -373,7 +373,7 @@ public class WoodworkerProfileServiceImpl implements WoodworkerProfileService {
     @Override
     public UpdateStatusPublicRes updatePublicStatus(UpdateStatusPublicRequest request) {
         WoodworkerProfile profile = wwRepository.findByUser_UserId(request.getUserId())
-                .orElseThrow(() -> new RuntimeException("Không tìm thấy thợ mộc theo userId: " + request.getUserId()));
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy xưởng mộc theo userId: " + request.getUserId()));
 
         profile.setPublicStatus(request.isPublicStatus());
         profile.setUpdatedAt(LocalDateTime.now());

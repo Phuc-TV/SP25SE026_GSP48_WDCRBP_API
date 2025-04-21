@@ -61,7 +61,7 @@ public class ServiceOrderController {
         return serviceOrderService.addServiceOrderCustomize(request);
     }
 
-    // 3. Thợ mộc hoặc khách hàng chấp nhận đơn và thiết lập lịch hẹn
+    // 3. xưởng mộc hoặc khách hàng chấp nhận đơn và thiết lập lịch hẹn
     @SecurityRequirement(name = "Bear Authentication")
     @PostMapping("/accept")
     public CoreApiResponse acceptServiceOrder(

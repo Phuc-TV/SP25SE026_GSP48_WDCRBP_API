@@ -160,11 +160,11 @@ public class VNPayServiceImp implements VNPayService {
             verifyEmail(dbUser, email);
 
             if (!"Woodworker".equalsIgnoreCase(dbUser.getRole())) {
-                throw new WDCRBPApiException(HttpStatus.FORBIDDEN, "Chỉ thợ mộc mới có thể mua gói.");
+                throw new WDCRBPApiException(HttpStatus.FORBIDDEN, "Chỉ xưởng mộc mới có thể mua gói.");
             }
 
             WoodworkerProfile profile = woodworkerProfileRepository.findByUser_UserId(dbUser.getUserId())
-                    .orElseThrow(() -> new WDCRBPApiException(HttpStatus.NOT_FOUND, "Không tìm thấy hồ sơ thợ mộc."));
+                    .orElseThrow(() -> new WDCRBPApiException(HttpStatus.NOT_FOUND, "Không tìm thấy hồ sơ xưởng mộc."));
 
             LocalDateTime currentEndDate = profile.getServicePackEndDate();
             ServicePack currentPack = profile.getServicePack();
@@ -276,7 +276,7 @@ public class VNPayServiceImp implements VNPayService {
             verifyEmail(dbUser, email);
 
             if (!"Customer".equalsIgnoreCase(dbUser.getRole()) && !"Woodworker".equalsIgnoreCase(dbUser.getRole())) {
-                throw new WDCRBPApiException(HttpStatus.FORBIDDEN, "chỉ có thợ mộc và khách hàng mới được sài dịch vụ này.");
+                throw new WDCRBPApiException(HttpStatus.FORBIDDEN, "chỉ có xưởng mộc và khách hàng mới được sài dịch vụ này.");
             }
 
             var wallet = walletRepository.findById(parsedWalletId)
@@ -519,11 +519,11 @@ public class VNPayServiceImp implements VNPayService {
             verifyEmail(dbUser, email);
 
             if (!"Woodworker".equalsIgnoreCase(dbUser.getRole())) {
-                throw new WDCRBPApiException(HttpStatus.FORBIDDEN, "Chỉ thợ mộc mới có thể mua gói.");
+                throw new WDCRBPApiException(HttpStatus.FORBIDDEN, "Chỉ xưởng mộc mới có thể mua gói.");
             }
 
             WoodworkerProfile profile = woodworkerProfileRepository.findByUser_UserId(dbUser.getUserId())
-                    .orElseThrow(() -> new WDCRBPApiException(HttpStatus.NOT_FOUND, "Không tìm thấy hồ sơ thợ mộc."));
+                    .orElseThrow(() -> new WDCRBPApiException(HttpStatus.NOT_FOUND, "Không tìm thấy hồ sơ xưởng mộc."));
 
             LocalDateTime currentEndDate = profile.getServicePackEndDate();
             ServicePack currentPack = profile.getServicePack();
@@ -638,7 +638,7 @@ public class VNPayServiceImp implements VNPayService {
             verifyEmail(dbUser, email);
 
             if (!"Customer".equalsIgnoreCase(dbUser.getRole()) && !"Woodworker".equalsIgnoreCase(dbUser.getRole())) {
-                throw new WDCRBPApiException(HttpStatus.FORBIDDEN, "chỉ có thợ mộc và khách hàng mới được sài dịch vụ này.");
+                throw new WDCRBPApiException(HttpStatus.FORBIDDEN, "chỉ có xưởng mộc và khách hàng mới được sài dịch vụ này.");
             }
 
             var wallet = walletRepository.findById(parsedWalletId)
