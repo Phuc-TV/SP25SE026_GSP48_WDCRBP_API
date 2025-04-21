@@ -33,4 +33,6 @@ public class RequestedProductDetailRes {
     private DesignVariantDetailRes designIdeaVariantDetail;
 
     private PersonalProductDetailRes personalProductDetail;
+
+    private ProductListItemRes product;
 }

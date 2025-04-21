@@ -7,6 +7,7 @@ import SP25SE026_GSP48_WDCRBP_api.model.entity.ProductImages;
 import SP25SE026_GSP48_WDCRBP_api.model.entity.ServiceOrder;
 import SP25SE026_GSP48_WDCRBP_api.model.requestModel.CreateServiceOrderPersonalizeRequest;
 import SP25SE026_GSP48_WDCRBP_api.model.requestModel.CreateServiceOrderCusRequest;
+import SP25SE026_GSP48_WDCRBP_api.model.requestModel.CreateServiceOrderSaleRequest;
 import SP25SE026_GSP48_WDCRBP_api.model.responseModel.ServiceOrderDetailRes;
 
 import java.time.LocalDateTime;
@@ -18,6 +19,8 @@ public interface ServiceOrderService {
     ServiceOrderDetailRes getServiceDetailById(Long id);
 
     CoreApiResponse addServiceOrderCustomize(CreateServiceOrderCusRequest createServiceOrderCusRequest);
+
+    void addSaleOrder(CreateServiceOrderSaleRequest request);
 
     ServiceOrder acceptServiceOrder(Long serviceOrderId, LocalDateTime timeMeeting, String linkMeeting, String form, String desc);
 

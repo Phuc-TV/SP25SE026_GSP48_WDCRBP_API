@@ -22,6 +22,9 @@ public class Transaction {
     private String transactionType;
 
     @Column(nullable = true)
+    private String paymentFor;
+
+    @Column(nullable = true)
     private float amount;
 
     @Column(nullable = true)
@@ -29,9 +32,6 @@ public class Transaction {
 
     @Column(nullable = true)
     private LocalDateTime createdAt;
-
-    @Column(nullable = true)
-    private LocalDateTime canceledAt;
 
     @Column(nullable = true)
     private boolean status;

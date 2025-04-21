@@ -1,9 +1,6 @@
 package SP25SE026_GSP48_WDCRBP_api.service.impl;
 
-import SP25SE026_GSP48_WDCRBP_api.constant.GuaranteeOrderStatusConstant;
-import SP25SE026_GSP48_WDCRBP_api.constant.ServiceNameConstant;
-import SP25SE026_GSP48_WDCRBP_api.constant.ServiceOrderStatusConstant;
-import SP25SE026_GSP48_WDCRBP_api.constant.TransactionTypeConstant;
+import SP25SE026_GSP48_WDCRBP_api.constant.*;
 import SP25SE026_GSP48_WDCRBP_api.model.entity.*;
 import SP25SE026_GSP48_WDCRBP_api.model.exception.WDCRBPApiException;
 import SP25SE026_GSP48_WDCRBP_api.model.requestModel.PaymentOrderRequest;
@@ -227,6 +224,7 @@ public class WalletServiceImpl implements WalletService {
         txn.setTransactionType(TransactionTypeConstant.THANH_TOAN_BANG_VI);
         txn.setAmount(orderDeposit.getAmount());
         txn.setDescription("Thanh toán đặt cọc đơn hàng");
+        txn.setPaymentFor(PaymentForConstant.ORDER_PAYMENT);
         txn.setCreatedAt(LocalDateTime.now());
         txn.setStatus(true);
         txn.setUser(dbUser);
@@ -300,6 +298,7 @@ public class WalletServiceImpl implements WalletService {
         txn.setTransactionType(TransactionTypeConstant.THANH_TOAN_BANG_VI);
         txn.setAmount(amount);
         txn.setDescription("Thanh toán gói dịch vụ " + servicePack.getName());
+        txn.setPaymentFor(PaymentForConstant.SERVICE_PACK_PAYMENT);
         txn.setCreatedAt(LocalDateTime.now());
         txn.setStatus(true);
         txn.setUser(dbUser);

@@ -151,25 +151,7 @@ public class ContractServiceImpl implements ContractService {
         }
     }
 
-    @Override
-    public Contract customerSignContract(Long serviceOrderId, String customerSign, Long cusId)
-    {
-        ServiceOrder serviceOrder = serviceRepository.findServiceOrderByOrderId(serviceOrderId);
-        serviceOrder.setStatus(ServiceOrderStatusConstant.DA_DUYET_HOP_DONG);
-
-        OrderProgress newOrderProgress = new OrderProgress();
-        newOrderProgress.setServiceOrder(serviceOrder);
-        newOrderProgress.setCreatedTime(LocalDateTime.now());
-        newOrderProgress.setStatus(ServiceOrderStatusConstant.DA_DUYET_HOP_DONG);
-
-        Contract contract = contractRepository.findContractByServiceOrder(serviceOrder);
-        contract.setCustomerSignature(customerSign);
-
-        User user = userRepository.findUserByUserId(cusId);
-        contract.setCusFullName(user.getUsername());
-        contract.setCusPhone(user.getPhone());
-        contractRepository.save(contract);
-
+    public void createOrderDeposit(ServiceOrder serviceOrder) {
         Short numberOfDeposits = serviceOrder.getAvailableService().getService().getNumberOfDeposits();
 
         for (int i = 0; i < numberOfDeposits; i++)
@@ -191,6 +173,28 @@ public class ContractServiceImpl implements ContractService {
 
             orderDepositRepository.save(orderDeposit);
         }
+    }
+
+    @Override
+    public Contract customerSignContract(Long serviceOrderId, String customerSign, Long cusId)
+    {
+        ServiceOrder serviceOrder = serviceRepository.findServiceOrderByOrderId(serviceOrderId);
+        serviceOrder.setStatus(ServiceOrderStatusConstant.DA_DUYET_HOP_DONG);
+
+        OrderProgress newOrderProgress = new OrderProgress();
+        newOrderProgress.setServiceOrder(serviceOrder);
+        newOrderProgress.setCreatedTime(LocalDateTime.now());
+        newOrderProgress.setStatus(ServiceOrderStatusConstant.DA_DUYET_HOP_DONG);
+
+        Contract contract = contractRepository.findContractByServiceOrder(serviceOrder);
+        contract.setCustomerSignature(customerSign);
+
+        User user = userRepository.findUserByUserId(cusId);
+        contract.setCusFullName(user.getUsername());
+        contract.setCusPhone(user.getPhone());
+        contractRepository.save(contract);
+
+        createOrderDeposit(serviceOrder);
 
         serviceRepository.save(serviceOrder);
         orderProgressRepository.save(newOrderProgress);
