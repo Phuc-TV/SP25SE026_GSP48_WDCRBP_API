@@ -17,8 +17,6 @@ public class WwCreateContractCustomizeRequest {
 
     private String woodworkerTerms;
 
-    private String warrantyPolicy;
-
     private LocalDateTime completeDate;
 
     private Long serviceOrderId;

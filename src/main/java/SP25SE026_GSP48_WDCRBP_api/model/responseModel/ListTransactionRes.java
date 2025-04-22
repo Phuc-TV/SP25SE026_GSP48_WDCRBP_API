@@ -15,6 +15,7 @@ public class ListTransactionRes {
     public static class Data {
         private Long transactionId;
         private String transactionType;
+        private String paymentFor;
         private float amount;
         private String description;
         private LocalDateTime createdAt;

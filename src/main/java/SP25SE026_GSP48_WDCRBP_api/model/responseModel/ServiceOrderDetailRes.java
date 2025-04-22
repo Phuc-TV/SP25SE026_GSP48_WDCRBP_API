@@ -31,6 +31,7 @@ public class ServiceOrderDetailRes {
     private AvaliableServiceDto service;
     private UserDetailRes user;
     private LocalDateTime createdAt;
+    private LocalDateTime completeDate;
     private LocalDateTime updatedAt;
     private List<RequestedProductDetailRes> requestedProduct;
     private ConsultantAppointmentDetailRes consultantAppointment;

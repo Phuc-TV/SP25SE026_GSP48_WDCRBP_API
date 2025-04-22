@@ -6,4 +6,6 @@ public class TransactionTypeConstant {
     public static final String THANH_TOAN_BANG_VI = "Thanh toán bằng ví";
     public static final String THANH_TOAN_QUA_CONG = "Thanh toán bằng VNPay";
     public static final String NHAN_TIEN = "Nhận tiền";
+    public static final String HOAN_TIEN = "Nhận hoàn tiền";
+    public static final String TRU_HOAN_TIEN = "Hoàn tiền cho khách hàng";
 }

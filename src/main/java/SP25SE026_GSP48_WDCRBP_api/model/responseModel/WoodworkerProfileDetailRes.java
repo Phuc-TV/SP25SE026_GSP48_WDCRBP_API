@@ -31,6 +31,8 @@ public class WoodworkerProfileDetailRes {
 
     private String wardCode;
 
+    private String warrantyPolicy;
+
     private String districtId;
 
     private String cityId;

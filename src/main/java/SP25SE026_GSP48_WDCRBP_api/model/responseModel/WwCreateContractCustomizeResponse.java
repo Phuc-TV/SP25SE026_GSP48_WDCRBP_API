@@ -14,8 +14,6 @@ import java.time.LocalDateTime;
 public class WwCreateContractCustomizeResponse {
     private String woodworkerSignature;
 
-    private String warrantyPolicy;
-
     private LocalDateTime completeDate;
 
     private LocalDateTime signDate;

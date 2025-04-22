@@ -9,6 +9,6 @@ import lombok.*;
 @Builder
 public class UpdateStatusComplaintRes {
     private Long complaintId;
-    private Boolean updatedStatus;
+    private String updatedStatus;
     private String message;
 }
