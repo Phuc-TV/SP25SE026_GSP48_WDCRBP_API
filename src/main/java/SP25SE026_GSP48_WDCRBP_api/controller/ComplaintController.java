@@ -12,25 +12,36 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/v1/complaints")
+@CrossOrigin(origins = "*")
 @RequiredArgsConstructor
 public class ComplaintController {
 
     private final ComplaintService complaintService;
 
-    @GetMapping("/{serviceOrderId}")
-    public CoreApiResponse<ComplaintRes> getByServiceOrderId(@PathVariable Long serviceOrderId) {
-        try {
-            ComplaintRes result = complaintService.getComplaintByServiceOrderId(serviceOrderId);
-            return CoreApiResponse.success(result, "Lấy khiếu nại theo mã đơn hàng thành công");
-        } catch (Exception e) {
-            return CoreApiResponse.error(HttpStatus.NOT_FOUND, "Không tìm thấy khiếu nại với đơn hàng ID: " + serviceOrderId);
-        }
-    }
-
     @GetMapping
     public CoreApiResponse<List<ComplaintRes>> getAllComplaints() {
         try {
             List<ComplaintRes> result = complaintService.getAllComplaints();
+            return CoreApiResponse.success(result, "Lấy danh sách tất cả khiếu nại thành công");
+        } catch (Exception e) {
+            return CoreApiResponse.error(HttpStatus.INTERNAL_SERVER_ERROR, "Lỗi hệ thống khi lấy danh sách khiếu nại");
+        }
+    }
+
+    @GetMapping("/user/{id}")
+    public CoreApiResponse<List<ComplaintRes>> getAllComplaintsByUserId(@PathVariable Long id) {
+        try {
+            List<ComplaintRes> result = complaintService.getAllComplaintsByUserId(id);
+            return CoreApiResponse.success(result, "Lấy danh sách tất cả khiếu nại thành công");
+        } catch (Exception e) {
+            return CoreApiResponse.error(HttpStatus.INTERNAL_SERVER_ERROR, "Lỗi hệ thống khi lấy danh sách khiếu nại");
+        }
+    }
+
+    @GetMapping("/service-order/{id}")
+    public CoreApiResponse<List<ComplaintRes>> getAllComplaintsByServiceOrderId(@PathVariable Long id) {
+        try {
+            List<ComplaintRes> result = complaintService.getAllComplaintsByServiceOrderId(id);
             return CoreApiResponse.success(result, "Lấy danh sách tất cả khiếu nại thành công");
         } catch (Exception e) {
             return CoreApiResponse.error(HttpStatus.INTERNAL_SERVER_ERROR, "Lỗi hệ thống khi lấy danh sách khiếu nại");
@@ -47,20 +58,20 @@ public class ComplaintController {
         }
     }
 
-    @PutMapping("/status")
-    public CoreApiResponse<UpdateStatusComplaintRes> updateStatus(@RequestBody UpdateStatusComplaintRequest request) {
+    @PutMapping("/staff")
+    public CoreApiResponse<UpdateStatusComplaintRes> updateComplaintByStaff(@RequestBody UpdateStatusComplaintRequest request) {
         try {
-            UpdateStatusComplaintRes result = complaintService.updateStatusByServiceOrderId(request);
+            UpdateStatusComplaintRes result = complaintService.updateStatusByComplaintId(request);
             return CoreApiResponse.success(result, "Cập nhật trạng thái khiếu nại thành công");
         } catch (Exception e) {
             return CoreApiResponse.error(HttpStatus.NOT_FOUND, "Không thể cập nhật trạng thái khiếu nại: " + e.getMessage());
         }
     }
 
-    @PutMapping
+    @PutMapping("/woodworker")
     public CoreApiResponse<ComplaintRes> updateComplaint(@RequestBody UpdateComplaintRequest request) {
         try {
-            ComplaintRes result = complaintService.updateComplaintByServiceOrderId(request);
+            ComplaintRes result = complaintService.updateComplaintByComplaintId(request);
             return CoreApiResponse.success(result, "Cập nhật nội dung khiếu nại thành công");
         } catch (Exception e) {
             return CoreApiResponse.error(HttpStatus.NOT_FOUND, "Không thể cập nhật khiếu nại: " + e.getMessage());

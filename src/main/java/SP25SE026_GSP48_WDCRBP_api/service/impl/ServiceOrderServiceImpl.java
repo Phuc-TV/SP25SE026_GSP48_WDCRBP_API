@@ -21,6 +21,7 @@ import org.springframework.stereotype.Service;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class ServiceOrderServiceImpl implements ServiceOrderService {
@@ -75,6 +76,9 @@ public class ServiceOrderServiceImpl implements ServiceOrderService {
     @Autowired
     private ContractServiceImpl contractServiceImpl;
 
+    @Autowired
+    private ContractRepository contractRepository;
+
     @Override
     public List<ServiceOrderDto> listServiceOrderByUserIdOrWwId(Long id, String role) {
         List<ServiceOrder> orders = new ArrayList<>();
@@ -120,6 +124,7 @@ public class ServiceOrderServiceImpl implements ServiceOrderService {
     @Override
     public ServiceOrderDetailRes getServiceDetailById(Long id) {
         ServiceOrder order = orderRepository.findServiceOrderByOrderId(id);
+        Contract contract = contractRepository.findContractByServiceOrder(order);
 
         if (order == null) {
             return null;
@@ -210,7 +215,10 @@ public class ServiceOrderServiceImpl implements ServiceOrderService {
             requestedProductDetailResList.add(requestedProductDetailRes);
         }
 
-        return ServiceOrderMapper.toServiceOrderDetailRes(serviceOrderDto, requestedProductDetailResList, consultantAppointmentDetailRes, reviewRes);
+        ServiceOrderDetailRes serviceOrderDetailRes = ServiceOrderMapper.toServiceOrderDetailRes(serviceOrderDto, requestedProductDetailResList, consultantAppointmentDetailRes, reviewRes);
+        serviceOrderDetailRes.setCompleteDate(contract != null ? contract.getCompleteDate() : null);
+
+        return serviceOrderDetailRes;
     }
 
     @Override

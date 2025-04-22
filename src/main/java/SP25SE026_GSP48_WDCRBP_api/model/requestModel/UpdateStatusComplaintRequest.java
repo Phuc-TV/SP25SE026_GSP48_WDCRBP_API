@@ -11,14 +11,13 @@ import lombok.*;
 @Builder
 public class UpdateStatusComplaintRequest {
 
-    @NotNull(message = "Service Order ID cannot be null")
-    @Positive(message = "Service Order ID must be a positive number")
-    private Long serviceOrderId;
+    @NotNull(message = "complaintId cannot be null")
+    @Positive(message = "complaintId must be a positive number")
+    private Long complaintId;
 
-    @NotNull(message = "Status cannot be null")
-    private Boolean status;
+    private float refundAmount;
 
-    @NotNull(message = "User ID cannot be null")
-    @Positive(message = "User ID must be a positive number")
-    private Long userId;
+    private String staffResponse;
+
+    private Long staffUserId;
 }

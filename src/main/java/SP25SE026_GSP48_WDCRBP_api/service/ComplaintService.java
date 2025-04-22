@@ -9,14 +9,15 @@ import SP25SE026_GSP48_WDCRBP_api.model.responseModel.UpdateStatusComplaintRes;
 import java.util.List;
 
 public interface ComplaintService {
-
-    ComplaintRes getComplaintByServiceOrderId(Long serviceOrderId);
-
     ComplaintRes createComplaint(CreateComplaintRequest request);
 
-    UpdateStatusComplaintRes updateStatusByServiceOrderId(UpdateStatusComplaintRequest request);
-
-    ComplaintRes updateComplaintByServiceOrderId(UpdateComplaintRequest request);
-
     List<ComplaintRes> getAllComplaints();
+
+    List<ComplaintRes> getAllComplaintsByServiceOrderId(Long serviceOrderId);
+
+    List<ComplaintRes> getAllComplaintsByUserId(Long userId);
+
+    ComplaintRes updateComplaintByComplaintId(UpdateComplaintRequest request);
+
+    UpdateStatusComplaintRes updateStatusByComplaintId(UpdateStatusComplaintRequest request);
 }

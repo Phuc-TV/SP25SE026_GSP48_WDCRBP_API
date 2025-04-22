@@ -18,8 +18,6 @@ public class ContractDto {
 
     private String woodworkerSignature;
 
-    private String warrantyPolicy;
-
     private float contractTotalAmount;
 
     private LocalDateTime completeDate;

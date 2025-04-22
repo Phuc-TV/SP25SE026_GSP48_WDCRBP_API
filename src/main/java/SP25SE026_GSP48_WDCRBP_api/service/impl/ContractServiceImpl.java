@@ -83,7 +83,6 @@ public class ContractServiceImpl implements ContractService {
                         requestedProductRepository.findRequestedProductByRequestedProductId(wwCreateContractCustomizeRequest.getRequestedProductIds().get(i));
                 requestedProduct.setWarrantyDuration(warrantyDuration);
             }
-            contract.setWarrantyPolicy(wwCreateContractCustomizeRequest.getWarrantyPolicy());
             contract.setCompleteDate(wwCreateContractCustomizeRequest.getCompleteDate());
             contract.setWoodworkerSignature(wwCreateContractCustomizeRequest.getWoodworkerSignature());
             contract.setSignDate(LocalDateTime.now());
@@ -116,8 +115,6 @@ public class ContractServiceImpl implements ContractService {
         }
         else
         {
-            if (wwCreateContractCustomizeRequest.getWarrantyPolicy() != null)
-                contract1.setWarrantyPolicy(wwCreateContractCustomizeRequest.getWarrantyPolicy());
             if (wwCreateContractCustomizeRequest.getCompleteDate() != null)
                 contract1.setCompleteDate(wwCreateContractCustomizeRequest.getCompleteDate());
             for (int i = 0; i < wwCreateContractCustomizeRequest.getWarrantyDurations().size(); i++)

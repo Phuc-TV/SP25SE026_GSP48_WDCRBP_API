@@ -23,6 +23,9 @@ public class WoodworkerProfile {
     @Column(nullable = true,length = 2000)
     private String bio;
 
+    @Column(nullable = true,length = 2000)
+    private String warrantyPolicy;
+
     @Column(nullable = true)
     private int rating;
 

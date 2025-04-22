@@ -17,18 +17,37 @@ public class Complaint {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long complaintId;
 
-    @ManyToOne
-    @JoinColumn(name = "user_id", nullable = true)
-    private User user;
+    @Column(nullable = true)
+    private String complaintType;
 
-    @Column(nullable = true,length = 2000)
+    @Column(nullable = true,length = 500)
     private String description;
 
+    @Column(nullable = true,length = 500)
+    private String woodworkerResponse;
+
+    @Column(nullable = true,length = 500)
+    private String staffResponse;
+
+    @Column(nullable = true,length = 2000)
+    private String proofImgUrls;
+
     @Column(nullable = true)
-    private Boolean status;
+    private String status;
 
     @Column(nullable = true)
     private LocalDateTime createdAt;
+
+    @Column(nullable = true)
+    private float refundAmount;
+
+    @OneToOne
+    @JoinColumn(name = "refund_credit_transaction_id", nullable = true)
+    private Transaction refundCreditTransaction;
+
+    @OneToOne
+    @JoinColumn(name = "refund_debit_transaction_id", nullable = true)
+    private Transaction refundDebitTransaction;
 
     @Column(nullable = true)
     private LocalDateTime updatedAt;
@@ -36,4 +55,8 @@ public class Complaint {
     @ManyToOne
     @JoinColumn(name = "orderId", nullable = true)
     private ServiceOrder serviceOrder;
+
+    @ManyToOne
+    @JoinColumn(name = "staff_user_id", nullable = true)
+    private User staffUser;
 }

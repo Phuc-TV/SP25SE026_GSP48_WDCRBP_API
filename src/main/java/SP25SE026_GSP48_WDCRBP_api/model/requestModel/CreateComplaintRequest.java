@@ -10,11 +10,6 @@ import lombok.*;
 @NoArgsConstructor
 @Builder
 public class CreateComplaintRequest {
-
-    @NotNull(message = "User ID cannot be null")
-    @Positive(message = "User ID must be a positive number")
-    private Long userId;
-
     @NotBlank(message = "Description cannot be blank")
     @Size(max = 500, message = "Description cannot exceed 500 characters")
     private String description;
@@ -22,4 +17,8 @@ public class CreateComplaintRequest {
     @NotNull(message = "Service Order ID cannot be null")
     @Positive(message = "Service Order ID must be a positive number")
     private Long serviceOrderId;
+
+    private String complaintType;
+
+    private String proofImgUrls;
 }

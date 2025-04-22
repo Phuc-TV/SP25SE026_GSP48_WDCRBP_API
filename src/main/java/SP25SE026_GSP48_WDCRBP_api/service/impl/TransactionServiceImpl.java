@@ -238,6 +238,7 @@ public class TransactionServiceImpl implements TransactionService {
         dto.setUserId(tx.getUser() != null ? tx.getUser().getUserId() : null);
         dto.setOrderDepositId(tx.getOrderDeposit() != null ? tx.getOrderDeposit().getOrderDepositId() : null);
         dto.setWalletId(tx.getWallet() != null ? tx.getWallet().getWalletId() : null);
+        dto.setPaymentFor(tx.getPaymentFor());
         return dto;
     }
 }

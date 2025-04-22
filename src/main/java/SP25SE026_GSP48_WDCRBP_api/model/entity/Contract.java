@@ -27,9 +27,6 @@ public class Contract {
     @Column(nullable = true,length = 2000)
     private String woodworkerTerms;
 
-    @Column(nullable = true,length = 2000)
-    private String warrantyPolicy;
-
     @Column(nullable = true)
     private float contractTotalAmount;
 

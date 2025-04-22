@@ -11,15 +11,11 @@ import lombok.*;
 @Builder
 public class UpdateComplaintRequest {
 
-    @NotNull(message = "Service Order ID cannot be null")
-    @Positive(message = "Service Order ID must be a positive number")
-    private Long serviceOrderId;
+    @NotNull(message = "complaintId cannot be null")
+    @Positive(message = "complaintId must be a positive number")
+    private Long complaintId;
 
-    @NotBlank(message = "Description cannot be blank")
-    @Size(max = 500, message = "Description cannot exceed 500 characters")
-    private String description;
-
-    @NotNull(message = "User ID cannot be null")
-    @Positive(message = "User ID must be a positive number")
-    private Long userId;
+    @NotBlank(message = "woodworkerResponse cannot be blank")
+    @Size(max = 500, message = "woodworkerResponse cannot exceed 500 characters")
+    private String woodworkerResponse;
 }
