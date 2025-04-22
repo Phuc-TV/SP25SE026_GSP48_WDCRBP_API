@@ -26,4 +26,6 @@ public class CreateGuaranteeOrderRequest {
     private int priceShipping;
     private String productCurrentStatus;
     private String currentProductImgUrls;
+    private String guaranteeError;
+    private Boolean isGuarantee;
 }

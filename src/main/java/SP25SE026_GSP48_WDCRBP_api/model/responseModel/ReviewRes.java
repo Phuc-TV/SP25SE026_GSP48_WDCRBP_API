@@ -13,7 +13,8 @@ public class ReviewRes {
     private Long reviewId;
     private Long userId;
     private String username;
-    private String description;
+    private Long woodworkerId;
+    private String brandName;
     private Integer rating;
     private String comment;
     private LocalDateTime createdAt;

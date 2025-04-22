@@ -7,5 +7,4 @@ import java.util.List;
 
 public interface ReviewRepository extends CrudRepository<Review, Long> {
     List<Review> findAllByStatusFalse();
-    List<Review> findAllByStatusFalseAndWoodworkerResponseIsNotNull();
 }

@@ -21,6 +21,8 @@ public class GuaranteeOrderDetailRes {
     private String currentProductImgUrls;
     private Float shipFee;
     private boolean isInstall;
+    private Boolean isGuarantee;
+    private String guaranteeError;
     private String status;
     private Float amountPaid;
     private Float amountRemaining;

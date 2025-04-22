@@ -26,6 +26,8 @@ public class GuaranteeOrderListItemRes {
     private boolean isInstall;
     private String currentProductImgUrls;
     private String status;
+    private Boolean isGuarantee;
+    private String guaranteeError;
     private Float amountPaid;
     private Float amountRemaining;
     private RequestedProductListItemRes requestedProduct;

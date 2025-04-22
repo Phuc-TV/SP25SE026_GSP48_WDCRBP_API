@@ -261,7 +261,7 @@ public class ServiceOrderServiceImpl implements ServiceOrderService {
         }
 
         serviceOrder.setTotalAmount(totalAmount + createServiceOrderCusRequest.getPriceShipping());
-        serviceOrder.setAmountRemaining(totalAmount);
+        serviceOrder.setAmountRemaining(totalAmount + createServiceOrderCusRequest.getPriceShipping());
         serviceOrder.setShipFee((float)createServiceOrderCusRequest.getPriceShipping());
         serviceOrder.setAmountPaid(0.f);
         orderRepository.save(serviceOrder);
@@ -349,7 +349,7 @@ public class ServiceOrderServiceImpl implements ServiceOrderService {
         }
 
         serviceOrder.setTotalAmount(totalAmount + request.getPriceShipping());
-        serviceOrder.setAmountRemaining(totalAmount);
+        serviceOrder.setAmountRemaining(totalAmount + request.getPriceShipping());
         serviceOrder.setShipFee((float)request.getPriceShipping());
         serviceOrder.setAmountPaid(0.f);
         orderRepository.save(serviceOrder);

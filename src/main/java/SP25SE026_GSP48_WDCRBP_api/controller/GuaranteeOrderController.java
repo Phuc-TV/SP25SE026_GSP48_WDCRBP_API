@@ -106,4 +106,17 @@ public class GuaranteeOrderController {
             return CoreApiResponse.error("Lỗi hệ thống");
         }
     }
+
+    @SecurityRequirement(name = "Bear Authentication")
+    @PostMapping("/accept-free")
+    public CoreApiResponse acceptFreeGuarantee(
+            @RequestParam Long guaranteeOrderId) {
+        try {
+            guaranteeOrderService.acceptGuaranteeFreeOrder(guaranteeOrderId);
+
+            return CoreApiResponse.success("Success");
+        } catch (Exception e) {
+            return CoreApiResponse.error("Lỗi hệ thống");
+        }
+    }
 }
