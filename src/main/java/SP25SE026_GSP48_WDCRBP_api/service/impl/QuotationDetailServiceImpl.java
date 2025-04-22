@@ -145,6 +145,48 @@ public class QuotationDetailServiceImpl implements QuotationDetailService {
     }
 
     @Override
+    public void saveQuotationForFreeGuarantee(Long guaranteeOrderId) {
+        GuaranteeOrder guaranteeOrder = guaranteeOrderRepository.findById(guaranteeOrderId)
+                .orElseThrow(() -> new RuntimeException("RequestedProduct not found"));
+
+        quotationDetailRepository.deleteByGuaranteeOrder(guaranteeOrder);
+
+        float totalAmount = Optional.ofNullable(guaranteeOrder.getShipFee()).orElse(0f);
+
+        QuotationDetail detail = QuotationDetail.builder()
+                .costType("Bảo hành miễn phí")
+                .costAmount(0f)
+                .quantityRequired("1")
+                .guaranteeOrder(guaranteeOrder)
+                .build();
+        quotationDetailRepository.save(detail);
+
+        guaranteeOrder.setStatus(GuaranteeOrderStatusConstant.DANG_CHO_NHAN_HANG);
+
+        OrderProgress newOrderProgress = new OrderProgress();
+        newOrderProgress.setGuaranteeOrder(guaranteeOrder);
+        newOrderProgress.setCreatedTime(LocalDateTime.now());
+        newOrderProgress.setStatus(GuaranteeOrderStatusConstant.DANG_CHO_NHAN_HANG);
+        orderProgressRepository.save(newOrderProgress);
+
+        guaranteeOrder.setTotalAmount(totalAmount);
+        guaranteeOrder.setAmountPaid(0f);
+        guaranteeOrder.setAmountRemaining(totalAmount);
+        guaranteeOrder.setIsGuarantee(true);
+        guaranteeOrder.setRole("Woodworker");
+        guaranteeOrder.setFeedback("");
+        guaranteeOrderRepository.save(guaranteeOrder);
+
+        OrderDeposit orderDeposit = new OrderDeposit();
+        orderDeposit.setAmount(totalAmount);
+        orderDeposit.setDepositNumber((short) 1);
+        orderDeposit.setPercent((short) 100);
+        orderDeposit.setGuaranteeOrder(guaranteeOrder);
+        orderDeposit.setCreatedAt(LocalDateTime.now());
+        orderDepositRepository.save(orderDeposit);
+    }
+
+    @Override
     @Transactional(readOnly = true)
     public QuotationDetailRes getAllByGuaranteeOrderId(Long guaranteeServiceId) {
         GuaranteeOrder guaranteeOrder = guaranteeOrderRepository.findById(guaranteeServiceId)

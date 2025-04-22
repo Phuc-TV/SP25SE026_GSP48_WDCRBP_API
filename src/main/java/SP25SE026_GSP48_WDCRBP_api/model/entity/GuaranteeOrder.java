@@ -45,6 +45,12 @@ public class GuaranteeOrder {
     private boolean isInstall;
 
     @Column(nullable = true)
+    private Boolean isGuarantee;
+
+    @Column(nullable = true)
+    private String guaranteeError;
+
+    @Column(nullable = true)
     private Float amountPaid;
 
     @Column(nullable = true)

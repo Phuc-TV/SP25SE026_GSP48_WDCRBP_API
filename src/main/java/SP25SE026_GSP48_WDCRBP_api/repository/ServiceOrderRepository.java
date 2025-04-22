@@ -19,17 +19,6 @@ public interface ServiceOrderRepository extends JpaRepository<ServiceOrder, Long
 
     List<ServiceOrder> findAllByAvailableService_AvailableServiceIdIn(List<Long> availableServiceIds);
 
-    @Query("""
-        SELECT so FROM ServiceOrder so
-        JOIN so.review r
-        JOIN so.availableService avs
-        JOIN avs.woodworkerProfile wp
-        JOIN Product p ON p.woodworkerProfile = wp
-        WHERE p.productId = :productId 
-        AND r.status = true
-    """)
-    List<ServiceOrder> findServiceOrdersByProductId(@Param("productId") Long productId);
-
     ServiceOrder findServiceOrderByReview(Review review);
 }
 

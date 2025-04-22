@@ -11,6 +11,7 @@ public interface QuotationDetailService {
     void saveQuotationDetail(QuotationDetailRequest requestDTO);
     List<QuotationDetailRes> getAllByServiceOrderId(Long serviceOrderId);
     void saveQuotationDetailForGuarantee(GuaranteeQuotationDetailRequest requestDTO);
+    void saveQuotationForFreeGuarantee(Long guaranteeOrderId);
     QuotationDetailRes getAllByGuaranteeOrderId(Long guaranteeServiceId);
     void acceptQuotation(Long guaranteeOrderId);
 }

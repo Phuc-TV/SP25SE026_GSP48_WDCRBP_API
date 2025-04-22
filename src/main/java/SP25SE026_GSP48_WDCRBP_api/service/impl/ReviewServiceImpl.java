@@ -19,6 +19,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
+import java.util.stream.StreamSupport;
 
 @Service
 @RequiredArgsConstructor
@@ -53,32 +54,33 @@ public class ReviewServiceImpl implements ReviewService {
         List<ReviewRes> serviceOrderReviews = orders.stream()
                 .map(order -> {
                     Review review = order.getReview();
-                    if (review != null && review.getStatus() != null) {
+                    if (review != null && review.getStatus() != null && review.getStatus()) {
                         String serviceName = order.getAvailableService().getService().getServiceName();
                         return toReviewRes(review, serviceName);
                     }
                     return null;
                 })
                 .filter(Objects::nonNull)
-                .collect(Collectors.toList());
+                .toList();
 
         List<ReviewRes> guaranteeOrderReviews = guaranteeOrders.stream()
                 .map(order -> {
                     Review review = order.getReview();
-                    if (review != null && review.getStatus() != null) {
+                    if (review != null && review.getStatus() != null && review.getStatus()) {
                         String serviceName = order.getAvailableService().getService().getServiceName();
                         return toReviewRes(review, serviceName);
                     }
                     return null;
                 })
                 .filter(Objects::nonNull)
-                .collect(Collectors.toList());
+                .toList();
 
         // Step 4: Combine both lists
         List<ReviewRes> allReviews = new ArrayList<>();
         allReviews.addAll(serviceOrderReviews);
         allReviews.addAll(guaranteeOrderReviews);
 
+        allReviews.sort((o1, o2) -> o2.getCreatedAt().compareTo(o1.getCreatedAt()));
         return allReviews;
     }
 
@@ -102,45 +104,59 @@ public class ReviewServiceImpl implements ReviewService {
         List<ReviewRes> serviceOrderReviews = orders.stream()
                 .map(order -> {
                     Review review = order.getReview();
-                    if (review != null && review.getStatus() != null && review.getWoodworkerResponse() == null) {
+                    if (review != null && review.getStatus() != null && review.getStatus() && review.getWoodworkerResponse() == null) {
                         String serviceName = order.getAvailableService().getService().getServiceName();
                         return toReviewRes(review, serviceName);
                     }
                     return null;
                 })
                 .filter(Objects::nonNull)
-                .collect(Collectors.toList());
+                .toList();
 
         // Step 4: Lấy review chưa được phản hồi từ GuaranteeOrder
         List<ReviewRes> guaranteeOrderReviews = guaranteeOrders.stream()
                 .map(order -> {
                     Review review = order.getReview();
-                    if (review != null && review.getStatus() != null && review.getWoodworkerResponse() == null) {
+                    if (review != null && review.getStatus() != null && review.getStatus() && review.getWoodworkerResponse() == null) {
                         String serviceName = order.getAvailableService().getService().getServiceName();
                         return toReviewRes(review, serviceName);
                     }
                     return null;
                 })
                 .filter(Objects::nonNull)
-                .collect(Collectors.toList());
+                .toList();
 
         // Step 5: Gộp cả hai list lại
         List<ReviewRes> allReviews = new ArrayList<>();
         allReviews.addAll(serviceOrderReviews);
         allReviews.addAll(guaranteeOrderReviews);
 
+        allReviews.sort((o1, o2) -> o2.getCreatedAt().compareTo(o1.getCreatedAt()));
         return allReviews;
     }
 
     @Override
     public List<ReviewRes> getReviewsByProductId(Long productId) {
-        Product product = productRepository.findById(productId).orElse(null);
+        Product product = productRepository.findProductByProductId(productId);
         if (product == null) return new ArrayList<>();
 
-        List<ServiceOrder> orders = serviceOrderRepository.findServiceOrdersByProductId(productId);
+        List<ServiceOrder> orders = serviceOrderRepository.findAll();
 
         return orders.stream()
-                .map(order -> toReviewRes(order.getReview(), product.getProductName()))
+                .filter(order -> order.getAvailableService() != null)
+                .filter(order -> order.getAvailableService().getWoodworkerProfile() != null)
+                .filter(order -> order.getAvailableService().getWoodworkerProfile().getWoodworkerId().equals(
+                        product.getWoodworkerProfile().getWoodworkerId()
+                ))
+                .filter(order -> {
+                    List<RequestedProduct> products = order.getRequestedProducts();
+                    return products.stream()
+                            .anyMatch(item -> item.getProduct() != null && item.getProduct().getProductId().equals(productId));
+                })
+                .map(ServiceOrder::getReview)
+                .filter(review -> review != null && review.getStatus() != null && review.getStatus())
+                .map(review -> toReviewRes(review,""))
+                .sorted((o1, o2) -> o2.getCreatedAt().compareTo(o1.getCreatedAt()))
                 .collect(Collectors.toList());
     }
 
@@ -157,9 +173,15 @@ public class ReviewServiceImpl implements ReviewService {
                 .filter(order -> order.getAvailableService().getWoodworkerProfile().getWoodworkerId().equals(
                         designIdea.getWoodworkerProfile().getWoodworkerId()
                 ))
+                .filter(order -> {
+                     List<RequestedProduct> products = order.getRequestedProducts();
+                        return products.stream()
+                                .anyMatch(product -> product.getDesignIdeaVariant() != null && product.getDesignIdeaVariant().getDesignIdea().getDesignIdeaId().equals(designId));
+                 })
                 .map(ServiceOrder::getReview)
-                .filter(review -> review != null && review.getStatus() != null)
+                .filter(review -> review != null && review.getStatus() != null && review.getStatus())
                 .map(review -> toReviewRes(review,""))
+                .sorted((o1, o2) -> o2.getCreatedAt().compareTo(o1.getCreatedAt()))
                 .collect(Collectors.toList());
     }
 
@@ -191,6 +213,9 @@ public class ReviewServiceImpl implements ReviewService {
                 .reviewId(review.getReviewId())
                 .userId(review.getUser().getUserId())
                 .username(review.getUser().getUsername())
+                .status(review.getStatus())
+                .brandName(serviceOrder != null ? serviceOrder.getAvailableService().getWoodworkerProfile().getBrandName() : guaranteeOrder.getAvailableService().getWoodworkerProfile().getBrandName())
+                .woodworkerId(serviceOrder != null ? serviceOrder.getAvailableService().getWoodworkerProfile().getWoodworkerId() : guaranteeOrder.getAvailableService().getWoodworkerProfile().getWoodworkerId())
                 .rating(review.getRating())
                 .comment(review.getComment())
                 .createdAt(review.getCreatedAt())
@@ -279,7 +304,18 @@ public class ReviewServiceImpl implements ReviewService {
                 designIdeaRepository.save(designIdea);
             }
         } else if (serviceOrder.getAvailableService().getService().getServiceName().equals(ServiceNameConstant.SALE)) {
+            List<RequestedProduct> requestedProducts = serviceOrder.getRequestedProducts();
 
+            for (RequestedProduct requestedProduct : requestedProducts) {
+                Product product = requestedProduct.getProduct();
+                product.setTotalStar((short) (
+                        Optional.ofNullable(product.getTotalStar()).orElse((short) 0) + review.getRating()
+                ));
+                product.setTotalReviews((short) (
+                        Optional.ofNullable(product.getTotalReviews()).orElse((short) 0) + 1
+                ));
+                productRepository.save(product);
+            }
         }
     }
 
@@ -341,7 +377,13 @@ public class ReviewServiceImpl implements ReviewService {
 
     @Override
     public List<ReviewRes> getPendingReviewsWithWoodworkerResponse() {
-        List<Review> reviews = reviewRepository.findAllByStatusFalseAndWoodworkerResponseIsNotNull();
+        Iterable<Review> allReviews = reviewRepository.findAll();
+
+        List<Review> reviews = StreamSupport.stream(allReviews.spliterator(), false)
+                .filter(r -> Boolean.FALSE.equals(r.getWoodworkerResponseStatus())
+                        && Boolean.TRUE.equals(r.getStatus()) && r.getWoodworkerResponse() != null)
+                .toList();
+
         return reviews.stream()
                 .map(review -> toReviewRes(review, ""))
                 .collect(Collectors.toList());

@@ -21,4 +21,6 @@ public interface GuaranteeOrderService {
     void confirmFinishRepair(Long guaranteeOrderId);
 
     void customerFeedback(Long guaranteeOrderId, String feedback);
+
+    void acceptGuaranteeFreeOrder(Long guaranteeOrderId);
 }

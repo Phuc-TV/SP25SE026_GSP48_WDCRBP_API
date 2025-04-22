@@ -7,6 +7,7 @@ import SP25SE026_GSP48_WDCRBP_api.model.requestModel.CreateGuaranteeOrderRequest
 import SP25SE026_GSP48_WDCRBP_api.model.responseModel.*;
 import SP25SE026_GSP48_WDCRBP_api.repository.*;
 import SP25SE026_GSP48_WDCRBP_api.service.GuaranteeOrderService;
+import SP25SE026_GSP48_WDCRBP_api.service.QuotationDetailService;
 import SP25SE026_GSP48_WDCRBP_api.service.ServiceOrderService;
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
@@ -27,8 +28,9 @@ public class GuaranteeOrderServiceImpl implements GuaranteeOrderService  {
     private final WoodworkerProfileRepository woodworkerProfileRepository;
     private final ServiceOrderService serviceOrderService;
     private final ConsultantAppointmentRepository consultantAppointmentRepository;
+    private final QuotationDetailService quotationDetailService;
 
-    public GuaranteeOrderServiceImpl(UserRepository userRepository, AvailableServiceRepository availableServiceRepository, GuaranteeOrderRepository guaranteeOrderRepository, RequestedProductRepository requestedProductRepository, OrderProgressRepository orderProgressRepository, ShipmentRepository shipmentRepository, ModelMapper modelMapper, WoodworkerProfileRepository woodworkerProfileRepository, ServiceOrderService serviceOrderService, ConsultantAppointmentRepository consultantAppointmentRepository) {
+    public GuaranteeOrderServiceImpl(UserRepository userRepository, AvailableServiceRepository availableServiceRepository, GuaranteeOrderRepository guaranteeOrderRepository, RequestedProductRepository requestedProductRepository, OrderProgressRepository orderProgressRepository, ShipmentRepository shipmentRepository, ModelMapper modelMapper, WoodworkerProfileRepository woodworkerProfileRepository, ServiceOrderService serviceOrderService, ConsultantAppointmentRepository consultantAppointmentRepository, QuotationDetailService quotationDetailService) {
         this.userRepository = userRepository;
         this.availableServiceRepository = availableServiceRepository;
         this.guaranteeOrderRepository = guaranteeOrderRepository;
@@ -39,6 +41,7 @@ public class GuaranteeOrderServiceImpl implements GuaranteeOrderService  {
         this.woodworkerProfileRepository = woodworkerProfileRepository;
         this.serviceOrderService = serviceOrderService;
         this.consultantAppointmentRepository = consultantAppointmentRepository;
+        this.quotationDetailService = quotationDetailService;
     }
 
     @Override
@@ -63,6 +66,8 @@ public class GuaranteeOrderServiceImpl implements GuaranteeOrderService  {
         order.setCurrentProductImgUrls(request.getCurrentProductImgUrls());
         order.setRequestedProduct(requestedProduct);
         order.setShipFee((float)request.getPriceShipping());
+        order.setGuaranteeError(request.getGuaranteeError());
+        order.setIsGuarantee(request.getIsGuarantee());
         guaranteeOrderRepository.save(order);
 
         //Create OrderProgress
@@ -205,6 +210,7 @@ public class GuaranteeOrderServiceImpl implements GuaranteeOrderService  {
 
                     order.setConsultantAppointment(consultantAppointment);
                     order.setStatus(GuaranteeOrderStatusConstant.DANG_CHO_KHACH_DUYET_LICH_HEN);
+                    order.setIsGuarantee(false);
                     newOrderProgress.setStatus(GuaranteeOrderStatusConstant.DANG_CHO_KHACH_DUYET_LICH_HEN);
                 }
 
@@ -276,5 +282,10 @@ public class GuaranteeOrderServiceImpl implements GuaranteeOrderService  {
             order.setRole("Woodworker");
             guaranteeOrderRepository.save(order);
         }
+    }
+
+    @Override
+    public void acceptGuaranteeFreeOrder(Long guaranteeOrderId) {
+        quotationDetailService.saveQuotationForFreeGuarantee(guaranteeOrderId);
     }
 }
