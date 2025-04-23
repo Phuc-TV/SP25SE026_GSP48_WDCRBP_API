@@ -6,4 +6,6 @@ import lombok.Data;
 public class ServiceDepositBriefRes {
     private Long serviceDepositId;
     private Short percent;
+    private Short depositNumber;
+    private String description;
 }

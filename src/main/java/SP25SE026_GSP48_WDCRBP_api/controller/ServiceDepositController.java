@@ -23,8 +23,7 @@ public class ServiceDepositController {
     public CoreApiResponse<List<UpdateServiceDepositPercentRes>> updatePercentForAllDeposits(
             @RequestBody UpdateServiceDepositPercentRequest request) {
         try {
-            List<UpdateServiceDepositPercentRes> updatedDeposits = serviceDepositService
-                    .updatePercentAllServiceDepositByServiceId(request.getServiceId(), request.getNewPercent());
+            List<UpdateServiceDepositPercentRes> updatedDeposits =serviceDepositService.updateDepositPercents(request);
             return CoreApiResponse.success(updatedDeposits, "Updated all deposits successfully");
         } catch (EntityNotFoundException ex) {
             return CoreApiResponse.error(HttpStatus.NOT_FOUND, ex.getMessage());
