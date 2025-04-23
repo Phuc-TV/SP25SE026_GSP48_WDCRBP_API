@@ -128,14 +128,4 @@ public class WoodworkerProfileController {
             return CoreApiResponse.error(HttpStatus.BAD_REQUEST, "Không thể cập nhật chính sách bảo hành: " + e.getMessage());
         }
     }
-
-    @PostMapping("/get-warranty-policy")
-    public CoreApiResponse<WoodworkerProfileDetailRes> getWarrantyPolicy(@RequestBody @Valid GetWarrantyPolicyByWwIdRequest request) {
-        try {
-            WoodworkerProfileDetailRes result = woodworkerProfileService.getWarrantyPolicyByWwId(request);
-            return CoreApiResponse.success(result, "Lấy chính sách bảo hành thành công");
-        } catch (Exception e) {
-            return CoreApiResponse.error(HttpStatus.BAD_REQUEST, "Không thể lấy chính sách bảo hành: " + e.getMessage());
-        }
-    }
 }
