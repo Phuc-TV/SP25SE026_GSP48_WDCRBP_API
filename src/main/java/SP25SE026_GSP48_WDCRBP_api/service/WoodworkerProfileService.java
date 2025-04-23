@@ -32,7 +32,5 @@ public interface WoodworkerProfileService {
 
     WoodworkerProfileDetailRes updateWoodworkerProfile(UpdateWoodworkerProfileRequest request);
 
-    WoodworkerProfileDetailRes getWarrantyPolicyByWwId(GetWarrantyPolicyByWwIdRequest request);
-
     WoodworkerProfileDetailRes updateWarrantyPolicyByWwId(UpdateWarrantyPolicyByWwIdRequest request);
 }

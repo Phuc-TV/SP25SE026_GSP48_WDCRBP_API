@@ -391,18 +391,12 @@ public class WoodworkerProfileServiceImpl implements WoodworkerProfileService {
 
         profile.setBrandName(request.getBrandName());
         profile.setBio(request.getBio());
-        profile.setWarrantyPolicy(request.getWarrantyPolicy());
-        profile.setRating(request.getRating());
-        profile.setVerificationStauts(request.getVerificationStauts());
-        profile.setNoOrder(request.getNoOrder());
         profile.setBusinessType(request.getBusinessType());
         profile.setImgUrl(request.getImgUrl());
         profile.setAddress(request.getAddress());
         profile.setWardCode(request.getWardCode());
         profile.setDistrictId(request.getDistrictId());
         profile.setCityId(request.getCityId());
-        profile.setTotalStar(request.getTotalStar());
-        profile.setTotalReviews(request.getTotalReviews());
         profile.setUpdatedAt(LocalDateTime.now());
 
         WoodworkerProfile updatedProfile = wwRepository.save(profile);
@@ -442,13 +436,6 @@ public class WoodworkerProfileServiceImpl implements WoodworkerProfileService {
         }
 
         return dto;
-    }
-
-    @Override
-    public WoodworkerProfileDetailRes getWarrantyPolicyByWwId(GetWarrantyPolicyByWwIdRequest request) {
-        WoodworkerProfile profile = wwRepository.findById(request.getWoodworkerId())
-                .orElseThrow(() -> new RuntimeException("Không tìm thấy xưởng mộc"));
-        return toDetailDto(profile); // Already contains warrantyPolicy field
     }
 
     @Override

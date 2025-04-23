@@ -23,6 +23,7 @@ public class ProductRes {
     private String color;
     private String specialFeature;
     private String style;
+    private String businessType;
     private String sculpture;
     private String scent;
     private Short totalStar;
@@ -41,4 +42,6 @@ public class ProductRes {
     private Boolean isInstall;
     private String wardCode;
     private String districtId;
+    private Short woodworkerTotalStar;
+    private Short woodworkerTotalReviews;
 }

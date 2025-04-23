@@ -132,6 +132,7 @@ public class ProductServiceImpl implements ProductService {
                 .length(product.getLength())
                 .width(product.getWidth())
                 .height(product.getHeight())
+                .businessType(product.getWoodworkerProfile().getBusinessType())
                 .mediaUrls(product.getMediaUrls())
                 .woodType(product.getWoodType())
                 .color(product.getColor())
@@ -154,6 +155,8 @@ public class ProductServiceImpl implements ProductService {
                 .isWoodworkerProfilePublic(product.getWoodworkerProfile().getPublicStatus())
                 .wardCode(product.getWoodworkerProfile().getWardCode())
                 .districtId(product.getWoodworkerProfile().getDistrictId())
+                .woodworkerTotalStar(product.getWoodworkerProfile().getTotalStar())
+                .woodworkerTotalReviews(product.getWoodworkerProfile().getTotalReviews())
                 .build();
     }
 
