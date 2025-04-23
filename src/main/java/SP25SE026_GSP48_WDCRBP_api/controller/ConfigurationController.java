@@ -1,5 +1,7 @@
 package SP25SE026_GSP48_WDCRBP_api.controller;
 
+import SP25SE026_GSP48_WDCRBP_api.model.requestModel.ConfigurationNameRequest;
+import SP25SE026_GSP48_WDCRBP_api.model.requestModel.ConfigurationUpdateRequest;
 import SP25SE026_GSP48_WDCRBP_api.components.CoreApiResponse;
 import SP25SE026_GSP48_WDCRBP_api.model.requestModel.ConfigurationSearchRequest;
 import SP25SE026_GSP48_WDCRBP_api.model.requestModel.ConfigurationUpsertRequest;
@@ -70,6 +72,29 @@ public class ConfigurationController {
             return CoreApiResponse.success("Xóa cấu hình thành công");
         } catch (Exception e) {
             return CoreApiResponse.error(HttpStatus.INTERNAL_SERVER_ERROR, "Lỗi khi xóa cấu hình: " + e.getMessage());
+        }
+    }
+
+    @PostMapping("/getByName")
+    public CoreApiResponse<ConfigurationRes> getConfigByName(@Valid @RequestBody ConfigurationNameRequest request) {
+        try {
+            String value = configurationService.getValue(request.getName());
+            ConfigurationRes res = new ConfigurationRes();
+            res.setName(request.getName());
+            res.setValue(value);
+            return CoreApiResponse.success(res, "Lấy giá trị cấu hình thành công");
+        } catch (Exception e) {
+            return CoreApiResponse.error(HttpStatus.INTERNAL_SERVER_ERROR, "Lỗi khi lấy cấu hình: " + e.getMessage());
+        }
+    }
+
+    @PutMapping("/updateValue")
+    public CoreApiResponse<ConfigurationRes> updateConfigValue(@Valid @RequestBody ConfigurationUpdateRequest request) {
+        try {
+            ConfigurationRes updated = configurationService.update(request);
+            return CoreApiResponse.success(updated, "Cập nhật giá trị cấu hình thành công");
+        } catch (Exception e) {
+            return CoreApiResponse.error(HttpStatus.INTERNAL_SERVER_ERROR, "Lỗi khi cập nhật cấu hình: " + e.getMessage());
         }
     }
 }

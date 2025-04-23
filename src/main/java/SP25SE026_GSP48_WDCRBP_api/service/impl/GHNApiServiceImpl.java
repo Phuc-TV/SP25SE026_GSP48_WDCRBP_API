@@ -115,7 +115,7 @@ public class GHNApiServiceImpl implements GHNApiService {
         request.setWeight(Math.min(totalWeight, 50000));
 
         HttpHeaders headers = getDefaultHeaders();
-        headers.set("ShopId", "196376"); // có thể cho vào config DB nếu muốn linh hoạt
+        headers.set("ShopId", getShopIdFromConfig()); // có thể cho vào config DB nếu muốn linh hoạt
 
         HttpEntity<CalculateFeeRequest> entity = new HttpEntity<>(request, headers);
 
@@ -127,7 +127,7 @@ public class GHNApiServiceImpl implements GHNApiService {
     @Override
     public CoreApiResponse getAvailableService(GetGHNAvailableServiceRequest request) {
         HttpHeaders headers = getDefaultHeaders();
-        request.setShop_id(196376);
+        request.setShop_id(Integer.parseInt(getShopIdFromConfig()));
 
         HttpEntity<GetGHNAvailableServiceRequest> entity = new HttpEntity<>(request, headers);
 
@@ -159,7 +159,7 @@ public class GHNApiServiceImpl implements GHNApiService {
     @Override
     public CoreApiResponse createOrder(Long serviceOrderId, CreateOrderGhnApiRequest request) {
         HttpHeaders headers = getDefaultHeaders();
-        headers.set("ShopId", "196376"); // Lưu ý: Bạn có thể lấy ShopId từ DB (ConfigurationService)
+        headers.set("ShopId", getShopIdFromConfig()); // Lưu ý: Bạn có thể lấy ShopId từ DB (ConfigurationService)
 
         // Tính toán từ danh sách items
         if (request.getItems() == null || request.getItems().isEmpty()) {
@@ -206,5 +206,14 @@ public class GHNApiServiceImpl implements GHNApiService {
         String url = "https://dev-online-gateway.ghn.vn/shiip/public-api/v2/shipping-order/detail";
 
         return callExternalAPI(url, HttpMethod.POST, entity);
+    }
+
+    private String getShopIdFromConfig() {
+        List<Configuration> configurations = (List<Configuration>) configurationService.getAllConfiguration().getData();
+        return configurations.stream()
+                .filter(config -> "GHN_Shop_ID".equals(config.getDescription()))
+                .findFirst()
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy cấu hình GHN_Shop_ID"))
+                .getValue();
     }
 }

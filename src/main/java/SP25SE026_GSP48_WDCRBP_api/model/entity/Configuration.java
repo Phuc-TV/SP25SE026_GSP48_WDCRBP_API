@@ -29,4 +29,7 @@ public class Configuration {
 
     @Column(nullable = true)
     private LocalDateTime updatedAt;
+
+    @Column(nullable = true)
+    private String name;
 }

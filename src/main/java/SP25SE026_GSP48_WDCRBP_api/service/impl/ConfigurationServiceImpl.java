@@ -3,6 +3,7 @@ package SP25SE026_GSP48_WDCRBP_api.service.impl;
 import SP25SE026_GSP48_WDCRBP_api.components.CoreApiResponse;
 import SP25SE026_GSP48_WDCRBP_api.model.entity.Configuration;
 import SP25SE026_GSP48_WDCRBP_api.model.requestModel.ConfigurationSearchRequest;
+import SP25SE026_GSP48_WDCRBP_api.model.requestModel.ConfigurationUpdateRequest;
 import SP25SE026_GSP48_WDCRBP_api.model.requestModel.ConfigurationUpsertRequest;
 import SP25SE026_GSP48_WDCRBP_api.model.responseModel.ConfigurationRes;
 import SP25SE026_GSP48_WDCRBP_api.repository.ConfigurationRepository;
@@ -87,8 +88,28 @@ public class ConfigurationServiceImpl implements ConfigurationService {
                 .configurationId(entity.getConfigurationId())
                 .description(entity.getDescription())
                 .value(entity.getValue())
+                .name(entity.getName())
                 .createdBy(entity.getCreatedBy())
                 .updatedAt(entity.getUpdatedAt())
                 .build();
+    }
+
+    @Override
+    public String getValue(String name) {
+        return configurationRepository.findByName(name).map(Configuration::getValue).orElse(null);
+    }
+
+    @Override
+    public ConfigurationRes update(ConfigurationUpdateRequest request) {
+        Configuration config = configurationRepository.findById(request.getConfigurationId())
+                .orElseThrow(() -> new RuntimeException("Configuration not found"));
+
+        config.setDescription(request.getDescription());
+        config.setValue(request.getValue());
+        config.setName(request.getName());
+        config.setUpdatedAt(LocalDateTime.now());
+
+        Configuration updated = configurationRepository.save(config);
+        return toDTO(updated);
     }
 }
