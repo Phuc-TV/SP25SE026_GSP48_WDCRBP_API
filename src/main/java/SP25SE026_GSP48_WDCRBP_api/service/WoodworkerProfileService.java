@@ -1,6 +1,8 @@
 package SP25SE026_GSP48_WDCRBP_api.service;
 
-import SP25SE026_GSP48_WDCRBP_api.model.entity.WoodworkerProfile;
+import SP25SE026_GSP48_WDCRBP_api.model.requestModel.GetWarrantyPolicyByWwIdRequest;
+import SP25SE026_GSP48_WDCRBP_api.model.requestModel.UpdateWarrantyPolicyByWwIdRequest;
+import SP25SE026_GSP48_WDCRBP_api.model.requestModel.UpdateWoodworkerProfileRequest;
 import SP25SE026_GSP48_WDCRBP_api.model.requestModel.UpdateStatusPublicRequest;
 import SP25SE026_GSP48_WDCRBP_api.model.requestModel.UpdateWoodworkerServicePackRequest;
 import SP25SE026_GSP48_WDCRBP_api.model.requestModel.WoodworkerRequest;
@@ -28,4 +30,9 @@ public interface WoodworkerProfileService {
 
     UpdateStatusPublicRes updatePublicStatus(UpdateStatusPublicRequest request);
 
+    WoodworkerProfileDetailRes updateWoodworkerProfile(UpdateWoodworkerProfileRequest request);
+
+    WoodworkerProfileDetailRes getWarrantyPolicyByWwId(GetWarrantyPolicyByWwIdRequest request);
+
+    WoodworkerProfileDetailRes updateWarrantyPolicyByWwId(UpdateWarrantyPolicyByWwIdRequest request);
 }

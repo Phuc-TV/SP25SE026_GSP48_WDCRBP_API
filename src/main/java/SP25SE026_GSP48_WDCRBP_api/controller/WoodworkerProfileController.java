@@ -109,4 +109,33 @@ public class WoodworkerProfileController {
         }
     }
 
+    @PutMapping("/update-woodworker-profile")
+    public CoreApiResponse<WoodworkerProfileDetailRes> updateWoodworkerProfile(@RequestBody @Valid UpdateWoodworkerProfileRequest request) {
+        try {
+            WoodworkerProfileDetailRes updatedProfile = woodworkerProfileService.updateWoodworkerProfile(request);
+            return CoreApiResponse.success(updatedProfile, "Cập nhật thông tin xưởng thành công");
+        } catch (Exception e) {
+            return CoreApiResponse.error(HttpStatus.BAD_REQUEST, "Cập nhật thất bại: " + e.getMessage());
+        }
+    }
+
+    @PutMapping("/update-warranty-policy")
+    public CoreApiResponse<WoodworkerProfileDetailRes> updateWarrantyPolicy(@RequestBody @Valid UpdateWarrantyPolicyByWwIdRequest request) {
+        try {
+            WoodworkerProfileDetailRes updated = woodworkerProfileService.updateWarrantyPolicyByWwId(request);
+            return CoreApiResponse.success(updated, "Cập nhật chính sách bảo hành thành công");
+        } catch (Exception e) {
+            return CoreApiResponse.error(HttpStatus.BAD_REQUEST, "Không thể cập nhật chính sách bảo hành: " + e.getMessage());
+        }
+    }
+
+    @PostMapping("/get-warranty-policy")
+    public CoreApiResponse<WoodworkerProfileDetailRes> getWarrantyPolicy(@RequestBody @Valid GetWarrantyPolicyByWwIdRequest request) {
+        try {
+            WoodworkerProfileDetailRes result = woodworkerProfileService.getWarrantyPolicyByWwId(request);
+            return CoreApiResponse.success(result, "Lấy chính sách bảo hành thành công");
+        } catch (Exception e) {
+            return CoreApiResponse.error(HttpStatus.BAD_REQUEST, "Không thể lấy chính sách bảo hành: " + e.getMessage());
+        }
+    }
 }
