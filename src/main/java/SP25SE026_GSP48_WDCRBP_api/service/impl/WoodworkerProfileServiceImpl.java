@@ -7,10 +7,7 @@ import SP25SE026_GSP48_WDCRBP_api.model.entity.Wallet;
 import SP25SE026_GSP48_WDCRBP_api.model.entity.ServicePack;
 import SP25SE026_GSP48_WDCRBP_api.model.entity.WoodworkerProfile;
 import SP25SE026_GSP48_WDCRBP_api.model.exception.WDCRBPApiException;
-import SP25SE026_GSP48_WDCRBP_api.model.requestModel.UpdateStatusPublicRequest;
-import SP25SE026_GSP48_WDCRBP_api.model.requestModel.UpdateWoodworkerServicePackRequest;
-import SP25SE026_GSP48_WDCRBP_api.model.requestModel.WoodworkerRequest;
-import SP25SE026_GSP48_WDCRBP_api.model.requestModel.WoodworkerUpdateStatusRequest;
+import SP25SE026_GSP48_WDCRBP_api.model.requestModel.*;
 import SP25SE026_GSP48_WDCRBP_api.model.responseModel.*;
 import SP25SE026_GSP48_WDCRBP_api.repository.UserRepository;
 import SP25SE026_GSP48_WDCRBP_api.repository.ServicePackRepository;
@@ -386,6 +383,86 @@ public class WoodworkerProfileServiceImpl implements WoodworkerProfileService {
                 .message("Cập nhật trạng thái công khai thành công")
                 .build();
     }
+
+    @Override
+    public WoodworkerProfileDetailRes updateWoodworkerProfile(UpdateWoodworkerProfileRequest request) {
+        WoodworkerProfile profile = wwRepository.findById(request.getWoodworkerId())
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy xưởng mộc"));
+
+        profile.setBrandName(request.getBrandName());
+        profile.setBio(request.getBio());
+        profile.setWarrantyPolicy(request.getWarrantyPolicy());
+        profile.setRating(request.getRating());
+        profile.setVerificationStauts(request.getVerificationStauts());
+        profile.setNoOrder(request.getNoOrder());
+        profile.setBusinessType(request.getBusinessType());
+        profile.setImgUrl(request.getImgUrl());
+        profile.setAddress(request.getAddress());
+        profile.setWardCode(request.getWardCode());
+        profile.setDistrictId(request.getDistrictId());
+        profile.setCityId(request.getCityId());
+        profile.setTotalStar(request.getTotalStar());
+        profile.setTotalReviews(request.getTotalReviews());
+        profile.setUpdatedAt(LocalDateTime.now());
+
+        WoodworkerProfile updatedProfile = wwRepository.save(profile);
+        return toDetailDto(updatedProfile);
+    }
+
+
+    private WoodworkerProfileDetailRes toDetailDto(WoodworkerProfile profile) {
+        if (profile == null) return null;
+
+        WoodworkerProfileDetailRes dto = new WoodworkerProfileDetailRes();
+        dto.setWoodworkerId(profile.getWoodworkerId());
+        dto.setBrandName(profile.getBrandName());
+        dto.setBio(profile.getBio());
+        dto.setWarrantyPolicy(profile.getWarrantyPolicy());
+        dto.setBusinessType(profile.getBusinessType());
+        dto.setTaxCode(profile.getTaxCode());
+        dto.setImgUrl(profile.getImgUrl());
+        dto.setAddress(profile.getAddress());
+        dto.setWardCode(profile.getWardCode());
+        dto.setDistrictId(profile.getDistrictId());
+        dto.setCityId(profile.getCityId());
+        dto.setTotalStar(profile.getTotalStar());
+        dto.setTotalReviews(profile.getTotalReviews());
+        dto.setServicePackStartDate(profile.getServicePackStartDate());
+        dto.setServicePackEndDate(profile.getServicePackEndDate());
+        dto.setPublicStatus(profile.getPublicStatus());
+        dto.setServicePack(profile.getServicePack());
+
+        if (profile.getUser() != null) {
+            UserDetailRes userDto = new UserDetailRes();
+            userDto.setUserId(profile.getUser().getUserId());
+            userDto.setUsername(profile.getUser().getUsername());
+            userDto.setEmail(profile.getUser().getEmail());
+            userDto.setPhone(profile.getUser().getPhone());
+            dto.setUser(userDto);
+        }
+
+        return dto;
+    }
+
+    @Override
+    public WoodworkerProfileDetailRes getWarrantyPolicyByWwId(GetWarrantyPolicyByWwIdRequest request) {
+        WoodworkerProfile profile = wwRepository.findById(request.getWoodworkerId())
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy xưởng mộc"));
+        return toDetailDto(profile); // Already contains warrantyPolicy field
+    }
+
+    @Override
+    public WoodworkerProfileDetailRes updateWarrantyPolicyByWwId(UpdateWarrantyPolicyByWwIdRequest request) {
+        WoodworkerProfile profile = wwRepository.findById(request.getWoodworkerId())
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy xưởng mộc"));
+
+        profile.setWarrantyPolicy(request.getWarrantyPolicy());
+        profile.setUpdatedAt(LocalDateTime.now());
+        WoodworkerProfile updated = wwRepository.save(profile);
+
+        return toDetailDto(updated);
+    }
+
 }
 
 
