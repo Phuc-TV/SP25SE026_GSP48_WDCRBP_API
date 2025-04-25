@@ -11,9 +11,6 @@ import lombok.*;
 public class ConfigurationUpsertRequest {
     private Long configurationId; // required for update
 
-    @NotBlank(message = "Description is required")
-    private String description;
-
     @NotBlank(message = "Value is required")
     private String value;
 }

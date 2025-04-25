@@ -31,24 +31,10 @@ public class ConfigurationServiceImpl implements ConfigurationService {
     }
 
     @Override
-    public ConfigurationRes create(ConfigurationUpsertRequest request) {
-        Configuration config = Configuration.builder()
-                .description(request.getDescription())
-                .value(request.getValue())
-                .createdBy(LocalDateTime.now())
-                .updatedAt(LocalDateTime.now())
-                .build();
-
-        Configuration saved = configurationRepository.save(config);
-        return toDTO(saved);
-    }
-
-    @Override
     public ConfigurationRes update(ConfigurationUpsertRequest request) {
         Configuration config = configurationRepository.findById(request.getConfigurationId())
                 .orElseThrow(() -> new RuntimeException("Configuration not found"));
 
-        config.setDescription(request.getDescription());
         config.setValue(request.getValue());
         config.setUpdatedAt(LocalDateTime.now());
 
@@ -96,7 +82,13 @@ public class ConfigurationServiceImpl implements ConfigurationService {
 
     @Override
     public String getValue(String name) {
-        return configurationRepository.findByName(name).map(Configuration::getValue).orElse(null);
+        List<Configuration> configurations = (List<Configuration>) getAllConfiguration().getData();
+
+        return configurations.stream()
+                .filter(config -> name.equals(config.getDescription()))
+                .findFirst()
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy cấu hình GHN_Token_API"))
+                .getValue();
     }
 
     @Override

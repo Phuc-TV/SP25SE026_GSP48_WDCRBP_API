@@ -9,10 +9,8 @@ import java.util.Random;
 public class VnPayConfig {
 
     public static String vnp_PayUrl = "https://sandbox.vnpayment.vn/paymentv2/vpcpay.html";
-    public static String vnp_TmnCode = "74B7NM0Y";
     public static String vnp_Version = "2.1.0";
     public static String vnp_Command = "pay";
-    public static String secretKey = "QHRX1ELPYEDJQ2OE8WHORG63N9QZ8ZGQ";
 
     public static String Sha256(String message) {
         String digest = null;

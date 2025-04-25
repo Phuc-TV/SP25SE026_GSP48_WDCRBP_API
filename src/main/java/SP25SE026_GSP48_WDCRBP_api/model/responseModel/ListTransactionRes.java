@@ -19,11 +19,14 @@ public class ListTransactionRes {
         private float amount;
         private String description;
         private LocalDateTime createdAt;
-        private LocalDateTime canceledAt;
         private boolean status;
         private Long userId;
+        private String username;
+        private String userEmail;
+        private String userPhone;
         private Long orderDepositId;
         private Long paymentId;
         private Long walletId;
+        private String role;
     }
 }
