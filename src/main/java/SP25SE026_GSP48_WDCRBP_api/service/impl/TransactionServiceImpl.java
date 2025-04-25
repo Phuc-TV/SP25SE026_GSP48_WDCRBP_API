@@ -1,9 +1,6 @@
 package SP25SE026_GSP48_WDCRBP_api.service.impl;
 
-import SP25SE026_GSP48_WDCRBP_api.constant.GuaranteeOrderStatusConstant;
-import SP25SE026_GSP48_WDCRBP_api.constant.ServiceNameConstant;
-import SP25SE026_GSP48_WDCRBP_api.constant.ServiceOrderStatusConstant;
-import SP25SE026_GSP48_WDCRBP_api.constant.TransactionTypeConstant;
+import SP25SE026_GSP48_WDCRBP_api.constant.*;
 import SP25SE026_GSP48_WDCRBP_api.model.entity.*;
 import SP25SE026_GSP48_WDCRBP_api.model.exception.WDCRBPApiException;
 import SP25SE026_GSP48_WDCRBP_api.model.requestModel.TransactionUpdateRequest;
@@ -198,6 +195,7 @@ public class TransactionServiceImpl implements TransactionService {
         transaction.setCreatedAt(LocalDateTime.now());
         transaction.setStatus(true);
         transaction.setUser(user);
+        transaction.setPaymentFor(PaymentForConstant.WALLET_PAYMENT);
         transaction.setOrderDeposit(null);
         transaction.setWallet(wallet);
         transactionRepository.save(transaction);
@@ -219,6 +217,7 @@ public class TransactionServiceImpl implements TransactionService {
         transaction.setCreatedAt(LocalDateTime.now());
         transaction.setStatus(true);
         transaction.setUser(user);
+        transaction.setPaymentFor(PaymentForConstant.WALLET_PAYMENT);
         transaction.setOrderDeposit(null);
         transaction.setWallet(wallet);
         transactionRepository.save(transaction);
@@ -239,6 +238,10 @@ public class TransactionServiceImpl implements TransactionService {
         dto.setOrderDepositId(tx.getOrderDeposit() != null ? tx.getOrderDeposit().getOrderDepositId() : null);
         dto.setWalletId(tx.getWallet() != null ? tx.getWallet().getWalletId() : null);
         dto.setPaymentFor(tx.getPaymentFor());
+        dto.setUsername(tx.getUser().getUsername());
+        dto.setUserEmail(tx.getUser().getEmail());
+        dto.setUserPhone(tx.getUser().getPhone());
+        dto.setRole(tx.getUser().getRole());
         return dto;
     }
 }

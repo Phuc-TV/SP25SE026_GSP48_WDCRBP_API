@@ -1,7 +1,6 @@
 package SP25SE026_GSP48_WDCRBP_api.service.impl;
 
 import SP25SE026_GSP48_WDCRBP_api.config.VnPayConfig;
-import SP25SE026_GSP48_WDCRBP_api.config.VnPayDynamicConfig;
 import SP25SE026_GSP48_WDCRBP_api.constant.PaymentForConstant;
 import SP25SE026_GSP48_WDCRBP_api.constant.TransactionTypeConstant;
 import SP25SE026_GSP48_WDCRBP_api.model.entity.ServicePack;
@@ -32,8 +31,6 @@ import java.util.*;
 @RequiredArgsConstructor
 public class VNPayServiceImp implements VNPayService {
 
-    private final ConfigurationService configurationService;
-    private final VnPayDynamicConfig vnPayConfig;
     private static final String AES_KEY = "YourSecretKey123";
     private final UserRepository userRepository;
     private final OrderDepositRepository orderDepositRepository;
@@ -42,6 +39,15 @@ public class VNPayServiceImp implements VNPayService {
     private final WalletRepository walletRepository;
     private final MailServiceImpl mailServiceImpl;
     private final WoodworkerProfileRepository woodworkerProfileRepository;
+    private final ConfigurationService configurationService;
+
+    private String getVnPaySecretKey() {
+        return configurationService.getValue("vnp_secretKey");
+    }
+
+    private String getVnPayTmnCode() {
+        return configurationService.getValue("vnp_TmnCode");
+    }
 
     @Override
     public PaymentRes processOrderPayment(PaymentOrderRequest request) {
@@ -90,9 +96,9 @@ public class VNPayServiceImp implements VNPayService {
             long vnpAmount = (long) (Math.ceil(orderDeposit.getAmount() * 100)) ;
             String vnp_TxnRef = UUID.randomUUID().toString().replace("-", "").substring(0, 12);
             String vnp_IpAddr = "127.0.0.1";
-            vnp_Params.put("vnp_Version", vnPayConfig.getVersion());
-            vnp_Params.put("vnp_Command", vnPayConfig.getCommand());
-            vnp_Params.put("vnp_TmnCode", configurationService.getValue("vnpay.tmnCode"));
+            vnp_Params.put("vnp_Version", VnPayConfig.vnp_Version);
+            vnp_Params.put("vnp_Command", VnPayConfig.vnp_Command);
+            vnp_Params.put("vnp_TmnCode", getVnPayTmnCode());
             vnp_Params.put("vnp_Amount", String.valueOf(vnpAmount));
             vnp_Params.put("vnp_CurrCode", "VND");
             vnp_Params.put("vnp_TxnRef", vnp_TxnRef);
@@ -125,9 +131,9 @@ public class VNPayServiceImp implements VNPayService {
                     query.append('&');
                 }
             }
-            String vnp_SecureHash = VnPayConfig.hmacSHA512(configurationService.getValue("vnpay.secretKey"), hashData.toString());
+            String vnp_SecureHash = VnPayConfig.hmacSHA512(getVnPaySecretKey(), hashData.toString());
             query.append("&vnp_SecureHash=").append(vnp_SecureHash);
-            String paymentUrl = VnPayDynamicConfig.PAY_URL + "?" + query;
+            String paymentUrl = VnPayConfig.vnp_PayUrl + "?" + query;
             mailServiceImpl.sendEmail(email, "VNPay Payment Link", "payment", paymentUrl);
             return PaymentRes.builder()
                     .status("ok")
@@ -203,9 +209,9 @@ public class VNPayServiceImp implements VNPayService {
             long vnpAmount = amount * 100 ;
             String vnp_TxnRef = UUID.randomUUID().toString().replace("-", "").substring(0, 12);
             String vnp_IpAddr = "127.0.0.1";
-            vnp_Params.put("vnp_Version", vnPayConfig.getVersion());
-            vnp_Params.put("vnp_Command", vnPayConfig.getCommand());
-            vnp_Params.put("vnp_TmnCode", configurationService.getValue("vnpay.tmnCode"));
+            vnp_Params.put("vnp_Version", VnPayConfig.vnp_Version);
+            vnp_Params.put("vnp_Command", VnPayConfig.vnp_Command);
+            vnp_Params.put("vnp_TmnCode", getVnPayTmnCode());
             vnp_Params.put("vnp_Amount", String.valueOf(vnpAmount));
             vnp_Params.put("vnp_CurrCode", "VND");
             vnp_Params.put("vnp_TxnRef", vnp_TxnRef);
@@ -240,9 +246,9 @@ public class VNPayServiceImp implements VNPayService {
                 }
             }
 
-            String vnp_SecureHash = VnPayConfig.hmacSHA512(configurationService.getValue("vnpay.secretKey"), hashData.toString());
+            String vnp_SecureHash = VnPayConfig.hmacSHA512(getVnPaySecretKey(), hashData.toString());
             query.append("&vnp_SecureHash=").append(vnp_SecureHash);
-            String paymentUrl = VnPayDynamicConfig.PAY_URL + "?" + query;
+            String paymentUrl = VnPayConfig.vnp_PayUrl + "?" + query;
 
             mailServiceImpl.sendEmail(email, "VNPay Payment Link", "payment", paymentUrl);
 
@@ -312,9 +318,9 @@ public class VNPayServiceImp implements VNPayService {
             long vnpAmount = amount * 100 ;
             String vnp_TxnRef = UUID.randomUUID().toString().replace("-", "").substring(0, 12);
             String vnp_IpAddr = "127.0.0.1";
-            vnp_Params.put("vnp_Version", vnPayConfig.getVersion());
-            vnp_Params.put("vnp_Command", vnPayConfig.getCommand());
-            vnp_Params.put("vnp_TmnCode", configurationService.getValue("vnpay.tmnCode"));
+            vnp_Params.put("vnp_Version", VnPayConfig.vnp_Version);
+            vnp_Params.put("vnp_Command", VnPayConfig.vnp_Command);
+            vnp_Params.put("vnp_TmnCode", getVnPayTmnCode());
             vnp_Params.put("vnp_Amount", String.valueOf(vnpAmount));
             vnp_Params.put("vnp_CurrCode", "VND");
             vnp_Params.put("vnp_TxnRef", vnp_TxnRef);
@@ -349,9 +355,9 @@ public class VNPayServiceImp implements VNPayService {
                 }
             }
 
-            String vnp_SecureHash = VnPayConfig.hmacSHA512(configurationService.getValue("vnpay.secretKey"), hashData.toString());
+            String vnp_SecureHash = VnPayConfig.hmacSHA512(getVnPaySecretKey(), hashData.toString());
             query.append("&vnp_SecureHash=").append(vnp_SecureHash);
-            String paymentUrl = VnPayDynamicConfig.PAY_URL + "?" + query;
+            String paymentUrl = VnPayConfig.vnp_PayUrl + "?" + query;
 
             mailServiceImpl.sendEmail(email, "VNPay Payment Link", "payment", paymentUrl);
 
@@ -452,9 +458,9 @@ public class VNPayServiceImp implements VNPayService {
             long vnpAmount = (long) (Math.ceil(orderDeposit.getAmount() * 100)) ;
             String vnp_TxnRef = UUID.randomUUID().toString().replace("-", "").substring(0, 12);
             String vnp_IpAddr = "127.0.0.1";
-            vnp_Params.put("vnp_Version", vnPayConfig.getVersion());
-            vnp_Params.put("vnp_Command", vnPayConfig.getCommand());
-            vnp_Params.put("vnp_TmnCode", configurationService.getValue("vnpay.tmnCode"));
+            vnp_Params.put("vnp_Version", VnPayConfig.vnp_Version);
+            vnp_Params.put("vnp_Command", VnPayConfig.vnp_Command);
+            vnp_Params.put("vnp_TmnCode", getVnPayTmnCode());
             vnp_Params.put("vnp_Amount", String.valueOf(vnpAmount));
             vnp_Params.put("vnp_CurrCode", "VND");
             vnp_Params.put("vnp_TxnRef", vnp_TxnRef);
@@ -487,9 +493,9 @@ public class VNPayServiceImp implements VNPayService {
                     query.append('&');
                 }
             }
-            String vnp_SecureHash = VnPayConfig.hmacSHA512(configurationService.getValue("vnpay.secretKey"), hashData.toString());
+            String vnp_SecureHash = VnPayConfig.hmacSHA512(getVnPaySecretKey(), hashData.toString());
             query.append("&vnp_SecureHash=").append(vnp_SecureHash);
-            String paymentUrl = VnPayDynamicConfig.PAY_URL + "?" + query;
+            String paymentUrl = VnPayConfig.vnp_PayUrl + "?" + query;
             mailServiceImpl.sendEmail(email, "VNPay Payment Link", "payment", paymentUrl);
             return PaymentRes.builder()
                     .status("ok")
@@ -567,9 +573,9 @@ public class VNPayServiceImp implements VNPayService {
             String vnp_TxnRef = UUID.randomUUID().toString().replace("-", "").substring(0, 12);
             String vnp_IpAddr = "127.0.0.1";
 
-            vnp_Params.put("vnp_Version", vnPayConfig.getVersion());
-            vnp_Params.put("vnp_Command", vnPayConfig.getCommand());
-            vnp_Params.put("vnp_TmnCode", configurationService.getValue("vnpay.tmnCode"));
+            vnp_Params.put("vnp_Version", VnPayConfig.vnp_Version);
+            vnp_Params.put("vnp_Command", VnPayConfig.vnp_Command);
+            vnp_Params.put("vnp_TmnCode", getVnPayTmnCode());
             vnp_Params.put("vnp_Amount", String.valueOf(vnpAmount));
             vnp_Params.put("vnp_CurrCode", "VND");
             vnp_Params.put("vnp_TxnRef", vnp_TxnRef);
@@ -606,10 +612,10 @@ public class VNPayServiceImp implements VNPayService {
                 }
             }
 
-            String vnp_SecureHash = VnPayConfig.hmacSHA512(configurationService.getValue("vnpay.secretKey"), hashData.toString());
+            String vnp_SecureHash = VnPayConfig.hmacSHA512(getVnPaySecretKey(), hashData.toString());
             query.append("&vnp_SecureHash=").append(vnp_SecureHash);
 
-            String paymentUrl = VnPayDynamicConfig.PAY_URL + "?" + query;
+            String paymentUrl = VnPayConfig.vnp_PayUrl + "?" + query;
 
             mailServiceImpl.sendEmail(email, "VNPay Payment Link", "payment", paymentUrl);
 
@@ -678,9 +684,9 @@ public class VNPayServiceImp implements VNPayService {
             long vnpAmount = amount * 100 ;
             String vnp_TxnRef = UUID.randomUUID().toString().replace("-", "").substring(0, 12);
             String vnp_IpAddr = "127.0.0.1";
-            vnp_Params.put("vnp_Version", vnPayConfig.getVersion());
-            vnp_Params.put("vnp_Command", vnPayConfig.getCommand());
-            vnp_Params.put("vnp_TmnCode", configurationService.getValue("vnpay.tmnCode"));
+            vnp_Params.put("vnp_Version", VnPayConfig.vnp_Version);
+            vnp_Params.put("vnp_Command", VnPayConfig.vnp_Command);
+            vnp_Params.put("vnp_TmnCode", getVnPayTmnCode());
             vnp_Params.put("vnp_Amount", String.valueOf(vnpAmount));
             vnp_Params.put("vnp_CurrCode", "VND");
             vnp_Params.put("vnp_TxnRef", vnp_TxnRef);
@@ -715,9 +721,9 @@ public class VNPayServiceImp implements VNPayService {
                 }
             }
 
-            String vnp_SecureHash = VnPayConfig.hmacSHA512(configurationService.getValue("vnpay.secretKey"), hashData.toString());
+            String vnp_SecureHash = VnPayConfig.hmacSHA512(getVnPaySecretKey(), hashData.toString());
             query.append("&vnp_SecureHash=").append(vnp_SecureHash);
-            String paymentUrl = VnPayDynamicConfig.PAY_URL + "?" + query;
+            String paymentUrl = VnPayConfig.vnp_PayUrl + "?" + query;
 
             mailServiceImpl.sendEmail(email, "VNPay Payment Link", "payment", paymentUrl);
 

@@ -14,7 +14,6 @@ public interface ConfigurationService {
     CoreApiResponse getAllConfiguration();
     List<ConfigurationRes> getAll();
     List<ConfigurationRes> getByDescription(ConfigurationSearchRequest request);
-    ConfigurationRes create(ConfigurationUpsertRequest request);
     ConfigurationRes update(ConfigurationUpsertRequest request);
     void delete(Long id);
 }
