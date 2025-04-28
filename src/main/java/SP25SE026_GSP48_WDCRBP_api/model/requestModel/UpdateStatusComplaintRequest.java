@@ -15,7 +15,11 @@ public class UpdateStatusComplaintRequest {
     @Positive(message = "complaintId must be a positive number")
     private Long complaintId;
 
-    private float refundAmount;
+    private Float refundAmount;
+
+    private Integer refundPercent;
+
+    private Boolean isAccept;
 
     private String staffResponse;
 

@@ -39,7 +39,13 @@ public class Complaint {
     private LocalDateTime createdAt;
 
     @Column(nullable = true)
-    private float refundAmount;
+    private Float refundAmount;
+
+    @Column(nullable = true)
+    private Integer refundPercent;
+
+    @Column(nullable = true)
+    private String orderStatus;
 
     @OneToOne
     @JoinColumn(name = "refund_credit_transaction_id", nullable = true)

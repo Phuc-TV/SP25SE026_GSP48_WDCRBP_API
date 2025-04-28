@@ -39,6 +39,7 @@ public class ComplaintServiceImpl implements ComplaintService {
                 .proofImgUrls(request.getProofImgUrls())
                 .complaintType(request.getComplaintType())
                 .status(ComplainStatusConstant.PENDING)
+                .orderStatus(order.getStatus())
                 .build();
 
         complaint = complaintRepository.save(complaint);
@@ -103,43 +104,53 @@ public class ComplaintServiceImpl implements ComplaintService {
 
         complaint.setStatus(ComplainStatusConstant.COMPLETED);
         complaint.setUpdatedAt(LocalDateTime.now());
+        complaint.setRefundPercent(request.getRefundPercent());
         complaint.setRefundAmount(request.getRefundAmount());
         complaint.setStaffResponse(request.getStaffResponse());
         complaint.setStaffUser(staffUser);
 
-        Transaction refundCreditTransaction = Transaction.builder()
-                .transactionType(TransactionTypeConstant.HOAN_TIEN)
-                .paymentFor(PaymentForConstant.REFUND_PAYMENT)
-                .amount(request.getRefundAmount())
-                .description("Nhận tiền hoàn lại từ đơn hàng: " + complaint.getServiceOrder().getOrderId() + "Mã khiếu nại: " + complaint.getComplaintId())
-                .createdAt(LocalDateTime.now())
-                .status(true)
-                .user(customerUser)
-                .wallet(customerWallet)
-                .build();
-        transactionRepository.save(refundCreditTransaction);
+        if (request.getIsAccept() == null) {
+            complaint.setStatus(ComplainStatusConstant.PENDING);
+        } else if (request.getIsAccept()) {
+            complaint.setStatus(ComplainStatusConstant.COMPLETED);
 
-        Transaction refundDebitTransaction = Transaction.builder()
-                .transactionType(TransactionTypeConstant.TRU_HOAN_TIEN)
-                .paymentFor(PaymentForConstant.REFUND_PAYMENT)
-                .amount(request.getRefundAmount())
-                .description("Hoàn tiền cho đơn hàng: " + complaint.getServiceOrder().getOrderId() + "Mã khiếu nại: " + complaint.getComplaintId())
-                .createdAt(LocalDateTime.now())
-                .status(true)
-                .user(woodworkerUser)
-                .wallet(woodworkerWallet)
-                .build();
-        transactionRepository.save(refundDebitTransaction);
+            Transaction refundCreditTransaction = Transaction.builder()
+                    .transactionType(TransactionTypeConstant.HOAN_TIEN)
+                    .paymentFor(PaymentForConstant.REFUND_PAYMENT)
+                    .amount(request.getRefundAmount())
+                    .description("Nhận tiền hoàn lại từ đơn hàng: " + complaint.getServiceOrder().getOrderId() + "\nMã khiếu nại: " + complaint.getComplaintId())
+                    .createdAt(LocalDateTime.now())
+                    .status(true)
+                    .user(customerUser)
+                    .wallet(customerWallet)
+                    .build();
+            transactionRepository.save(refundCreditTransaction);
 
-        complaint.setRefundCreditTransaction(refundCreditTransaction);
-        complaint.setRefundDebitTransaction(refundDebitTransaction);
-        complaintRepository.save(complaint);
+            Transaction refundDebitTransaction = Transaction.builder()
+                    .transactionType(TransactionTypeConstant.TRU_HOAN_TIEN)
+                    .paymentFor(PaymentForConstant.REFUND_PAYMENT)
+                    .amount(request.getRefundAmount())
+                    .description("Hoàn tiền cho đơn hàng: " + complaint.getServiceOrder().getOrderId() + "\nMã khiếu nại: " + complaint.getComplaintId())
+                    .createdAt(LocalDateTime.now())
+                    .status(true)
+                    .user(woodworkerUser)
+                    .wallet(woodworkerWallet)
+                    .build();
+            transactionRepository.save(refundDebitTransaction);
 
-        customerWallet.setBalance(customerWallet.getBalance() + request.getRefundAmount());
-        walletRepository.save(customerWallet);
+            complaint.setRefundCreditTransaction(refundCreditTransaction);
+            complaint.setRefundDebitTransaction(refundDebitTransaction);
+            complaintRepository.save(complaint);
 
-        woodworkerWallet.setBalance(woodworkerWallet.getBalance() - request.getRefundAmount());
-        walletRepository.save(woodworkerWallet);
+            customerWallet.setBalance(customerWallet.getBalance() + request.getRefundAmount());
+            walletRepository.save(customerWallet);
+
+            woodworkerWallet.setBalance(woodworkerWallet.getBalance() - request.getRefundAmount());
+            walletRepository.save(woodworkerWallet);
+        } else {
+            complaint.setStatus(ComplainStatusConstant.CANCELEDED);
+            complaintRepository.save(complaint);
+        }
 
         return UpdateStatusComplaintRes.builder()
                 .complaintId(complaint.getComplaintId())
@@ -159,6 +170,8 @@ public class ComplaintServiceImpl implements ComplaintService {
                 .staffResponse(complaint.getStaffResponse())
                 .proofImgUrls(complaint.getProofImgUrls())
                 .status(complaint.getStatus())
+                .refundPercent(complaint.getRefundPercent())
+                .orderStatus(complaint.getOrderStatus())
                 .createdAt(complaint.getCreatedAt())
                 .updatedAt(complaint.getUpdatedAt())
                 .refundAmount(complaint.getRefundAmount())

@@ -74,6 +74,7 @@ public class ProductServiceImpl implements ProductService {
     public List<ProductRes> getAllProducts() {
         List<Product> products = productRepository.findAll();
         return products.stream()
+                .filter(product -> product.getWoodworkerProfile() != null)
                 .map(this::convertToProductRes)
                 .collect(Collectors.toList());
     }
@@ -117,7 +118,9 @@ public class ProductServiceImpl implements ProductService {
     public void deleteProduct(Long productId) {
         Product product = productRepository.findById(productId)
                 .orElseThrow(() -> new RuntimeException("Product not found with ID: " + productId));
-        productRepository.delete(product);
+
+        product.setWoodworkerProfile(null);
+        productRepository.save(product);
     }
 
     private ProductRes convertToProductRes(Product product) {

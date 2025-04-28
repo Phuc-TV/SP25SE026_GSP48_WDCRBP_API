@@ -27,11 +27,15 @@ public class ComplaintRes {
 
     private LocalDateTime createdAt;
 
+    private Integer refundPercent;
+
+    private String orderStatus;
+
     private String proofImgUrls;
 
     private LocalDateTime updatedAt;
 
-    private float refundAmount;
+    private Float refundAmount;
 
     private TransactionDetailRes refundCreditTransaction;
 
