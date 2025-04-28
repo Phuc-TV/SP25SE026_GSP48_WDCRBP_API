@@ -2,16 +2,22 @@ package SP25SE026_GSP48_WDCRBP_api.service.impl;
 
 import SP25SE026_GSP48_WDCRBP_api.components.CoreApiResponse;
 import SP25SE026_GSP48_WDCRBP_api.model.entity.User;
+import SP25SE026_GSP48_WDCRBP_api.model.requestModel.BanUserRequest;
 import SP25SE026_GSP48_WDCRBP_api.model.requestModel.ChangePasswordRequest;
+import SP25SE026_GSP48_WDCRBP_api.model.requestModel.UpdateRoleRequest;
 import SP25SE026_GSP48_WDCRBP_api.model.requestModel.UpdateUserProfileRequest;
 import SP25SE026_GSP48_WDCRBP_api.model.responseModel.UserDetailRes;
 import SP25SE026_GSP48_WDCRBP_api.model.responseModel.UserInfoResponse;
+import SP25SE026_GSP48_WDCRBP_api.model.responseModel.UserRes;
 import SP25SE026_GSP48_WDCRBP_api.repository.UserRepository;
 import SP25SE026_GSP48_WDCRBP_api.service.UserService;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class UserServiceImpl implements UserService {
@@ -82,4 +88,43 @@ public class UserServiceImpl implements UserService {
         return CoreApiResponse.success("Cập nhật thông tin người dùng thành công");
     }
 
+    @Override
+    public CoreApiResponse<?> updateUserRole(UpdateRoleRequest request) {
+        User user = userRepository.findById(request.getUserId())
+                .orElseThrow(() -> new RuntimeException("User not found with ID: " + request.getUserId()));
+
+        user.setRole(request.getNewRole());
+        userRepository.save(user);
+
+        return CoreApiResponse.success("Role updated successfully");
+    }
+
+    @Override
+    public CoreApiResponse<?> banUser(BanUserRequest request) {
+        User user = userRepository.findById(request.getUserId())
+                .orElseThrow(() -> new RuntimeException("User not found with ID: " + request.getUserId()));
+
+        user.setStatus(request.getBanned());
+        userRepository.save(user);
+
+        return CoreApiResponse.success("User ban status updated successfully");
+    }
+
+    @Override
+    public CoreApiResponse<List<UserRes>> getAllUsers() {
+        List<User> users = userRepository.findAll();
+
+        List<UserRes> userResponses = users.stream().map(user -> {
+            UserRes userRes = new UserRes();
+            userRes.setId(user.getUserId());
+            userRes.setUsername(user.getUsername());
+            userRes.setEmail(user.getEmail());
+            userRes.setPhone(user.getPhone());
+            userRes.setRole(user.getRole());
+            userRes.setStatus(user.getStatus());
+            return userRes;
+        }).collect(Collectors.toList());
+
+        return CoreApiResponse.success(userResponses, "Successfully fetched all users");
+    }
 }
