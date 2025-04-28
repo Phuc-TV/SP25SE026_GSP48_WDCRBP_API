@@ -57,14 +57,9 @@ public class ServicePackServiceImpl implements ServicePackService {
     public CreateServicePackRes updateServicePack(Long servicePackId, CreateServicePackRequest request) {
         ServicePack existing = servicePackRepository.findById(servicePackId)
                 .orElseThrow(() -> new RuntimeException("Service Pack not found with ID: " + servicePackId));
-        existing.setName(request.getName());
+
         existing.setPrice(request.getPrice());
-        existing.setDescription(request.getDescription());
-        existing.setDuration(request.getDuration());
-        existing.setPostLimitPerMonth(request.getPostLimitPerMonth());
-        existing.setProductManagement(request.getProductManagement());
-        existing.setSearchResultPriority(request.getSearchResultPriority());
-        existing.setPersonalization(request.getPersonalization());
+
         ServicePack updated = servicePackRepository.save(existing);
         CreateServicePackRes.Data data = CreateServicePackRes.Data.builder()
                 .servicePackId(updated.getServicePackId())

@@ -22,6 +22,7 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 public class ServiceOrderServiceImpl implements ServiceOrderService {
@@ -102,7 +103,10 @@ public class ServiceOrderServiceImpl implements ServiceOrderService {
 
         for (ServiceOrder serviceOrder : orders) {
             AvaliableServiceDto avaliableServiceDto = new AvaliableServiceDto();
-            avaliableServiceDto.setService(serviceOrder.getAvailableService().getService());
+            ServiceDto serviceDto = modelMapper.map(serviceOrder.getAvailableService().getService(), ServiceDto.class);
+            serviceDto.setServiceId(serviceOrder.getAvailableService().getAvailableServiceId());
+
+            avaliableServiceDto.setService(serviceDto);
 
             wwDto wwDto = new wwDto();
             wwDto.setBrandName(serviceOrder.getAvailableService().getWoodworkerProfile().getBrandName());
@@ -122,6 +126,13 @@ public class ServiceOrderServiceImpl implements ServiceOrderService {
     }
 
     @Override
+    public List<ServiceOrderListItemRes> getAll() {
+        List<ServiceOrder> orders = orderRepository.findAll();
+
+        return orders.stream().map(item -> modelMapper.map(item, ServiceOrderListItemRes.class)).collect(Collectors.toList());
+    }
+
+    @Override
     public ServiceOrderDetailRes getServiceDetailById(Long id) {
         ServiceOrder order = orderRepository.findServiceOrderByOrderId(id);
         Contract contract = contractRepository.findContractByServiceOrder(order);
@@ -132,7 +143,10 @@ public class ServiceOrderServiceImpl implements ServiceOrderService {
 
         // Build service order dto
         AvaliableServiceDto avaliableServiceDto = new AvaliableServiceDto();
-        avaliableServiceDto.setService(order.getAvailableService().getService());
+        ServiceDto serviceDto = modelMapper.map(order.getAvailableService().getService(), ServiceDto.class);
+        serviceDto.setServiceId(order.getAvailableService().getAvailableServiceId());
+
+        avaliableServiceDto.setService(serviceDto);
 
         wwDto wwDto = new wwDto();
         wwDto.setBrandName(order.getAvailableService().getWoodworkerProfile().getBrandName());
