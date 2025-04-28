@@ -9,12 +9,15 @@ import SP25SE026_GSP48_WDCRBP_api.model.requestModel.CreateServiceOrderPersonali
 import SP25SE026_GSP48_WDCRBP_api.model.requestModel.CreateServiceOrderCusRequest;
 import SP25SE026_GSP48_WDCRBP_api.model.requestModel.CreateServiceOrderSaleRequest;
 import SP25SE026_GSP48_WDCRBP_api.model.responseModel.ServiceOrderDetailRes;
+import SP25SE026_GSP48_WDCRBP_api.model.responseModel.ServiceOrderListItemRes;
 
 import java.time.LocalDateTime;
 import java.util.List;
 
 public interface ServiceOrderService {
     List<ServiceOrderDto> listServiceOrderByUserIdOrWwId(Long id, String role);
+
+    List<ServiceOrderListItemRes> getAll();
 
     ServiceOrderDetailRes getServiceDetailById(Long id);
 

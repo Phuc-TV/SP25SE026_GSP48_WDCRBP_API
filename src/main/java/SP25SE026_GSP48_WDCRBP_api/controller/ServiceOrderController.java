@@ -8,6 +8,7 @@ import SP25SE026_GSP48_WDCRBP_api.model.entity.ProductImages;
 import SP25SE026_GSP48_WDCRBP_api.model.entity.ServiceOrder;
 import SP25SE026_GSP48_WDCRBP_api.model.requestModel.*;
 import SP25SE026_GSP48_WDCRBP_api.model.responseModel.ServiceOrderDetailRes;
+import SP25SE026_GSP48_WDCRBP_api.model.responseModel.ServiceOrderListItemRes;
 import SP25SE026_GSP48_WDCRBP_api.service.ServiceOrderService;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import org.modelmapper.ModelMapper;
@@ -28,6 +29,14 @@ public class ServiceOrderController {
 
     @Autowired
     private ModelMapper modelMapper;
+
+    @SecurityRequirement(name = "Bear Authentication")
+    @GetMapping
+    public CoreApiResponse<List<ServiceOrderListItemRes>> getAllOrders() {
+        List<ServiceOrderListItemRes> serviceOrders = serviceOrderService.getAll();
+
+        return CoreApiResponse.success(serviceOrders);
+    }
 
     // 1. Lấy danh sách đơn dịch vụ theo userId hoặc woodworkerId và role
     @GetMapping("/listOrder")

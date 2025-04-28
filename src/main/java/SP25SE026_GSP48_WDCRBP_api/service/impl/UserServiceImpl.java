@@ -104,7 +104,7 @@ public class UserServiceImpl implements UserService {
         User user = userRepository.findById(request.getUserId())
                 .orElseThrow(() -> new RuntimeException("User not found with ID: " + request.getUserId()));
 
-        user.setStatus(request.getBanned());
+        user.setStatus(!request.getBanned());
         userRepository.save(user);
 
         return CoreApiResponse.success("User ban status updated successfully");

@@ -11,6 +11,6 @@ import lombok.Setter;
 @NoArgsConstructor
 @AllArgsConstructor
 public class AvaliableServiceDto {
-    private Service service;
+    private ServiceDto service;
     private wwDto wwDto;
 }
