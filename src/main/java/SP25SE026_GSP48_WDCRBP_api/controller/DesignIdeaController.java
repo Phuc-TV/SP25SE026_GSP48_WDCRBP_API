@@ -2,6 +2,7 @@ package SP25SE026_GSP48_WDCRBP_api.controller;
 
 import SP25SE026_GSP48_WDCRBP_api.components.CoreApiResponse;
 import SP25SE026_GSP48_WDCRBP_api.model.dto.DesignIdeaVariantDto;
+import SP25SE026_GSP48_WDCRBP_api.model.dto.DesignUpdateDto;
 import SP25SE026_GSP48_WDCRBP_api.model.dto.WoodworkProductDto;
 import SP25SE026_GSP48_WDCRBP_api.model.entity.DesignIdea;
 import SP25SE026_GSP48_WDCRBP_api.model.responseModel.DesignIdeaDetailRes;
@@ -79,6 +80,31 @@ public class DesignIdeaController {
         }
     }
 
+    @SecurityRequirement(name = "Bear Authentication")
+    @PutMapping("/updateDesignIdea")
+    public CoreApiResponse updateDesignIdea(@RequestBody DesignUpdateDto dto)
+    {
+        try {
+            designIdeaService.updateDesignIdea(dto);
+
+            return CoreApiResponse.success("Thành công");
+        } catch (Exception e) {
+            return CoreApiResponse.error("Lỗi thất bại");
+        }
+    }
+
+    @SecurityRequirement(name = "Bear Authentication")
+    @DeleteMapping("/{id}")
+    public CoreApiResponse deleteDesignIdea(@PathVariable Long id)
+    {
+        try {
+            designIdeaService.deleteDesignIdea(id);
+
+            return CoreApiResponse.success("Thành công");
+        } catch (Exception e) {
+            return CoreApiResponse.error("Lỗi thất bại");
+        }
+    }
 
     @GetMapping("/getDesignIdeaVariantByDesignId/{designId}")
     public CoreApiResponse<List<DesignIdeaVariantDto>> getDesignIdeaVariantByDesignId(@PathVariable Long designId)

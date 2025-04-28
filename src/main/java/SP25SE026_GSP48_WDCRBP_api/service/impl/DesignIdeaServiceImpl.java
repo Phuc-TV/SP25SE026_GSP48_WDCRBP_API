@@ -174,6 +174,40 @@ public class DesignIdeaServiceImpl implements DesignIdeaService {
     }
 
     @Override
+    public void updateDesignIdea(DesignUpdateDto dto) {
+        DesignIdea designIdea = ideaRepository.findDesignIdeaByDesignIdeaId(dto.getDesignIdeaId());
+
+        if (designIdea == null) return;
+
+        designIdea.setName(dto.getName());
+        designIdea.setDescription(dto.getDescription());
+        designIdea.setImg_urls(dto.getImg());
+        designIdea.setIsInstall(dto.getIsInstall());
+
+        List<VariantPriceDto> variantPriceDto = dto.getPrices();
+
+        for (VariantPriceDto priceDto : variantPriceDto) {
+            DesignIdeaVariant designIdeaVariant = designIdeaVariantRepository.findDesignIdeaVariantByDesignIdeaVariantId(priceDto.getDesignIdeaVariantId());
+
+            if (designIdeaVariant != null) {
+                designIdeaVariant.setPrice(priceDto.getPrice());
+                designIdeaVariantRepository.save(designIdeaVariant);
+            }
+        }
+    }
+
+    @Override
+    public void deleteDesignIdea(Long id) {
+        DesignIdea designIdea = ideaRepository.findDesignIdeaByDesignIdeaId(id);
+
+        if (designIdea == null) return;
+
+        designIdea.setWoodworkerProfile(null);
+
+        ideaRepository.save(designIdea);
+    }
+
+    @Override
     public List<DesignIdeaVariantDto> getDesignIdeaVariantByDesignId(Long designId) {
         DesignIdea designIdea = designIdeaRepository.findDesignIdeaByDesignIdeaId(designId);
         if (designIdea == null) return Collections.emptyList();

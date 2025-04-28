@@ -21,6 +21,8 @@ public class DesignIdeaListItemRes {
 
     private Short totalStar;
 
+    private Boolean isInstall;
+
     private Short totalReviews;
 
     private WoodworkerProfileListItemRes woodworkerProfile;

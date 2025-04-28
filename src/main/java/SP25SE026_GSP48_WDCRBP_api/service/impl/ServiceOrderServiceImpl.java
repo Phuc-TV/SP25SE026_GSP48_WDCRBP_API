@@ -343,6 +343,15 @@ public class ServiceOrderServiceImpl implements ServiceOrderService {
             Product product =
                     productRepository.findProductByProductId(i.getProductId());
 
+            if (product!=null && product.getStock() < i.getQuantity())
+            {
+                throw new RuntimeException("Sản phẩm "+product.getProductName()+" không đủ số lượng trong kho");
+            }
+            if (product != null) {
+                product.setStock((short) (product.getStock() - i.getQuantity()));
+                productRepository.save(product);
+            }
+
             RequestedProduct requestedProduct = new RequestedProduct();
             requestedProduct.setProduct(product);
             requestedProduct.setQuantity(Byte.parseByte(i.getQuantity() + ""));
