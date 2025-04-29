@@ -25,6 +25,9 @@ public class ServicePack {
     private String description;
 
     @Column(nullable = true)
+    private Boolean status;
+
+    @Column(nullable = true)
     private Short duration;
 
     @Column(nullable = true)
