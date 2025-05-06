@@ -268,7 +268,7 @@ public class WoodworkerProfileServiceImpl implements WoodworkerProfileService {
         }
 
         wwRepository.save(woodworker);
-        availableServiceService.activateAvailableServicesByServicePack(woodworker, newPack.getName());
+        availableServiceService.activateAvailableServicesByServicePack(woodworker, servicePackId);
 
         return modelMapper.map(woodworker, WoodworkerProfileListItemRes.class);
     }
@@ -371,6 +371,22 @@ public class WoodworkerProfileServiceImpl implements WoodworkerProfileService {
     public UpdateStatusPublicRes updatePublicStatus(UpdateStatusPublicRequest request) {
         WoodworkerProfile profile = wwRepository.findByUser_UserId(request.getUserId())
                 .orElseThrow(() -> new RuntimeException("Không tìm thấy xưởng mộc theo userId: " + request.getUserId()));
+        Wallet wallet = walletRepository.findByUser_UserId(request.getUserId())
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy ví theo userId: " + request.getUserId()));
+
+        if (request.isPublicStatus()) {
+            if (profile.getServicePack() == null) {
+                throw new RuntimeException("Xưởng mộc chưa có gói dịch vụ nào");
+            }
+
+            if (profile.getWarrantyPolicy() == null) {
+                throw new RuntimeException("Xưởng mộc chưa có chính sách bảo hành");
+            }
+
+            if (wallet.getBalance() < 10000000f) {
+                throw new RuntimeException("Số dư ví không đủ để kích hoạt trạng thái công khai");
+            }
+        }
 
         profile.setPublicStatus(request.isPublicStatus());
         profile.setUpdatedAt(LocalDateTime.now());

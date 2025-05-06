@@ -24,4 +24,6 @@ public class WwCreateContractCustomizeRequest {
     private List<Long> requestedProductIds;
 
     private List<Short> warrantyDurations;
+
+    private String agreement;
 }

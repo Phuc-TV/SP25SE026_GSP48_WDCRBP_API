@@ -37,4 +37,6 @@ public class CreateServicePackRequest {
 
     @NotNull(message = "Personalization is required")
     private Boolean personalization;
+
+    private Boolean status;
 }

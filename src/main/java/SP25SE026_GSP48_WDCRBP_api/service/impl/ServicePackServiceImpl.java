@@ -59,6 +59,10 @@ public class ServicePackServiceImpl implements ServicePackService {
                 .orElseThrow(() -> new RuntimeException("Service Pack not found with ID: " + servicePackId));
 
         existing.setPrice(request.getPrice());
+        existing.setPostLimitPerMonth(request.getPostLimitPerMonth());
+        existing.setProductManagement(request.getProductManagement());
+        existing.setPersonalization(request.getPersonalization());
+        existing.setStatus(request.getStatus());
 
         ServicePack updated = servicePackRepository.save(existing);
         CreateServicePackRes.Data data = CreateServicePackRes.Data.builder()
@@ -98,6 +102,26 @@ public class ServicePackServiceImpl implements ServicePackService {
             dto.setProductManagement(pack.getProductManagement());
             dto.setSearchResultPriority(pack.getSearchResultPriority());
             dto.setPersonalization(pack.getPersonalization());
+            dto.setStatus(pack.getStatus());
+            return dto;
+        }).toList();
+    }
+
+    @Override
+    public List<ListServicePackRes.Data> getAllActiveServicePacks() {
+        List<ServicePack> packs = servicePackRepository.findAll().stream().filter(ServicePack::getStatus).toList();
+        return packs.stream().map(pack -> {
+            ListServicePackRes.Data dto = new ListServicePackRes.Data();
+            dto.setServicePackId(pack.getServicePackId());
+            dto.setName(pack.getName());
+            dto.setPrice(pack.getPrice());
+            dto.setDescription(pack.getDescription());
+            dto.setDuration(pack.getDuration());
+            dto.setPostLimitPerMonth(pack.getPostLimitPerMonth());
+            dto.setProductManagement(pack.getProductManagement());
+            dto.setSearchResultPriority(pack.getSearchResultPriority());
+            dto.setPersonalization(pack.getPersonalization());
+            dto.setStatus(pack.getStatus());
             return dto;
         }).toList();
     }
@@ -116,6 +140,7 @@ public class ServicePackServiceImpl implements ServicePackService {
         dto.setProductManagement(pack.getProductManagement());
         dto.setSearchResultPriority(pack.getSearchResultPriority());
         dto.setPersonalization(pack.getPersonalization());
+        dto.setStatus(pack.getStatus());
         ListServicePackRes response = new ListServicePackRes();
         response.setData(List.of(dto));
         return response;

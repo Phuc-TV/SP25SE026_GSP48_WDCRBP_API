@@ -3,10 +3,12 @@ package SP25SE026_GSP48_WDCRBP_api.service.impl;
 import SP25SE026_GSP48_WDCRBP_api.constant.ServiceNameConstant;
 import SP25SE026_GSP48_WDCRBP_api.constant.ServicePackConstant;
 import SP25SE026_GSP48_WDCRBP_api.model.entity.AvailableService;
+import SP25SE026_GSP48_WDCRBP_api.model.entity.ServicePack;
 import SP25SE026_GSP48_WDCRBP_api.model.entity.WoodworkerProfile;
 import SP25SE026_GSP48_WDCRBP_api.model.requestModel.AvailableServiceUpdateReq;
 import SP25SE026_GSP48_WDCRBP_api.model.responseModel.AvailableServiceListItemRes;
 import SP25SE026_GSP48_WDCRBP_api.repository.AvailableServiceRepository;
+import SP25SE026_GSP48_WDCRBP_api.repository.ServicePackRepository;
 import SP25SE026_GSP48_WDCRBP_api.repository.ServiceRepository;
 import SP25SE026_GSP48_WDCRBP_api.repository.WoodworkerProfileRepository;
 import SP25SE026_GSP48_WDCRBP_api.service.AvailableServiceService;
@@ -26,47 +28,29 @@ public class AvailableServiceImpl implements AvailableServiceService {
 
     @Autowired
     private WoodworkerProfileRepository woodworkerProfileRepository;
+    @Autowired
+    private ServicePackRepository servicePackRepository;
 
     @Override
-    public void activateAvailableServicesByServicePack(WoodworkerProfile ww, String servicePackName)
+    public void activateAvailableServicesByServicePack(WoodworkerProfile ww, Long servicePackId)
     {
         List<AvailableService> availableServiceList = availableServiceRepository.findAvailableServicesByWoodworkerProfile(ww);
+        ServicePack servicePack = servicePackRepository.findServicePackByServicePackId(servicePackId);
 
-        switch (servicePackName) {
-            case ServicePackConstant.GOLD:
-                for (AvailableService availableService : availableServiceList) {
-                    availableService.setStatus(true);
-                    availableServiceRepository.save(availableService);
-                }
-                break;
-            case ServicePackConstant.SILVER:
-                for (AvailableService availableService : availableServiceList) {
-                    if (availableService.getService().getServiceName().equals(ServiceNameConstant.PERSONALIZATION)) {
-                        availableService.setStatus(false);
-                        availableServiceRepository.save(availableService);
-                    } else {
-                        availableService.setStatus(true);
-                        availableServiceRepository.save(availableService);
-                    }
-                }
-                break;
-            case ServicePackConstant.BRONZE:
-                for (AvailableService availableService : availableServiceList) {
-                    if (availableService.getService().getServiceName().equals(ServiceNameConstant.PERSONALIZATION)
-                            || availableService.getService().getServiceName().equals(ServiceNameConstant.SALE)) {
-                        availableService.setStatus(false);
-                        availableServiceRepository.save(availableService);
-                    } else {
-                        availableService.setStatus(true);
-                        availableServiceRepository.save(availableService);
-                    }
-                }
-                break;
-            default:
-                break;
+        for (AvailableService availableService : availableServiceList) {
+            if (availableService.getService().getServiceName().equals(ServiceNameConstant.PERSONALIZATION)) {
+                availableService.setStatus(servicePack.getPersonalization());
+                availableServiceRepository.save(availableService);
+            } else if (availableService.getService().getServiceName().equals(ServiceNameConstant.SALE)) {
+                availableService.setStatus(servicePack.getProductManagement());
+                availableServiceRepository.save(availableService);
+            } else  {
+                availableService.setStatus(true);
+                availableServiceRepository.save(availableService);
+            }
         }
-
     }
+
 
     @Override
     public void addAvailableServiceByServiceName(WoodworkerProfile ww, String serviceName) {

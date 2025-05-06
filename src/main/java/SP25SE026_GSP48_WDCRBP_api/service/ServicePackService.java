@@ -11,6 +11,7 @@ public interface ServicePackService {
     CreateServicePackRes updateServicePack(Long servicePackId, CreateServicePackRequest request);
     void deleteServicePack(Long servicePackId);
     List<ListServicePackRes.Data> getAllServicePacks();
+    List<ListServicePackRes.Data> getAllActiveServicePacks();
     ListServicePackRes getServicePackById(Long servicePackId);
 
 }
