@@ -8,7 +8,7 @@ import SP25SE026_GSP48_WDCRBP_api.model.responseModel.AvailableServiceListItemRe
 import java.util.List;
 
 public interface AvailableServiceService {
-    void activateAvailableServicesByServicePack(WoodworkerProfile ww, String servicePackName);
+    void activateAvailableServicesByServicePack(WoodworkerProfile ww, Long servicePackId);
 
     void addAvailableServiceByServiceName(WoodworkerProfile ww, String serviceName);
 

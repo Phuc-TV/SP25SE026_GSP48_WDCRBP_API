@@ -22,5 +22,6 @@ public class ListServicePackRes {
         private Boolean productManagement;
         private Short searchResultPriority;
         private Boolean personalization;
+        private Boolean status;
     }
 }

@@ -39,5 +39,7 @@ public class ContractDetailRes {
 
     private UserDetailRes customer;
 
+    private String agreement;
+
     private List<RequestedProductListItemRes> requestedProducts;
 }

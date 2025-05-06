@@ -55,9 +55,22 @@ public class ServicePackController {
     @GetMapping("/list")
     public CoreApiResponse<List<ListServicePackRes.Data>> getAllServicePacks() {
         List<ListServicePackRes.Data> result = servicePackService.getAllServicePacks();
+
         if (result.isEmpty()) {
             return CoreApiResponse.error(HttpStatus.NOT_FOUND, "Danh sách Service Pack trống");
         }
+
+        return CoreApiResponse.success(result, "Lấy danh sách Service Pack thành công");
+    }
+
+    @GetMapping("/listActive")
+    public CoreApiResponse<List<ListServicePackRes.Data>> getAllActiveServicePacks() {
+        List<ListServicePackRes.Data> result = servicePackService.getAllActiveServicePacks();
+
+        if (result.isEmpty()) {
+            return CoreApiResponse.error(HttpStatus.NOT_FOUND, "Danh sách Service Pack trống");
+        }
+
         return CoreApiResponse.success(result, "Lấy danh sách Service Pack thành công");
     }
 
