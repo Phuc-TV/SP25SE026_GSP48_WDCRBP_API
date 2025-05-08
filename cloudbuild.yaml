@@ -17,12 +17,8 @@ steps:
       - run
       - deploy
       - springboot-app
-      - --image
-      - gcr.io/gsp48wdcrbp/springboot-app
-      - --platform
-      - managed
-      - --region
-      - asia-southeast1
+      - --image=gcr.io/gsp48wdcrbp/springboot-app
+      - --platform=managed
+      - --region=asia-southeast1
       - --allow-unauthenticated
-      - --memory
-      - 512Mi
+      - --memory=512Mi
