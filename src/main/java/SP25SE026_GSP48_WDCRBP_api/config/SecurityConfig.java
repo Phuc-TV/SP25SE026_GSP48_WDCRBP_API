@@ -63,47 +63,60 @@ public class SecurityConfig {
 
     @Bean
     SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-
         http.csrf((csrf) -> csrf.disable())
-                .authorizeHttpRequests((authorize) ->
-                        authorize.requestMatchers(HttpMethod.GET, "/api/v1/**").permitAll()
-                                .requestMatchers("/api/v1/auth/**").permitAll()
-                                .requestMatchers("/swagger-ui/**").permitAll()
-                                .requestMatchers("/v3/api-docs/**").permitAll()
-                                .requestMatchers("/api/v1/OTP/start-verification").permitAll()
-                                .requestMatchers("/api/v1/OTP/check-verification").permitAll()
-                                .requestMatchers("/api/v1/GHNApi/**").permitAll()
-                                .requestMatchers("api/v1/payment/**").permitAll()
-                                .requestMatchers("/api/v1/transaction/**").permitAll()
-                                .requestMatchers("/api/v1/ww/**").permitAll()
-                                .requestMatchers("/api/v1/service-pack/**").permitAll()
-                                .requestMatchers("/api/v1/service-pack-details/**").permitAll()
-                                .requestMatchers("/api/v1/user/**").permitAll()
-                                .requestMatchers("/api/v1/meet/**").permitAll()
-                                .requestMatchers("/api/v1/designIdea/**").permitAll()
-                                .requestMatchers("/api/v1/wallet/**").permitAll()
-                                .requestMatchers("/api/v1/decrypt/**").permitAll()
-                                .requestMatchers("/api/v1/AvailableService/**").permitAll()
-                                .requestMatchers("/api/v1/Category/**").permitAll()
-                                .requestMatchers("/api/v1/products/**").permitAll()
-                                .requestMatchers("/api/v1/posts/**").permitAll()
-                                .requestMatchers("/api/v1/useraddresses/**").permitAll()
-                                .requestMatchers("/api/v1/reviews/**").permitAll()
-                                .requestMatchers("/api/v1/service-orders/**").permitAll()
-                                .requestMatchers("/api/v1/tech-spec/**").permitAll()
-                                .requestMatchers("/api/v1/Contract/**").permitAll()
-                                .requestMatchers("/api/v1/OrderDeposit/**").permitAll()
-                                .requestMatchers("/api/v1/OderProgress/**").permitAll()
-                                .requestMatchers("/api/v1/Shipment/**").permitAll()
-                                .requestMatchers("/api/v1/complaints/**").permitAll()
-                                .requestMatchers("/api/v1/quotation/**").permitAll()
-                                .requestMatchers("/api/v1/configuration/**").permitAll()
-                                .requestMatchers("/api/v1/guarantee-orders/**").permitAll()
-                                .requestMatchers("/api/v1/service-deposits/**").permitAll()
-                                .anyRequest().authenticated()
-                ).exceptionHandling((exception) -> exception
-                        .authenticationEntryPoint(this.jwtAuthenticationEntryPoint) // Sử dụng JwtAuthenticationEntryPoint tùy chỉnh
-                ).sessionManagement((session) -> session
+                .authorizeHttpRequests((authorize) -> authorize
+                        // ✅ Swagger UI
+                        .requestMatchers(
+                                "/swagger-ui.html",
+                                "/swagger-ui/**",
+                                "/v3/api-docs/**",
+                                "/swagger-resources/**",
+                                "/webjars/**",
+                                "/favicon.ico",
+                                "/"
+                        ).permitAll()
+
+                        // ✅ Public APIs
+                        .requestMatchers(HttpMethod.GET, "/api/v1/**").permitAll()
+                        .requestMatchers("/api/v1/auth/**").permitAll()
+                        .requestMatchers("/api/v1/OTP/start-verification").permitAll()
+                        .requestMatchers("/api/v1/OTP/check-verification").permitAll()
+                        .requestMatchers("/api/v1/GHNApi/**").permitAll()
+                        .requestMatchers("api/v1/payment/**").permitAll()
+                        .requestMatchers("/api/v1/transaction/**").permitAll()
+                        .requestMatchers("/api/v1/ww/**").permitAll()
+                        .requestMatchers("/api/v1/service-pack/**").permitAll()
+                        .requestMatchers("/api/v1/service-pack-details/**").permitAll()
+                        .requestMatchers("/api/v1/user/**").permitAll()
+                        .requestMatchers("/api/v1/meet/**").permitAll()
+                        .requestMatchers("/api/v1/designIdea/**").permitAll()
+                        .requestMatchers("/api/v1/wallet/**").permitAll()
+                        .requestMatchers("/api/v1/decrypt/**").permitAll()
+                        .requestMatchers("/api/v1/AvailableService/**").permitAll()
+                        .requestMatchers("/api/v1/Category/**").permitAll()
+                        .requestMatchers("/api/v1/products/**").permitAll()
+                        .requestMatchers("/api/v1/posts/**").permitAll()
+                        .requestMatchers("/api/v1/useraddresses/**").permitAll()
+                        .requestMatchers("/api/v1/reviews/**").permitAll()
+                        .requestMatchers("/api/v1/service-orders/**").permitAll()
+                        .requestMatchers("/api/v1/tech-spec/**").permitAll()
+                        .requestMatchers("/api/v1/Contract/**").permitAll()
+                        .requestMatchers("/api/v1/OrderDeposit/**").permitAll()
+                        .requestMatchers("/api/v1/OderProgress/**").permitAll()
+                        .requestMatchers("/api/v1/Shipment/**").permitAll()
+                        .requestMatchers("/api/v1/complaints/**").permitAll()
+                        .requestMatchers("/api/v1/quotation/**").permitAll()
+                        .requestMatchers("/api/v1/configuration/**").permitAll()
+                        .requestMatchers("/api/v1/guarantee-orders/**").permitAll()
+                        .requestMatchers("/api/v1/service-deposits/**").permitAll()
+
+                        // ❗ Tất cả route còn lại cần auth
+                        .anyRequest().authenticated()
+                )
+                .exceptionHandling((exception) -> exception
+                        .authenticationEntryPoint(this.jwtAuthenticationEntryPoint)
+                )
+                .sessionManagement((session) -> session
                         .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 );
 
