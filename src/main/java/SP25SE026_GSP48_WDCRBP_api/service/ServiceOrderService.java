@@ -34,4 +34,6 @@ public interface ServiceOrderService {
     void addProductImage(List<ProductImagesDto> productImagesDtos, Long serviceId);
 
     void addProductFinishImage(List<ProductImagesDto> productImagesDtos, Long serviceId);
+
+    void cancelOrder(Long id);
 }

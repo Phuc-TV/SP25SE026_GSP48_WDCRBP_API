@@ -24,4 +24,6 @@ public class UpdateStatusComplaintRequest {
     private String staffResponse;
 
     private Long staffUserId;
+
+    private Boolean isCancel;
 }

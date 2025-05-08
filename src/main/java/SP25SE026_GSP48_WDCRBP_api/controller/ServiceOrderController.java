@@ -126,4 +126,13 @@ public class ServiceOrderController {
 
         return CoreApiResponse.success("Success");
     }
+
+    @SecurityRequirement(name = "Bear Authentication")
+    @PostMapping("/cancel")
+    public CoreApiResponse cancel(@RequestBody ServiceOrderIdRequest request)
+    {
+        serviceOrderService.cancelOrder(request.getServiceOrderId());
+
+        return CoreApiResponse.success("Success");
+    }
 }
