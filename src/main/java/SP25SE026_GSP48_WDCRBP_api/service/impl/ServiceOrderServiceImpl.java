@@ -14,6 +14,7 @@ import SP25SE026_GSP48_WDCRBP_api.model.responseModel.*;
 import SP25SE026_GSP48_WDCRBP_api.repository.*;
 import SP25SE026_GSP48_WDCRBP_api.service.ContractService;
 import SP25SE026_GSP48_WDCRBP_api.service.ServiceOrderService;
+import SP25SE026_GSP48_WDCRBP_api.service.TransactionService;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -79,6 +80,8 @@ public class ServiceOrderServiceImpl implements ServiceOrderService {
 
     @Autowired
     private ContractRepository contractRepository;
+    @Autowired
+    private TransactionService transactionService;
 
     @Override
     public List<ServiceOrderDto> listServiceOrderByUserIdOrWwId(Long id, String role) {
@@ -360,10 +363,6 @@ public class ServiceOrderServiceImpl implements ServiceOrderService {
             if (product!=null && product.getStock() < i.getQuantity())
             {
                 throw new RuntimeException("Sản phẩm "+product.getProductName()+" không đủ số lượng trong kho");
-            }
-            if (product != null) {
-                product.setStock((short) (product.getStock() - i.getQuantity()));
-                productRepository.save(product);
             }
 
             RequestedProduct requestedProduct = new RequestedProduct();
@@ -649,6 +648,26 @@ public class ServiceOrderServiceImpl implements ServiceOrderService {
     @Override
     public void addProductFinishImage(List<ProductImagesDto> productImagesDtos, Long serviceId) {
         ServiceOrder serviceOrder = orderRepository.findById(serviceId).orElse(null);
+
+        if (serviceOrder.getAvailableService().getService().getServiceName().equals(ServiceNameConstant.SALE)) {
+            // Check stock for each requested product
+            for (RequestedProduct requestedProduct : serviceOrder.getRequestedProducts()) {
+                int quantity = requestedProduct.getQuantity();
+                Product product = requestedProduct.getProduct();
+                if (product.getStock() < quantity) {
+                    throw new RuntimeException("Sản phẩm " + product.getProductName() + " không đủ số lượng trong kho");
+                }
+            }
+
+            // Update stock for each requested product
+            for (RequestedProduct requestedProduct : serviceOrder.getRequestedProducts()) {
+                int quantity = requestedProduct.getQuantity();
+                Product product = requestedProduct.getProduct();
+                product.setStock((short) ((int)product.getStock() - quantity));
+                productRepository.save(product);
+            }
+        }
+
         List<ProductImages> productImages = new ArrayList<>();
         for (ProductImagesDto productImagesDto : productImagesDtos)
         {
@@ -673,5 +692,30 @@ public class ServiceOrderServiceImpl implements ServiceOrderService {
         serviceOrder.setFeedback("");
         serviceOrder.setStatus(ServiceOrderStatusConstant.DANG_GIAO_HANG_LAP_DAT);
         orderRepository.save(serviceOrder);
+    }
+
+    @Override
+    public void cancelOrder(Long id) {
+        ServiceOrder serviceOrder = orderRepository.findById(id).orElse(null);
+
+        if (serviceOrder != null) {
+            OrderProgress orderProgress = new OrderProgress();
+            orderProgress.setServiceOrder(serviceOrder);
+            orderProgress.setCreatedTime(LocalDateTime.now());
+            orderProgress.setStatus(ServiceOrderStatusConstant.DA_HUY);
+            orderProgressRepository.save(orderProgress);
+
+            serviceOrder.setRole("");
+            serviceOrder.setFeedback("");
+            serviceOrder.setStatus(ServiceOrderStatusConstant.DA_HUY);
+            orderRepository.save(serviceOrder);
+
+            if (serviceOrder.getAmountPaid()!=null && serviceOrder.getAmountPaid() > 0)
+            {
+                transactionService.addMoneyToWWWalletForServiceOrder(serviceOrder.getAvailableService().getWoodworkerProfile().getUser().getUserId(), serviceOrder);
+            }
+        } else {
+            throw new RuntimeException("Service order not found");
+        }
     }
 }

@@ -191,7 +191,7 @@ public class TransactionServiceImpl implements TransactionService {
         Transaction transaction = new Transaction();
         transaction.setTransactionType(TransactionTypeConstant.NHAN_TIEN);
         transaction.setDescription("Nhận tiền hoàn thành đơn hàng " + serviceOrder.getOrderId());
-        transaction.setAmount(serviceOrder.getTotalAmount());
+        transaction.setAmount(serviceOrder.getAmountPaid());
         transaction.setCreatedAt(LocalDateTime.now());
         transaction.setStatus(true);
         transaction.setUser(user);
@@ -200,7 +200,7 @@ public class TransactionServiceImpl implements TransactionService {
         transaction.setWallet(wallet);
         transactionRepository.save(transaction);
 
-        wallet.setBalance(wallet.getBalance() + serviceOrder.getTotalAmount());
+        wallet.setBalance(wallet.getBalance() + serviceOrder.getAmountPaid());
         walletRepository.save(wallet);
     }
 
@@ -213,7 +213,7 @@ public class TransactionServiceImpl implements TransactionService {
         Transaction transaction = new Transaction();
         transaction.setTransactionType(TransactionTypeConstant.NHAN_TIEN);
         transaction.setDescription("Nhận tiền hoàn thành đơn hàng sửa chữa / bảo hành " + guaranteeOrder.getGuaranteeOrderId());
-        transaction.setAmount(guaranteeOrder.getTotalAmount());
+        transaction.setAmount(guaranteeOrder.getAmountPaid());
         transaction.setCreatedAt(LocalDateTime.now());
         transaction.setStatus(true);
         transaction.setUser(user);
@@ -222,7 +222,7 @@ public class TransactionServiceImpl implements TransactionService {
         transaction.setWallet(wallet);
         transactionRepository.save(transaction);
 
-        wallet.setBalance(wallet.getBalance() + guaranteeOrder.getTotalAmount());
+        wallet.setBalance(wallet.getBalance() + guaranteeOrder.getAmountPaid());
         walletRepository.save(wallet);
     }
 

@@ -26,6 +26,7 @@ public class ComplaintServiceImpl implements ComplaintService {
     private final ModelMapper modelMapper;
     private final WalletRepository walletRepository;
     private final TransactionRepository transactionRepository;
+    private final WoodworkerProfileRepository woodworkerProfileRepository;
 
     @Override
     public ComplaintRes createComplaint(CreateComplaintRequest request) {
@@ -96,8 +97,9 @@ public class ComplaintServiceImpl implements ComplaintService {
     @Override
     public UpdateStatusComplaintRes updateStatusByComplaintId(UpdateStatusComplaintRequest request) {
         Complaint complaint = complaintRepository.findComplaintByComplaintId(request.getComplaintId());
+        WoodworkerProfile woodworkerProfile = complaint.getServiceOrder().getAvailableService().getWoodworkerProfile();
         User customerUser = complaint.getServiceOrder().getUser();
-        User woodworkerUser = complaint.getServiceOrder().getAvailableService().getWoodworkerProfile().getUser();
+        User woodworkerUser = woodworkerProfile.getUser();
         User staffUser = userRepository.findById(request.getStaffUserId()).orElseThrow();
         Wallet customerWallet = walletRepository.findByUser_UserId(customerUser.getUserId()).orElseThrow();
         Wallet woodworkerWallet = walletRepository.findByUser_UserId(woodworkerUser.getUserId()).orElseThrow();
@@ -113,6 +115,10 @@ public class ComplaintServiceImpl implements ComplaintService {
             complaint.setStatus(ComplainStatusConstant.PENDING);
         } else if (request.getIsAccept()) {
             complaint.setStatus(ComplainStatusConstant.COMPLETED);
+
+            if (request.getIsCancel()!=null && request.getIsCancel()) {
+                serviceOrderService.cancelOrder(complaint.getServiceOrder().getOrderId());
+            }
 
             Transaction refundCreditTransaction = Transaction.builder()
                     .transactionType(TransactionTypeConstant.HOAN_TIEN)
@@ -147,6 +153,10 @@ public class ComplaintServiceImpl implements ComplaintService {
 
             woodworkerWallet.setBalance(woodworkerWallet.getBalance() - request.getRefundAmount());
             walletRepository.save(woodworkerWallet);
+            if (woodworkerWallet.getBalance() < 10000000) {
+                woodworkerProfile.setPublicStatus(false);
+                woodworkerProfileRepository.save(woodworkerProfile);
+            }
         } else {
             complaint.setStatus(ComplainStatusConstant.CANCELEDED);
             complaintRepository.save(complaint);

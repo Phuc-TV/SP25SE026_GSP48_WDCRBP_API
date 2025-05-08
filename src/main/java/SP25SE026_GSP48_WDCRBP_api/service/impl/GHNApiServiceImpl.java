@@ -98,9 +98,9 @@ public class GHNApiServiceImpl implements GHNApiService {
             if (item.getWeight() == 0) {
                 int estimatedWeight = estimateWeight(item.getLength(), item.getWidth(), item.getHeight());
                 item.setWeight(Math.min(estimatedWeight, 50000));
-                item.setHeight(Math.min(item.getHeight(), 200));
-                item.setWidth(Math.min(item.getWidth(), 200));
-                item.setLength(Math.min(item.getLength(), 200));
+                item.setHeight(Math.min(item.getHeight(), 150));
+                item.setWidth(Math.min(item.getWidth(), 150));
+                item.setLength(Math.min(item.getLength(), 150));
             }
 
             totalLength += item.getLength();
@@ -109,9 +109,9 @@ public class GHNApiServiceImpl implements GHNApiService {
             totalWeight += item.getWeight() * item.getQuantity();
         }
 
-        request.setLength(Math.min(totalLength, 200));
-        request.setWidth(Math.min(maxWidth, 200));
-        request.setHeight(Math.min(maxHeight, 200));
+        request.setLength(Math.min(totalLength, 150));
+        request.setWidth(Math.min(maxWidth, 150));
+        request.setHeight(Math.min(maxHeight, 150));
         request.setWeight(Math.min(totalWeight, 50000));
 
         HttpHeaders headers = getDefaultHeaders();
@@ -175,9 +175,9 @@ public class GHNApiServiceImpl implements GHNApiService {
             if (item.getWeight() == 0) {
                 int estimatedWeight = estimateWeight(item.getLength(), item.getWidth(), item.getHeight());
                 item.setWeight(Math.min(estimatedWeight, 50000));
-                item.setHeight(Math.min(item.getHeight(), 200));
-                item.setWidth(Math.min(item.getWidth(), 200));
-                item.setLength(Math.min(item.getLength(), 200));
+                item.setHeight(Math.min(item.getHeight(), 150));
+                item.setWidth(Math.min(item.getWidth(), 150));
+                item.setLength(Math.min(item.getLength(), 150));
             }
 
             totalLength += item.getLength();
@@ -187,9 +187,9 @@ public class GHNApiServiceImpl implements GHNApiService {
         }
 
         request.setRequired_note("CHOXEMHANGKHONGTHU");
-        request.setLength(Math.min(totalLength, 200));
-        request.setWidth(Math.min(maxWidth, 200));
-        request.setHeight(Math.min(maxHeight, 200));
+        request.setLength(Math.min(totalLength, 150));
+        request.setWidth(Math.min(maxWidth, 150));
+        request.setHeight(Math.min(maxHeight, 150));
         request.setWeight(Math.min(totalWeight, 50000));
 
         HttpEntity<CreateOrderGhnApiRequest> entity = new HttpEntity<>(request, headers);
