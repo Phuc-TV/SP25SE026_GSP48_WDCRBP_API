@@ -3,6 +3,7 @@ package SP25SE026_GSP48_WDCRBP_api.service.impl;
 import com.sendgrid.*;
 import com.sendgrid.helpers.mail.Mail;
 import com.sendgrid.helpers.mail.objects.*;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
@@ -11,8 +12,8 @@ import java.io.IOException;
 @Service
 public class MailServiceImpl {
 
-    @Value("${sendgrid.api-key}")
-    private String sendgridApiKey;
+    @Autowired
+    private ConfigurationServiceImpl configurationServiceImpl;
 
     @Value("${sendgrid.from-email}")
     private String fromEmail;
@@ -24,8 +25,9 @@ public class MailServiceImpl {
         Email toEmail = new Email(to);
         Content content = new Content("text/html", htmlContent);
         Mail mail = new Mail(from, subject, toEmail, content);
+        System.out.printf(mail.toString());
 
-        SendGrid sg = new SendGrid(sendgridApiKey);
+        SendGrid sg = new SendGrid(configurationServiceImpl.getValue("sendgrid_api_key"));
         Request request = new Request();
 
         try {

@@ -208,8 +208,11 @@ public class WoodworkerProfileServiceImpl implements WoodworkerProfileService {
         woodworkerProfile.setUpdatedAt(LocalDateTime.now());
         wwRepository.save(woodworkerProfile);
 
+        System.out.println("test1");
+
         String plainPassword = TempPasswordStorage.getPlainPassword(user.getUserId());
         if (plainPassword != null) {
+            System.out.println("test2");
             sendPasswordToUser(user.getEmail(), plainPassword);
         }
 
@@ -235,9 +238,11 @@ public class WoodworkerProfileServiceImpl implements WoodworkerProfileService {
     }
 
     private void sendPasswordToUser(String email, String password) {
+        System.out.println("hello");
         try {
             // Send the email with the password to the user
             mailServiceImpl.sendEmail(email, "Your Woodworker Account Password", "password", password);
+            System.out.println("hello");
         } catch (Exception e) {
             throw new RuntimeException("Failed to send password email: " + e.getMessage());
         }
