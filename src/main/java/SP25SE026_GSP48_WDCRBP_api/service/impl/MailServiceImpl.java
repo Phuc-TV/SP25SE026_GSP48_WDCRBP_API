@@ -1,32 +1,43 @@
 package SP25SE026_GSP48_WDCRBP_api.service.impl;
 
-import jakarta.mail.MessagingException;
-import jakarta.mail.internet.MimeMessage;
-import lombok.RequiredArgsConstructor;
-import org.springframework.mail.javamail.JavaMailSender;
-import org.springframework.mail.javamail.MimeMessageHelper;
+import com.sendgrid.*;
+import com.sendgrid.helpers.mail.Mail;
+import com.sendgrid.helpers.mail.objects.*;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
+import java.io.IOException;
+
 @Service
-@RequiredArgsConstructor
 public class MailServiceImpl {
 
-    private final JavaMailSender mailSender;
+    @Autowired
+    private ConfigurationServiceImpl configurationServiceImpl;
+
+    @Value("${sendgrid.from-email}")
+    private String fromEmail;
 
     public void sendEmail(String to, String subject, String messageType, String linkOrPassword) {
+        String htmlContent = generateEmailContent(messageType, linkOrPassword);
+
+        Email from = new Email(fromEmail);
+        Email toEmail = new Email(to);
+        Content content = new Content("text/html", htmlContent);
+        Mail mail = new Mail(from, subject, toEmail, content);
+        System.out.printf(mail.toString());
+
+        SendGrid sg = new SendGrid(configurationServiceImpl.getValue("sendgrid_api_key"));
+        Request request = new Request();
+
         try {
-            MimeMessage mimeMessage = mailSender.createMimeMessage();
-            MimeMessageHelper helper = new MimeMessageHelper(mimeMessage, true, "UTF-8");
+            request.setMethod(Method.POST);
+            request.setEndpoint("mail/send");
+            request.setBody(mail.build());
+            Response response = sg.api(request);
 
-            helper.setTo(to);
-            helper.setSubject(subject);
-
-            String htmlContent = generateEmailContent(messageType, linkOrPassword);
-            helper.setText(htmlContent, true);
-
-            mailSender.send(mimeMessage);
-
-        } catch (MessagingException e) {
+            System.out.println("Email sent: " + response.getStatusCode());
+        } catch (IOException e) {
             throw new RuntimeException("Failed to send email: " + e.getMessage(), e);
         }
     }
