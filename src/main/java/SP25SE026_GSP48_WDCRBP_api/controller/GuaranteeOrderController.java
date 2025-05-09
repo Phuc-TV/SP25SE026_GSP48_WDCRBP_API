@@ -27,7 +27,7 @@ public class GuaranteeOrderController {
 
             return CoreApiResponse.success("Success");
         } catch (Exception e) {
-            return CoreApiResponse.error("Lỗi hệ thống");
+            return CoreApiResponse.error(e.getMessage());
         }
     }
 

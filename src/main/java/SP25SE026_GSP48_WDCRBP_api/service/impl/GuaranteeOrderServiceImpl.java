@@ -52,6 +52,11 @@ public class GuaranteeOrderServiceImpl implements GuaranteeOrderService  {
         WoodworkerProfile ww = availableService.getWoodworkerProfile();
         AvailableService guaranteeOrderService =
                 availableServiceRepository.findAvailableServicesByWoodworkerProfile(ww).stream().filter(service -> service.getService().getServiceName().equals(ServiceNameConstant.GUARANTEE)).findFirst().orElse(null);
+
+        if (guaranteeOrderService.getOperatingStatus() == null || !guaranteeOrderService.getOperatingStatus()) {
+            throw new RuntimeException("Dịch vụ đang được tạm ngưng hoặc không được hoạt động bởi");
+        }
+
         RequestedProduct requestedProduct = requestedProductRepository.findRequestedProductByRequestedProductId(request.getRequestedProductId());
 
         GuaranteeOrder order = new GuaranteeOrder();
