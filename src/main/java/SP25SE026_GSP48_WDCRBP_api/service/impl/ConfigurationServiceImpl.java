@@ -87,7 +87,7 @@ public class ConfigurationServiceImpl implements ConfigurationService {
         return configurations.stream()
                 .filter(config -> name.equals(config.getDescription()))
                 .findFirst()
-                .orElseThrow(() -> new RuntimeException("Không tìm thấy cấu hình GHN_Token_API"))
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy cấu hình"))
                 .getValue();
     }
 
