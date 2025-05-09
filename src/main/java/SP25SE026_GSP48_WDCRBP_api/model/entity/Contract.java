@@ -48,7 +48,7 @@ public class Contract {
     @Column(nullable = true)
     private LocalDateTime createdAt;
 
-    @Column(nullable = true)
+    @Column(nullable = true,length = 2000)
     private String agreement;
 
     @OneToOne
